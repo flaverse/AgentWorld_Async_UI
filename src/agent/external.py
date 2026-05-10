@@ -102,6 +102,8 @@ class ExternalAgentProxy:
                 self.entity.busy_result = None
 
                 self.entity.apply_deltas(result.caller_deltas)
+                if self.entity.has("agent"):
+                    self.entity.get("agent").drives.apply_deltas(result.caller_deltas)
                 if result.target_id and result.target_id in self.world.entities:
                     self.world.entities[result.target_id].apply_deltas(result.target_deltas)
                 for amb_eff in result.ambient_effects:

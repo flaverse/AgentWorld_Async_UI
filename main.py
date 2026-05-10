@@ -59,6 +59,7 @@ async def demo_loop(world, brain, systems, max_actions=5):
             agent.busy_result = None
 
             agent.apply_deltas(result.caller_deltas)
+            agent_layer.drives.apply_deltas(result.caller_deltas)
             if result.target_id and result.target_id in world.entities:
                 world.entities[result.target_id].apply_deltas(result.target_deltas)
             for amb_eff in result.ambient_effects:
@@ -147,6 +148,7 @@ async def demo_loop(world, brain, systems, max_actions=5):
             result = agent.busy_result
             agent.busy_result = None
             agent.apply_deltas(result.caller_deltas)
+            agent_layer.drives.apply_deltas(result.caller_deltas)
             if result.target_id and result.target_id in world.entities:
                 world.entities[result.target_id].apply_deltas(result.target_deltas)
             for amb_eff in result.ambient_effects:
