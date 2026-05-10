@@ -1,0 +1,181 @@
+world:
+  name: "Demo 酒馆"
+  time_scale: 60
+  start_time: "14:00"
+  tick_interval_seconds: 1.0
+
+zones:
+  - id: bar_zone
+    name: "狐狸与鹅酒馆"
+    width: 10
+    height: 8
+    tile_size: 32
+    ambient_light: "#3a2a1a"
+    connections: []
+
+entities:
+  - id: bar_counter
+    name: "吧台"
+    zone: bar_zone
+    pos: [7, 2]
+    visual:
+      visible_radius: 20
+      sprite: "counter_bar"
+      info:
+        look: "木制吧台，后面站着矮人老板"
+        detail: "酒架上有几瓶酒，吧台有些年头了"
+    interaction:
+      interaction_radius: 3
+      public_attrs:
+        type: "吧台"
+      private_attrs:
+        personality: "话不多的矮人老板，看心情定价"
+        mood: 60
+      actions:
+        搭话:
+          target_type: passive
+          resolve: llm
+        倚靠:
+          target_type: passive
+          resolve: rule
+          rule:
+            cost: {energy: -2}
+            effects: {fun: 5}
+            duration_minutes: 5
+            narrative: "{caller}靠在吧台上，手指轻敲着台面"
+
+  - id: drink_ale
+    name: "麦酒"
+    zone: bar_zone
+    pos: [7, 2]
+    visual:
+      visible_radius: 3
+      sprite: null
+      info:
+        look: "一杯琥珀色麦酒，泡沫细密"
+        detail: "闻起来有麦芽香气"
+    interaction:
+      interaction_radius: 2
+      private_attrs:
+        price: 5
+        quality: "普通"
+      actions:
+        饮用:
+          target_type: passive
+          resolve: llm
+          estimated_duration: 10
+        嗅闻:
+          target_type: passive
+          resolve: rule
+          rule:
+            narrative: "{caller}低头闻了闻麦酒，麦芽香气很浓，让人想喝一口"
+        端详:
+          target_type: passive
+          resolve: rule
+          rule:
+            narrative: "{caller}端起杯子对着光看了看，酒体琥珀色，泡沫细腻"
+
+  - id: drink_wine
+    name: "葡萄酒"
+    zone: bar_zone
+    pos: [7, 2]
+    visual:
+      visible_radius: 3
+      sprite: null
+      info:
+        look: "一杯深红色葡萄酒，果香浓郁"
+    interaction:
+      interaction_radius: 2
+      private_attrs:
+        price: 12
+        quality: "上等"
+      actions:
+        饮用:
+          target_type: passive
+          resolve: llm
+          estimated_duration: 10
+        嗅闻:
+          target_type: passive
+          resolve: rule
+          rule:
+            narrative: "{caller}闻了闻葡萄酒，果香芬芳，应该是好年份"
+
+  - id: table_01
+    name: "散桌"
+    zone: bar_zone
+    pos: [3, 5]
+    visual:
+      visible_radius: 15
+      sprite: "table"
+      info:
+        look: "靠窗的散桌，阳光正好洒在桌面"
+    interaction:
+      interaction_radius: 2
+      actions:
+        坐下:
+          target_type: passive
+          resolve: rule
+          rule:
+            cost: {energy: -3}
+            effects: {fun: 10, energy: -5}
+            duration_minutes: 15
+            narrative: "{caller}在散桌前坐下，阳光暖暖地洒在身上"
+
+  - id: coin_hidden
+    name: "硬币"
+    zone: bar_zone
+    pos: [1, 7]
+    visual:
+      visible_radius: 1
+      sprite: null
+      info:
+        look: "地上有一枚硬币，闪闪发亮"
+    interaction:
+      interaction_radius: 1
+      private_attrs:
+        value: 1
+      actions:
+        捡起:
+          target_type: passive
+          resolve: rule
+          rule:
+            effects: {coins: 1}
+            narrative: "{caller}弯腰捡起一枚硬币"
+
+  - id: xiaoming
+    name: "小明"
+    zone: bar_zone
+    pos: [5, 5]
+    visual:
+      visible_radius: 20
+      sprite: "char_male_01"
+      info:
+        look: "穿深色外套的年轻人"
+    interaction:
+      interaction_radius: 3
+      public_attrs:
+        expression: "友善，面带微笑"
+      private_attrs:
+        coins: 30
+        hunger: 60
+        thirst: 80
+        social: 50
+        energy: 70
+        fun: 30
+        mood: 55
+      actions:
+        交谈:
+          target_type: agent
+    agent:
+      autonomous: true
+      speed: 1.0
+      view_radius: 20
+      hearing_radius: 15
+      interaction_radius: 3
+      personality: "开朗外向，花钱大方，渴了就想喝一杯"
+      drives:
+        hunger: {decay: 0.02}
+        thirst: {decay: 0.025}
+        social: {decay: 0.015}
+        energy: {decay: -0.01}
+        fun: {decay: 0.02}

@@ -1,0 +1,6 @@
+provider: "deepseek"
+model: "deepseek-chat"
+api_key: ""
+base_url: "https://api.deepseek.com"
+timeout_seconds: 60
+max_retries: 2

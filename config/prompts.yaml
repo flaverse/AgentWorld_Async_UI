@@ -1,0 +1,174 @@
+system_prompts:
+  agent_decision: |
+    你是一个虚拟世界中的自主居民。根据你的欲望状态和周围环境，做出一个合理的行动决定。
+    你可以移动到某个坐标，或与某个实体交互。行动应自然、合理、有趣。
+
+  interaction_resolve: |
+    你是世界交互裁判。根据双方公开和私有状态，客观裁定交互结果。
+    结果应合理、有生活感、偶有惊喜。属性变化控制在-30到+30之间。
+    周边实体(state字段)的存在可能会影响交互结果(如酒在吧台上=老板可能在)。
+    你可修改周边实体的属性(ambient_effects)。
+    不禁止"违规"行为(如偷喝)，但会产生连锁后果(老板生气等)。
+
+templates:
+  agent_decision:
+    temperature: 0.7
+    slots:
+      - {name: time_info, provider: runtime}
+      - {name: persona, provider: runtime}
+      - {name: drive_state, provider: runtime}
+      - {name: spatial_context, provider: topology}
+      - {name: interactable_section, provider: topology}
+      - {name: visible_section, provider: topology, condition: "has_visible"}
+      - {name: recent_memory, provider: runtime, condition: "has_memory"}
+      - {name: action_guidance, provider: content}
+      - {name: output_format, provider: content}
+    output_schema: decision_output
+
+  interaction_resolve:
+    temperature: 0.3
+    slots:
+      - {name: caller_section, provider: runtime}
+      - {name: target_section, provider: runtime}
+      - {name: action_section, provider: runtime}
+      - {name: ambient_section, provider: runtime, condition: "has_ambient"}
+      - {name: resolve_guide, provider: content}
+      - {name: output_format_resolve, provider: content}
+    output_schema: resolve_output
+
+slots:
+  time_info:
+    provider: runtime
+    template: "## 时间\n现在是第{round}轮。"
+
+  persona:
+    provider: runtime
+    template: "## 你的身份\n你是{name}。性格: {personality}"
+
+  drive_state:
+    provider: runtime
+    template: |
+      ## 你的状态
+      {drives_table}
+      
+      (高于60=需要关注, 高于80=急需满足)
+
+  spatial_context:
+    provider: topology
+    template: "## 空间\n你在{zone_name}({zone_width}×{zone_height}) | 位置: ({pos_x}, {pos_y})"
+
+  interactable_section:
+    provider: topology
+    template: |
+      ## ✅ 可交互 (在范围内)
+      {interactable_text}
+
+  visible_section:
+    provider: topology
+    template: |
+      ## 👁️ 看得见但够不着 (需走近)
+      {visible_text}
+
+  recent_memory:
+    provider: runtime
+    template: |
+      ## 最近经历
+      {memory_text}
+
+  action_guidance:
+    provider: content
+    template: |
+      ## 指引
+      请决定下一步行动:
+      - 移动: 设置move_to为[x, y]坐标
+      - 交互: 选择目标实体的一个动作。仅可交互范围内的实体
+      - 同坐标可能有多个独立实体(如吧台旁有麦酒、葡萄酒)
+      - 行动应符合你当前的欲望(渴了喝水, 饿了吃东西, 累了休息)
+
+  output_format:
+    provider: content
+    template: |
+      ## 输出格式 (严格JSON，不要markdown包裹)
+      
+      {
+        "thinking": "简短推理",
+        "move_to": [x, y],
+        "target_entity": "目标实体的id",
+        "action": "动作名"
+      }
+      
+      - move_to: 移动目标坐标。不移动时填null
+      - target_entity: 要交互的实体id (必须与上面列出的id完全一致)。不交互时填null
+      - action: 动作名 (必须与上面列出的可做列表完全一致)。不交互时填null
+      - 每轮必须要么move_to不null, 要么target_entity+action不null。不能都null。
+
+  # -- 裁判 slots --
+  caller_section:
+    provider: runtime
+    template: |
+      ## 发起方: {caller_name}
+      公开: {caller_public}
+      私有: {caller_private}
+
+  target_section:
+    provider: runtime
+    template: |
+      ## 被调用方: {target_name}
+      公开: {target_public}
+      私有: {target_private}
+
+  action_section:
+    provider: runtime
+    template: "## 动作\n{action}"
+
+  ambient_section:
+    provider: runtime
+    template: |
+      ## 周边实体 (同位置或邻格)
+      {ambient_text}
+
+  resolve_guide:
+    provider: content
+    template: |
+      ## 裁定原则
+      - 综合考虑发起方、被调用方、周边实体
+      - 周边实体可能影响交互(如酒在吧台上=老板在场，不付钱会被察觉)
+      - 你可以修改周边实体的属性(ambient_effects)
+      - 不禁止违规行为，但产生连锁后果
+      - coins不能为负。发起方coins不够时拒绝或只收现有金额
+      - 给出简短叙事和精简公共观察
+
+  output_format_resolve:
+    provider: content
+    template: |
+      ## 输出格式 (严格JSON)
+      {
+        "caller_deltas": {"属性名": 变化值},
+        "target_deltas": {"属性名": 变化值},
+        "ambient_effects": [{"entity_id": "实体id", "deltas": {"属性": 变化}}],
+        "narrative": "一句话叙事",
+        "public_observation": "简短公开观察"
+      }
+
+output_schemas:
+  decision_output:
+    type: json_object
+    schema:
+      type: object
+      properties:
+        thinking: {type: string}
+        move_to: {type: array, items: {type: integer}}
+        target_entity: {type: string}
+        action: {type: string}
+      required: [thinking]
+  resolve_output:
+    type: json_object
+    schema:
+      type: object
+      properties:
+        caller_deltas: {type: object}
+        target_deltas: {type: object}
+        ambient_effects: {type: array}
+        narrative: {type: string}
+        public_observation: {type: string}
+      required: [narrative, public_observation]
