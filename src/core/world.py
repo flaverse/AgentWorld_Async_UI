@@ -142,5 +142,52 @@ class World:
             del self.active_events[eid]
             self.entities.pop(eid, None)
 
+    def register_external_agent(self, agent_id: str, name: str, zone: str,
+                                pos: list[int], sprite: str | None = None,
+                                personality: str = "来访者") -> Entity:
+        """注册远程 Agent，返回 Entity 对象。
+        外部 agent = autonomous=false 的普通 Entity，通过 WS/HTTP 操控。
+        它仍能被 SensorySystem 感知，被 InteractionSystem 处理交互。
+        """
+        from layers.visual import VisualLayer
+        from layers.interaction import InteractionLayer
+        from layers.agent import AgentLayer
+        from agent.sensory_memory import SensoryMemory
+        from agent.inbox import Inbox
+        from agent.memory import AgentMemory
+
+        entity = Entity(id=agent_id, name=name, zone=zone, pos=pos)
+        entity.layers["visual"] = VisualLayer(
+            visible_radius=20,
+            sprite=sprite,
+            info={"look": f"{name} (外部访客)"},
+        )
+        entity.layers["interaction"] = InteractionLayer(
+            interaction_radius=3,
+            public_attrs={"expression": "好奇地四处张望"},
+            private_attrs={"coins": 20, "mood": 60},
+            actions={
+                "交谈": {
+                    "target_type": "agent",
+                },
+            },
+        )
+        entity.layers["agent"] = AgentLayer(
+            autonomous=False,
+            speed=1.0,
+            view_radius=20,
+            hearing_radius=15,
+            interaction_radius=3,
+            personality=personality,
+        )
+        entity.get("agent").sensory = SensoryMemory()
+        entity.get("agent").memory = AgentMemory()
+        entity.get("agent").inbox = Inbox()
+        self.entities[entity.id] = entity
+        return entity
+
+    def get_systems(self):
+        return self._systems
+
     def get_systems(self):
         return self._systems
