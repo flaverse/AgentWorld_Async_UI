@@ -1,6 +1,8 @@
 import asyncio
 from core.clock import WorldClock
 from core.spatial_grid import SpatialGrid
+from core.event_bus import EventBus
+from core.lifecycle import EntityLifecycle
 from entity.entity import Entity
 from layers.visual import VisualLayer
 from layers.interaction import InteractionLayer, ActionDef, TargetType, ResolveType
@@ -27,9 +29,11 @@ class World:
         self.zones: dict[str, dict] = {}
         self.entities: dict[str, Entity] = {}
         self.active_events: dict = {}
-        self.grids: dict[str, SpatialGrid] = {}  # zone_id → grid
+        self.grids: dict[str, SpatialGrid] = {}
 
         self._systems = systems
+        self.event_bus = EventBus()
+        self.lifecycle = EntityLifecycle(self)
 
         for zone_def in world_config.get("zones", []):
             self.zones[zone_def["id"]] = zone_def
@@ -103,10 +107,7 @@ class World:
             if "gate" in ent_def:
                 entity.layers["gate"] = ent_def["gate"]
 
-            self.entities[entity.id] = entity
-            entity._world = self
-            if entity.zone in self.grids:
-                self.grids[entity.zone].insert(entity.id, entity.pos)
+            self.lifecycle.spawn(entity)
 
     def get_zone_data(self, zone_id: str) -> dict:
         return self.zones.get(zone_id, {})
@@ -140,9 +141,7 @@ class World:
 
     def spawn_event(self, event) -> None:
         self.active_events[event.id] = event
-        self.entities[event.id] = event
-        if event.zone in self.grids:
-            self.grids[event.zone].insert(event.id, event.pos)
+        self.lifecycle.spawn(event)
 
     def prune_events(self) -> None:
         now = self.clock.now()
@@ -150,9 +149,7 @@ class World:
                    if evt.is_expired(now)]
         for eid in expired:
             del self.active_events[eid]
-            entity = self.entities.pop(eid, None)
-            if entity and entity.zone in self.grids:
-                self.grids[entity.zone].remove(eid, entity.pos)
+            self.lifecycle.despawn(eid)
 
     def register_external_agent(self, agent_id: str, name: str, zone: str,
                                 pos: list[int], sprite: str | None = None,
@@ -197,10 +194,7 @@ class World:
         entity.get("agent").sensory = SensoryMemory()
         entity.get("agent").memory = AgentMemory()
         entity.get("agent").inbox = Inbox()
-        self.entities[entity.id] = entity
-        entity._world = self
-        if entity.zone in self.grids:
-            self.grids[entity.zone].insert(entity.id, entity.pos)
+        self.lifecycle.spawn(entity)
         return entity
 
     def get_nearby_ids(self, zone_id: str, pos: list[int], radius: int) -> set[str]:

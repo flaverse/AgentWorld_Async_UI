@@ -150,12 +150,16 @@ class InteractionSystem:
                     caller_deltas=result.caller_deltas,
                 )
 
-        # Gate传送
+        # Gate传送: 使用 Lifecycle.transfer_zone (P1#6)
         if result.move_to_zone:
-            agent.zone = result.move_to_zone
-            agent.pos = result.move_to_pos or agent.pos
-            if agent.has("agent"):
-                agent.get("agent").sensory.clear()
+            if hasattr(world, 'lifecycle'):
+                world.lifecycle.transfer_zone(agent, result.move_to_zone,
+                                              result.move_to_pos or agent.pos)
+            else:
+                agent.zone = result.move_to_zone
+                agent.pos = result.move_to_pos or agent.pos
+                if agent.has("agent"):
+                    agent.get("agent").sensory.clear()
 
         agent.status = "idle"
 

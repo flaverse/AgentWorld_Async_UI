@@ -246,41 +246,8 @@ async def _build_sensory_response(agent_id: str, entity, world, systems):
 
 @router.websocket("/ws/agent/{agent_id}")
 async def ws_agent(ws: WebSocket, agent_id: str):
-    from agent.external import ExternalAgentProxy
+    from agent.connection import AgentConnection
 
     await ws.accept()
     world = get_world()
-
-    # Check if agent exists; if not, auto-create a temporary one
-    entity = world.entities.get(agent_id)
-    if not entity:
-        zone_ids = list(world.zones.keys())
-        default_zone = zone_ids[0] if zone_ids else "bar_zone"
-        entity = world.register_external_agent(
-            agent_id=agent_id,
-            name=f"访客_{agent_id[:6]}",
-            zone=default_zone,
-            pos=[5, 5],
-            sprite=None,
-            personality="外部来访者",
-        )
-
-    proxy = ExternalAgentProxy(ws, entity, world, world.get_systems())
-    await manager.register_agent(agent_id, ws, proxy)
-
-    try:
-        # Push initial sensory
-        await _push_sensory(agent_id, entity, world, world.get_systems())
-
-        while True:
-            raw = await ws.receive_text()
-            try:
-                msg = json.loads(raw)
-            except json.JSONDecodeError:
-                await ws.send_json({"error": "invalid json"})
-                continue
-            await proxy.handle_message(msg)
-    except WebSocketDisconnect:
-        pass
-    finally:
-        await manager.unregister_agent(agent_id)
+    await AgentConnection.accept(ws, agent_id, world, world.get_systems())
