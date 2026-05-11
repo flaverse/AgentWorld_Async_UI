@@ -57,18 +57,7 @@ async def demo_loop(world, brain, systems, max_actions=5):
         if agent.busy_result is not None:
             result = agent.busy_result
             agent.busy_result = None
-
-            agent.apply_deltas(result.caller_deltas)
-            agent_layer.drives.apply_deltas(result.caller_deltas)
-            if result.target_id and result.target_id in world.entities:
-                world.entities[result.target_id].apply_deltas(result.target_deltas)
-            for amb_eff in result.ambient_effects:
-                aid = amb_eff.get("entity_id", "")
-                if aid in world.entities:
-                    world.entities[aid].apply_deltas(amb_eff.get("deltas", {}))
-
-            agent_layer.memory.record(narrative=result.narrative)
-            agent.status = "idle"
+            systems["interaction"].apply_result(result, agent, world)
 
             print(f"\n⏱  {world.clock.time_str()} | {agent.name} ({agent.pos[0]},{agent.pos[1]})")
             print(f"  📖 {result.narrative}")
@@ -148,7 +137,6 @@ async def demo_loop(world, brain, systems, max_actions=5):
             result = agent.busy_result
             agent.busy_result = None
             agent.apply_deltas(result.caller_deltas)
-            agent_layer.drives.apply_deltas(result.caller_deltas)
             if result.target_id and result.target_id in world.entities:
                 world.entities[result.target_id].apply_deltas(result.target_deltas)
             for amb_eff in result.ambient_effects:

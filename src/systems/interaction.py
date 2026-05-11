@@ -56,34 +56,79 @@ class InteractionSystem:
 
     async def _resolve_async(self, iid: str, agent, target, action: str,
                              world) -> None:
+        """后台裁定。resolve=rule 直接执行, resolve=llm 调裁判（含重试）。"""
+        result = await self._resolve_with_retry(agent, target, action, world,
+                                                 max_retries=2)
+        agent.busy_result = result
+
+    async def _resolve_with_retry(self, agent, target, action: str,
+                                  world, max_retries: int = 2) -> ActionResult:
+        """执行裁定。LLM 失败时带反馈重试。原则 ⑥ LLM 最小化: rule 不调 LLM。"""
         try:
             act_def = target.get("interaction").get_action(action)
 
             if act_def.resolve == ResolveType.RULE:
-                result = self._exec_rule(act_def, agent, target)
+                return self._exec_rule(act_def, agent, target)
+
             elif act_def.resolve == ResolveType.LLM:
                 ambient = world.get_ambient_entities(target, radius=2,
                                                       exclude={agent.id})
-                result = await self.resolver.resolve(
-                    caller=agent, target=target, action=action,
-                    ambient_entities=ambient, world=world,
-                )
-            else:
-                result = ActionResult(narrative="unknown resolve type")
+                last_raw = ""
+                for attempt in range(max_retries + 1):
+                    try:
+                        result = await self.resolver.resolve(
+                            caller=agent, target=target, action=action,
+                            ambient_entities=ambient, world=world,
+                        )
+                        if result.narrative:
+                            return result
+                    except Exception as e:
+                        if attempt < max_retries:
+                            import asyncio as _a
+                            await _a.sleep(1)
+                            continue
+                        raise
+                    if attempt < max_retries:
+                        import asyncio as _a
+                        await _a.sleep(1)
+                return ActionResult(target_id=target.id,
+                                    narrative="裁定未产生有效结果")
+
+            return ActionResult(target_id=target.id, narrative="unknown resolve type")
+
         except Exception as e:
-            result = ActionResult(
+            import traceback
+            traceback.print_exc()
+            return ActionResult(
                 target_id=target.id,
                 narrative=f"交互失败: {e}",
                 public_observation=f"{agent.name}尝试{action}但出了点问题",
             )
-            import traceback
-            traceback.print_exc()
 
-        agent.busy_result = result
-        try:
-            self._spawn_event(world, agent, target, action, result)
-        except Exception:
-            pass
+    def apply_result(self, result: ActionResult, agent, world) -> bool:
+        """处理 busy_result。返回 True 表示有有效结果。
+        
+        原则 ⑤ Systems 总控: 统一结果处理入口。main.py / external.py 不再重复。
+        """
+        if not result:
+            return False
+
+        agent.apply_deltas(result.caller_deltas)
+        if result.target_id and result.target_id in world.entities:
+            world.entities[result.target_id].apply_deltas(result.target_deltas)
+        for amb_eff in result.ambient_effects:
+            aid = amb_eff.get("entity_id", "")
+            if aid in world.entities:
+                world.entities[aid].apply_deltas(amb_eff.get("deltas", {}))
+
+        if agent.has("agent"):
+            agent.get("agent").memory.record(narrative=result.narrative)
+        agent.status = "idle"
+
+        self._spawn_event(world, agent,
+                          world.entities.get(result.target_id),
+                          "", result)
+        return True
 
     def _exec_rule(self, act_def, agent, target) -> ActionResult:
         rule = act_def.rule or {}

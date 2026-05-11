@@ -101,19 +101,8 @@ class ExternalAgentProxy:
                 result = self.entity.busy_result
                 self.entity.busy_result = None
 
-                self.entity.apply_deltas(result.caller_deltas)
-                if self.entity.has("agent"):
-                    self.entity.get("agent").drives.apply_deltas(result.caller_deltas)
-                if result.target_id and result.target_id in self.world.entities:
-                    self.world.entities[result.target_id].apply_deltas(result.target_deltas)
-                for amb_eff in result.ambient_effects:
-                    aid = amb_eff.get("entity_id", "")
-                    if aid in self.world.entities:
-                        self.world.entities[aid].apply_deltas(amb_eff.get("deltas", {}))
-
-                if self.entity.has("agent"):
-                    self.entity.get("agent").memory.record(narrative=result.narrative)
-                self.entity.status = "idle"
+                self.systems["interaction"].apply_result(result, self.entity,
+                                                        self.world)
 
                 await self.ws.send_json({
                     "type": "interaction_result",

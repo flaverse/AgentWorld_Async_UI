@@ -84,10 +84,10 @@ class World:
                                  for k, v in ag.get("drives", {}).items()},
                 )
                 if entity.has("interaction"):
-                    init_attrs = entity.get("interaction").private_attrs
+                    # DriveSystem 直接引用 private_attrs，非副本
+                    # apply_deltas() 更新 interaction.private_attrs 后 drives 自动可见
                     agent_layer.drives = DriveSystem(
-                        values={k: init_attrs.get(k, 50)
-                                for k in agent_layer.drive_rates},
+                        attrs=entity.get("interaction").private_attrs,
                         decay_rates=agent_layer.drive_rates,
                     )
                 agent_layer.sensory = SensoryMemory()

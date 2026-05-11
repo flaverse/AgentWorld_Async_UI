@@ -16,6 +16,17 @@ class VisionRecord:
 
 
 @dataclass
+class HearingRecord:
+    entity_id: str = ""
+    name: str = ""
+    pos: list = field(default_factory=lambda: [0, 0])
+    distance: int = 0
+    auditory_data: dict = field(default_factory=dict)
+    first_heard: float = 0.0
+    last_heard: float = 0.0
+
+
+@dataclass
 class SensoryMemory:
     vision: dict[str, VisionRecord] = field(default_factory=dict)
     hearing: dict = field(default_factory=dict)
