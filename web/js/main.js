@@ -1,9 +1,13 @@
 // ═══════════════════════════════════════
-// AgentWorld Pixel Frontend — Clean
+// AgentWorld Pixel Frontend — Decoupled
+// 
+// Set BACKEND_URL to wherever the server is running.
+// Leave empty for same-origin (served by backend).
 // ═══════════════════════════════════════
 
-const TILE_SIZE = 32;
-const ZOOM = 3;
+const BACKEND_URL = '';   // e.g. 'http://192.168.10.226:8000'
+const API = BACKEND_URL + '/api/v1';
+const WS  = (BACKEND_URL || `http://${location.host}`).replace('http', 'ws') + '/ws/live';
 let game = null;
 let ws = null;
 let entities = {};
@@ -49,7 +53,7 @@ class WorldScene extends Phaser.Scene {
 
     async loadWorldState() {
         try {
-            const resp = await fetch('/api/v1/world/state');
+            const resp = await fetch(API + '/world/state');
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const data = await resp.json();
             entities = {};
@@ -201,7 +205,7 @@ class WorldScene extends Phaser.Scene {
     // ── WebSocket ──
     connectWS() {
         if (ws) { ws.close(); ws = null; }
-        const url = `ws://${location.host}/ws/live`;
+        const url = WS;
         console.log('[WS] connecting:', url);
         ws = new WebSocket(url);
 
