@@ -40,7 +40,16 @@ class InteractionLayer(Layer):
 
     def apply_deltas(self, deltas: dict) -> None:
         for key, delta in deltas.items():
-            self.private_attrs[key] = self.private_attrs.get(key, 0) + delta
+            try:
+                delta = float(delta)
+            except (TypeError, ValueError):
+                continue
+            current = self.private_attrs.get(key, 0)
+            try:
+                current = float(current)
+            except (TypeError, ValueError):
+                continue
+            self.private_attrs[key] = current + delta
             # Clamp: non-coin attrs 0-100, coins >= 0
             if key == "coins":
                 self.private_attrs[key] = max(0, self.private_attrs[key])
