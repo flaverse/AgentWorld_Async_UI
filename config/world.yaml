@@ -7,8 +7,8 @@ world:
 zones:
   - id: bar_zone
     name: "狐狸与鹅酒馆"
-    width: 10
-    height: 8
+    width: 24
+    height: 16
     tile_size: 32
     ambient_light: "#3a2a1a"
     connections:
@@ -16,8 +16,8 @@ zones:
 
   - id: square
     name: "白果园广场"
-    width: 14
-    height: 12
+    width: 40
+    height: 30
     tile_size: 32
     ambient_light: "#f5e6c8"
     connections:
@@ -26,8 +26,8 @@ zones:
 
   - id: herb_hut
     name: "托蜜拉的草药小屋"
-    width: 10
-    height: 8
+    width: 16
+    height: 12
     tile_size: 32
     ambient_light: "#2d5016"
     connections:

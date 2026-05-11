@@ -6,4 +6,6 @@ data/
 .DS_Store
 *.swp
 *.swo
+geralt_*.md
+docs/
 docs/
