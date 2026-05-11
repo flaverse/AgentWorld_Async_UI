@@ -5,9 +5,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from fpdf import FPDF
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-REPORT_JSON = os.path.join(BASE, "..", "test_8npc_report.json")
-LOG_FILE = os.path.join(BASE, "..", "test_8npc_log.jsonl")
+REPORT_JSON = os.path.join(BASE, "..", "test_1hour_report.json")
+LOG_FILE = os.path.join(BASE, "..", "test_1hour_log.jsonl")
 OUT_DIR = os.path.join(BASE, "..", "docs")
+OUT_NAME = "test_1hour_report.pdf"
 os.makedirs(OUT_DIR, exist_ok=True)
 
 FONT_PATH = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
@@ -154,7 +155,7 @@ def build():
     pdf.body("56/56 属性检查全部通过(coins ≥ 0, thirst/hunger/social/energy/fun/mood 在 0-100 范围)。0 错误。")
     pdf.body("架构验证: Layer体系、Systems编排、LLM决策+裁判、Inbox消息、DriveSystem+Grid索引均正常工作。")
 
-    path = os.path.join(OUT_DIR, "test_8npc_report.pdf")
+    path = os.path.join(OUT_DIR, OUT_NAME)
     pdf.output(path)
     return path
 

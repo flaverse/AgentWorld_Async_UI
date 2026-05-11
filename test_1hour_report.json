@@ -1,0 +1,142 @@
+{
+  "test": "1-Hour Endurance — 8 NPCs × 3 Zones",
+  "generated": "2026-05-12T04:09:00.778401",
+  "elapsed_s": 3493.764589071274,
+  "total_actions": 892,
+  "total_zone_changes": 7,
+  "total_errors": 0,
+  "attr_checks": {
+    "passed": 32,
+    "failed": 0
+  },
+  "agents": [
+    {
+      "name": "杰洛特",
+      "actions": 125,
+      "zone_changes": 1,
+      "errors": 0,
+      "elapsed_s": 452.04758977890015,
+      "zone": "bar_zone",
+      "pos": [
+        20,
+        8
+      ],
+      "thirst": 78.80938533830643,
+      "coins": 86.0,
+      "mood": 100,
+      "social": 94.65149557828906
+    },
+    {
+      "name": "叶奈法",
+      "actions": 95,
+      "zone_changes": 2,
+      "errors": 0,
+      "elapsed_s": 451.90484070777893,
+      "zone": "bar_zone",
+      "pos": [
+        3,
+        5
+      ],
+      "thirst": 1.1049398517608642,
+      "coins": 447.0,
+      "mood": 86.0,
+      "social": 42.00526516151428
+    },
+    {
+      "name": "丹德里恩",
+      "actions": 125,
+      "zone_changes": 0,
+      "errors": 0,
+      "elapsed_s": 420.93153190612793,
+      "zone": "bar_zone",
+      "pos": [
+        7,
+        2
+      ],
+      "thirst": 0,
+      "coins": 0,
+      "mood": 100,
+      "social": 100.0
+    },
+    {
+      "name": "维瑟米尔",
+      "actions": 105,
+      "zone_changes": 0,
+      "errors": 0,
+      "elapsed_s": 422.49229168891907,
+      "zone": "bar_zone",
+      "pos": [
+        7,
+        2
+      ],
+      "thirst": 2.7705192565938286e-05,
+      "coins": 0,
+      "mood": 100,
+      "social": 95.0
+    },
+    {
+      "name": "特莉丝",
+      "actions": 104,
+      "zone_changes": 1,
+      "errors": 0,
+      "elapsed_s": 420.50827145576477,
+      "zone": "bar_zone",
+      "pos": [
+        7,
+        2
+      ],
+      "thirst": 0.11697130441665604,
+      "coins": 118.0,
+      "mood": 77.0,
+      "social": 99.90262139439585
+    },
+    {
+      "name": "卓尔坦",
+      "actions": 105,
+      "zone_changes": 0,
+      "errors": 0,
+      "elapsed_s": 451.6724445819855,
+      "zone": "bar_zone",
+      "pos": [
+        20,
+        8
+      ],
+      "thirst": 1.912799938201904,
+      "coins": 276.0,
+      "mood": 100,
+      "social": 100.0
+    },
+    {
+      "name": "凯拉",
+      "actions": 112,
+      "zone_changes": 2,
+      "errors": 0,
+      "elapsed_s": 422.5877196788788,
+      "zone": "bar_zone",
+      "pos": [
+        7,
+        2
+      ],
+      "thirst": 0,
+      "coins": 0,
+      "mood": 100,
+      "social": 99.7632616996765
+    },
+    {
+      "name": "兰伯特",
+      "actions": 121,
+      "zone_changes": 1,
+      "errors": 0,
+      "elapsed_s": 451.59407329559326,
+      "zone": "bar_zone",
+      "pos": [
+        7,
+        2
+      ],
+      "thirst": 12.04957776117325,
+      "coins": 0,
+      "mood": 100,
+      "social": 100.0
+    }
+  ]
+}
