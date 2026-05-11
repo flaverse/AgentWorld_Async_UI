@@ -123,17 +123,24 @@ class InteractionSystem:
 
         if agent.has("agent"):
             agent.get("agent").memory.record(narrative=result.narrative)
-            # Learn from own action
             if hasattr(agent.get("agent"), "knowledge") and agent.get("agent").knowledge:
                 target_name = world.entities.get(result.target_id, None)
                 target_name = target_name.name if target_name else result.target_id
                 agent.get("agent").knowledge.learn_direct(
                     entity_id=result.target_id or "",
                     entity_name=target_name or "",
-                    action="",  # action name not stored in ActionResult currently
+                    action="",
                     narrative=result.narrative,
                     caller_deltas=result.caller_deltas,
                 )
+
+        # Gate传送
+        if result.move_to_zone:
+            agent.zone = result.move_to_zone
+            agent.pos = result.move_to_pos or agent.pos
+            if agent.has("agent"):
+                agent.get("agent").sensory.clear()
+
         agent.status = "idle"
 
         self._spawn_event(world, agent,
