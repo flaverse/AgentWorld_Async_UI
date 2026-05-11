@@ -124,7 +124,7 @@ class InteractionSystem:
     def apply_result(self, result: ActionResult, agent, world) -> bool:
         """处理 busy_result。返回 True 表示有有效结果。
         
-        原则 ⑤ Systems 总控: 统一结果处理入口。main.py / external.py 不再重复。
+        原则 ⑤ Systems 总控: 统一结果处理入口。
         """
         if not result:
             return False
