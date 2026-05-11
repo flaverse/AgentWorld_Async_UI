@@ -167,9 +167,11 @@ class World:
             public_attrs={"expression": "好奇地四处张望"},
             private_attrs={"coins": 20, "mood": 60},
             actions={
-                "交谈": {
-                    "target_type": "agent",
-                },
+                "交谈": ActionDef(
+                    method="交谈",
+                    target_type=TargetType.AGENT,
+                    resolve=ResolveType.RULE,
+                ),
             },
         )
         entity.layers["agent"] = AgentLayer(
@@ -188,3 +190,13 @@ class World:
 
     def get_systems(self):
         return self._systems
+
+    # ── Event broadcast (set by main.py) ──
+    _on_event: callable = None
+
+    def set_event_callback(self, cb):
+        self._on_event = cb
+
+    async def emit_event(self, data: dict):
+        if self._on_event:
+            await self._on_event(data)

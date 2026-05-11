@@ -243,3 +243,23 @@ async def ws_agent(ws: WebSocket, agent_id: str):
         pass
     finally:
         await manager.unregister_agent(agent_id)
+
+
+# ── Global observer WebSocket (frontend) ──
+
+@router.websocket("/ws/live")
+async def ws_live(ws: WebSocket):
+    """前端观察者: 接收所有 agent 事件的广播。"""
+    from api.server import add_global_ws_client, remove_global_ws_client
+
+    await ws.accept()
+    add_global_ws_client(ws)
+
+    try:
+        while True:
+            # 保持连接，接收心跳或指令（当前只收不做）
+            await ws.receive_text()
+    except WebSocketDisconnect:
+        pass
+    finally:
+        remove_global_ws_client(ws)

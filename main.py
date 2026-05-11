@@ -59,6 +59,19 @@ async def demo_loop(world, brain, systems, max_actions=5):
             agent.busy_result = None
             systems["interaction"].apply_result(result, agent, world)
 
+            # Frontend event
+            await world.emit_event({
+                "event": "interaction_complete",
+                "agent": agent.id, "agent_name": agent.name,
+                "observation": result.narrative[:80],
+            })
+            if result.move_to_zone:
+                await world.emit_event({
+                    "event": "zone_change", "agent": agent.id,
+                    "zone": {"name": world.zones[result.move_to_zone]["name"],
+                             "id": result.move_to_zone},
+                })
+
             print(f"\n⏱  {world.clock.time_str()} | {agent.name} ({agent.pos[0]},{agent.pos[1]})")
             print(f"  📖 {result.narrative}")
             if result.caller_deltas:
@@ -111,15 +124,27 @@ async def demo_loop(world, brain, systems, max_actions=5):
             if inter:
                 pa = inter.private_attrs
                 print(f"  💭 想下一步... (thirst={pa.get('thirst',0):.0f} coins={pa.get('coins',0)})")
+            # Frontend time event
+            await world.emit_event({
+                "event": "world_time",
+                "time": world.clock.time_str(),
+            })
 
             decision = await brain.decide(context)
 
             # Move
             move_to = decision.get("move_to")
             if move_to and isinstance(move_to, list) and len(move_to) == 2:
-                move_time = agent.move_to(move_to)
+                move_time =                 agent.move_to(move_to)
                 agent.last_action_time = world.clock.now()
                 print(f"  🚶 移动到 ({move_to[0]},{move_to[1]})，耗时 {move_time} 分钟")
+                # Frontend event
+                await world.emit_event({
+                    "event": "agent_move",
+                    "agent": agent.id, "agent_name": agent.name,
+                    "from": [agent.pos[0], agent.pos[1] if move_to[0] else None],
+                    "to": move_to, "duration_ms": int(move_time * 1000 / world.time_scale),
+                })
                 systems["sensory"].update(agent, world.entities)
                 systems["interaction"].update_sensory(agent, world.entities)
 
@@ -131,13 +156,21 @@ async def demo_loop(world, brain, systems, max_actions=5):
                 inter_layer = target.get("interaction")
                 if inter_layer and inter_layer.get_action(action_name):
                     act_def = inter_layer.get_action(action_name)
-                    if act_def.target_type.value == "passive":
+                    if act_def.target_type.value == "passive" if hasattr(act_def, 'target_type') else act_def.get('target_type', 'passive') == 'passive':
                         if systems["interaction"].can_interact(agent, target):
                             iid = uuid.uuid4().hex[:8]
                             systems["interaction"].submit(iid, agent, target, action_name, world)
                             agent.last_action_time = world.clock.now()
                             action_count += 1
                             print(f"  🎯 {action_name} {target.name} → 后台裁定中...")
+                            # Frontend event
+                            await world.emit_event({
+                                "event": "interaction_start",
+                                "agent": agent.id, "agent_name": agent.name,
+                                "target": target.id, "target_name": target.name,
+                                "action": action_name,
+                                "bubble": f"{agent.name} {action_name} {target.name}",
+                            })
                         else:
                             print(f"  ⚠️  {target.name} 不在交互范围")
 
@@ -201,6 +234,10 @@ async def main():
     }
 
     world = World(world_cfg, systems)
+
+    # Wire frontend broadcast
+    from api.server import broadcast_to_frontend
+    world.set_event_callback(broadcast_to_frontend)
 
     # Start API server in a daemon thread
     start_api_server(world, host="0.0.0.0", port=8000)

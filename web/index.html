@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentWorld — 猎魔人世界</title>
+    <link rel="stylesheet" href="/web/css/pixel.css">
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Game Canvas -->
+        <div id="game-container"></div>
+
+        <!-- Side Panel -->
+        <div id="panel">
+            <!-- HUD -->
+            <div class="panel-section">
+                <div id="hud-time">--:--</div>
+                <div id="hud-zone">加载中...</div>
+                <div id="hud-entity-count"></div>
+            </div>
+
+            <!-- Agents -->
+            <div class="panel-section">
+                <h3>👤 NPC & Agents</h3>
+                <div id="agent-list"></div>
+            </div>
+
+            <!-- Event Log -->
+            <div class="panel-section" style="flex:1; display:flex; flex-direction:column; min-height:0;">
+                <h3>📋 Events</h3>
+                <div id="event-log"></div>
+            </div>
+
+            <!-- Controls -->
+            <div id="controls">
+                <button class="btn btn-start"  id="btn-start"  onclick="toggleSim()">▶ START</button>
+                <button class="btn btn-stop"   id="btn-stop"   onclick="stopSim()">■ STOP</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/web/js/main.js"></script>
+</body>
+</html>
