@@ -49,7 +49,7 @@ async def demo_loop(world, brain, systems, max_actions=5):
         systems["decay"].tick(agent, elapsed)
 
         # Sense
-        systems["sensory"].update(agent, world.entities)
+        systems["sensory"].update(agent, world.entities, world)
         systems["interaction"].update_sensory(agent, world.entities)
         world.prune_events()
 
@@ -146,7 +146,7 @@ async def demo_loop(world, brain, systems, max_actions=5):
                     "from": from_pos, "to": move_to,
                     "duration_ms": int(move_time * 1000 / world.time_scale),
                 })
-                systems["sensory"].update(agent, world.entities)
+                systems["sensory"].update(agent, world.entities, world)
                 systems["interaction"].update_sensory(agent, world.entities)
 
             # Interact

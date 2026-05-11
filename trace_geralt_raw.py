@@ -50,7 +50,7 @@ async def main():
         elapsed = world.clock.now() - agent.last_action_time
         if elapsed < 0: elapsed = 0
         systems["decay"].tick(agent, elapsed)
-        systems["sensory"].update(agent, world.entities)
+        systems["sensory"].update(agent, world.entities, world)
         systems["interaction"].update_sensory(agent, world.entities)
         world.prune_events()
 
@@ -125,7 +125,7 @@ async def main():
             dist = agent.move_to(move_to)
             agent.last_action_time = world.clock.now()
             output.append(f"🚶 移动 → ({move_to[0]},{move_to[1]}) 耗时 {dist}min\n")
-            systems["sensory"].update(agent, world.entities)
+            systems["sensory"].update(agent, world.entities, world)
             systems["interaction"].update_sensory(agent, world.entities)
 
         target_id = decision.get("target_entity")

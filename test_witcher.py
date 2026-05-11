@@ -26,7 +26,7 @@ async def run_npc(agent, world, brain, systems, max_actions=4):
             elapsed = 0
 
         systems["decay"].tick(agent, elapsed)
-        systems["sensory"].update(agent, world.entities)
+        systems["sensory"].update(agent, world.entities, world)
         systems["interaction"].update_sensory(agent, world.entities)
         world.prune_events()
 
@@ -93,7 +93,7 @@ async def run_npc(agent, world, brain, systems, max_actions=4):
                 agent.move_to(move_to)
                 agent.last_action_time = world.clock.now()
                 print(f"     🚶 → ({move_to[0]},{move_to[1]})")
-                systems["sensory"].update(agent, world.entities)
+                systems["sensory"].update(agent, world.entities, world)
                 systems["interaction"].update_sensory(agent, world.entities)
 
             # Interact

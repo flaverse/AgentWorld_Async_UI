@@ -42,7 +42,7 @@ class ExternalAgentProxy:
         move_time = self.entity.move_to(to)
 
         # 移动后重新感知
-        self.systems["sensory"].update(self.entity, self.world.entities)
+        self.systems["sensory"].update(self.entity, self.world.entities, self.world)
         self.systems["interaction"].update_sensory(self.entity, self.world.entities)
 
         # 推送感官
@@ -132,7 +132,7 @@ class ExternalAgentProxy:
                 break
 
     async def _handle_sensory_request(self):
-        self.systems["sensory"].update(self.entity, self.world.entities)
+        self.systems["sensory"].update(self.entity, self.world.entities, self.world)
         self.systems["interaction"].update_sensory(self.entity, self.world.entities)
         await self._push_sensory()
 

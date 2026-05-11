@@ -1,5 +1,6 @@
 import asyncio
 from core.clock import WorldClock
+from core.spatial_grid import SpatialGrid
 from entity.entity import Entity
 from layers.visual import VisualLayer
 from layers.interaction import InteractionLayer, ActionDef, TargetType, ResolveType
@@ -26,11 +27,15 @@ class World:
         self.zones: dict[str, dict] = {}
         self.entities: dict[str, Entity] = {}
         self.active_events: dict = {}
+        self.grids: dict[str, SpatialGrid] = {}  # zone_id → grid
 
         self._systems = systems
 
         for zone_def in world_config.get("zones", []):
             self.zones[zone_def["id"]] = zone_def
+            self.grids[zone_def["id"]] = SpatialGrid(
+                zone_def["width"], zone_def["height"], cell_size=5
+            )
 
         self._load_entities(world_config.get("entities", []))
 
@@ -99,6 +104,9 @@ class World:
                 entity.layers["gate"] = ent_def["gate"]
 
             self.entities[entity.id] = entity
+            entity._world = self
+            if entity.zone in self.grids:
+                self.grids[entity.zone].insert(entity.id, entity.pos)
 
     def get_zone_data(self, zone_id: str) -> dict:
         return self.zones.get(zone_id, {})
@@ -133,6 +141,8 @@ class World:
     def spawn_event(self, event) -> None:
         self.active_events[event.id] = event
         self.entities[event.id] = event
+        if event.zone in self.grids:
+            self.grids[event.zone].insert(event.id, event.pos)
 
     def prune_events(self) -> None:
         now = self.clock.now()
@@ -140,7 +150,9 @@ class World:
                    if evt.is_expired(now)]
         for eid in expired:
             del self.active_events[eid]
-            self.entities.pop(eid, None)
+            entity = self.entities.pop(eid, None)
+            if entity and entity.zone in self.grids:
+                self.grids[entity.zone].remove(eid, entity.pos)
 
     def register_external_agent(self, agent_id: str, name: str, zone: str,
                                 pos: list[int], sprite: str | None = None,
@@ -186,7 +198,26 @@ class World:
         entity.get("agent").memory = AgentMemory()
         entity.get("agent").inbox = Inbox()
         self.entities[entity.id] = entity
+        entity._world = self
+        if entity.zone in self.grids:
+            self.grids[entity.zone].insert(entity.id, entity.pos)
         return entity
+
+    def get_nearby_ids(self, zone_id: str, pos: list[int], radius: int) -> set[str]:
+        """Return entity_ids within radius. Uses spatial grid if available."""
+        grid = self.grids.get(zone_id)
+        if grid:
+            return grid.query_ids(pos, radius)
+        # Fallback: iterate all entities in zone
+        return {eid for eid, e in self.entities.items()
+                if e.zone == zone_id}
+
+    def notify_moved(self, entity_id: str, old_pos: list[int], new_pos: list[int],
+                     zone_id: str) -> None:
+        """Called by Entity.move_to to update spatial grid."""
+        grid = self.grids.get(zone_id)
+        if grid:
+            grid.move(entity_id, old_pos, new_pos)
 
     def get_systems(self):
         return self._systems

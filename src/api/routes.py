@@ -118,7 +118,7 @@ async def move_agent(agent_id: str, req: AgentMoveRequest):
     move_time = entity.move_to(req.to)
 
     systems = world.get_systems()
-    systems["sensory"].update(entity, world.entities)
+    systems["sensory"].update(entity, world.entities, world)
     systems["interaction"].update_sensory(entity, world.entities)
 
     # Push sensory to this agent
@@ -192,7 +192,7 @@ async def get_sensory(agent_id: str):
         raise HTTPException(404, "Agent not found")
 
     systems = world.get_systems()
-    systems["sensory"].update(entity, world.entities)
+    systems["sensory"].update(entity, world.entities, world)
     systems["interaction"].update_sensory(entity, world.entities)
 
     return await _build_sensory_response(agent_id, entity, world, systems)

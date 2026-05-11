@@ -1,4 +1,4 @@
-"""SensorySystem: 读 target 的 Visual/Auditory Layer → 写 observer.sensory_memory.
+"""SensorySystem: 读 target 的 Visual/Auditory Layer + 写 observer.sensory_memory.
 
 原则 ② 分层架构: 每层统一接口 see()/hear()。
 原则 ⑤ Systems 总控: 跨层感知逻辑唯一在此。
@@ -8,7 +8,7 @@ from agent.sensory_memory import VisionRecord, HearingRecord
 
 
 class SensorySystem:
-    def update(self, observer, all_entities: dict) -> None:
+    def update(self, observer, all_entities: dict, world=None) -> None:
         if not observer.has("agent"):
             return
 
@@ -17,50 +17,63 @@ class SensorySystem:
         current_vision_ids = set()
         current_hearing_ids = set()
 
-        for entity in all_entities.values():
-            if entity.id == observer.id:
-                continue
-            if entity.zone != observer.zone:
+        # Get candidate entities: spatial grid if available, else full scan
+        if world:
+            view_radius = max(agent_layer.view_radius,
+                              agent_layer.hearing_radius)
+            candidate_ids = world.get_nearby_ids(
+                observer.zone, observer.pos, view_radius
+            )
+        else:
+            candidate_ids = [
+                eid for eid, e in all_entities.items()
+                if e.zone == observer.zone and e.id != observer.id
+            ]
+
+        for eid in candidate_ids:
+            entity = all_entities.get(eid)
+            if not entity or entity.id == observer.id:
                 continue
 
             d = observer.distance_to(entity)
 
-            # ── 视觉 (VisualLayer.see) ──
+            # ── 视觉 ──
             if entity.has("visual"):
                 visual_layer = entity.get("visual")
-                see_range = min(agent_layer.view_radius, visual_layer.visible_radius)
+                see_range = min(agent_layer.view_radius,
+                                visual_layer.visible_radius)
                 if d <= see_range:
-                    current_vision_ids.add(entity.id)
-                    is_new = entity.id not in sensory.vision
+                    current_vision_ids.add(eid)
+                    is_new = eid not in sensory.vision
                     vision_data = visual_layer.see(d)
                     actions = []
                     if entity.has("interaction"):
                         actions = entity.get("interaction").interact()
-                    sensory.vision[entity.id] = VisionRecord(
-                        entity_id=entity.id, name=entity.name,
+                    sensory.vision[eid] = VisionRecord(
+                        entity_id=eid, name=entity.name,
                         pos=list(entity.pos), distance=d,
                         visual_data=vision_data, actions=actions,
                         can_interact=False,
                         first_seen=(time.time() if is_new
-                                    else sensory.vision[entity.id].first_seen),
+                                    else sensory.vision[eid].first_seen),
                         last_seen=time.time(),
                     )
 
-            # ── 听觉 (AuditoryLayer.hear) ──
+            # ── 听觉 ──
             if entity.has("auditory"):
                 auditory_layer = entity.get("auditory")
                 hear_range = min(agent_layer.hearing_radius,
                                  auditory_layer.audible_radius)
                 if d <= hear_range:
-                    current_hearing_ids.add(entity.id)
-                    is_new = entity.id not in sensory.hearing
+                    current_hearing_ids.add(eid)
+                    is_new = eid not in sensory.hearing
                     auditory_data = auditory_layer.hear(d)
-                    sensory.hearing[entity.id] = HearingRecord(
-                        entity_id=entity.id, name=entity.name,
+                    sensory.hearing[eid] = HearingRecord(
+                        entity_id=eid, name=entity.name,
                         pos=list(entity.pos), distance=d,
                         auditory_data=auditory_data,
                         first_heard=(time.time() if is_new
-                                     else sensory.hearing[entity.id].first_heard),
+                                     else sensory.hearing[eid].first_heard),
                         last_heard=time.time(),
                     )
 

@@ -13,6 +13,7 @@ class Entity:
     last_action_time: float = 0.0
 
     layers: dict = field(default_factory=dict)
+    _world: object = None  # weak ref to World, set during registration
 
     def has(self, layer_name: str) -> bool:
         return layer_name in self.layers
@@ -25,9 +26,13 @@ class Entity:
 
     def move_to(self, target_pos: list[int]) -> int:
         dist = abs(self.pos[0] - target_pos[0]) + abs(self.pos[1] - target_pos[1])
+        old_pos = list(self.pos)
         self.pos = target_pos
         agent_layer = self.get("agent")
         speed = agent_layer.speed if agent_layer else 1.0
+        # Notify World to update spatial grid
+        if self._world:
+            self._world.notify_moved(self.id, old_pos, target_pos, self.zone)
         return int(dist * speed)
 
     def apply_deltas(self, deltas: dict) -> None:
