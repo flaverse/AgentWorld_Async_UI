@@ -71,6 +71,23 @@ async def demo_loop(world, brain, systems, max_actions=5):
             zone_data = world.get_zone_data(agent.zone)
             sensory = agent_layer.sensory
             memory = agent_layer.memory
+            inbox_msgs = agent_layer.inbox.drain()
+
+            # Build visible-only section from sensory
+            visible_text = ""
+            visible_only = sensory.get_visible_only()
+            if visible_only:
+                parts = []
+                for r in visible_only:
+                    parts.append(f"  id={r.entity_id} | {r.name} ({r.pos[0]},{r.pos[1]}) | dist={r.distance}")
+                visible_text = "\n".join(parts)
+
+            # Build messages section from inbox
+            messages_text = ""
+            if inbox_msgs:
+                messages_text = "\n".join(
+                    f"- {m.from_agent_name}: \"{m.content[:50]}\"" for m in inbox_msgs
+                )
 
             context = {
                 "round": action_count + 1,
@@ -83,9 +100,10 @@ async def demo_loop(world, brain, systems, max_actions=5):
                 "pos_x": agent.pos[0],
                 "pos_y": agent.pos[1],
                 "interactable_text": sensory.to_prompt_vision(),
-                "visible_text": "",
+                "visible_text": visible_text,
                 "memory_text": memory.to_prompt_text(5),
-                "messages_text": "",
+                "messages_text": messages_text,
+                "hearing_text": sensory.to_prompt_hearing(),
             }
 
             print(f"\n⏱  {world.clock.time_str()} | {agent.name} ({agent.pos[0]},{agent.pos[1]})")
@@ -136,15 +154,7 @@ async def demo_loop(world, brain, systems, max_actions=5):
         if agent.busy_result is not None:
             result = agent.busy_result
             agent.busy_result = None
-            agent.apply_deltas(result.caller_deltas)
-            if result.target_id and result.target_id in world.entities:
-                world.entities[result.target_id].apply_deltas(result.target_deltas)
-            for amb_eff in result.ambient_effects:
-                aid = amb_eff.get("entity_id", "")
-                if aid in world.entities:
-                    world.entities[aid].apply_deltas(amb_eff.get("deltas", {}))
-            agent_layer.memory.record(narrative=result.narrative)
-            agent.status = "idle"
+            systems["interaction"].apply_result(result, agent, world)
             print(f"  📖 {result.narrative}")
             break
         if agent.status == "idle":

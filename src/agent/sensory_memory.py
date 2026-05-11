@@ -29,7 +29,7 @@ class HearingRecord:
 @dataclass
 class SensoryMemory:
     vision: dict[str, VisionRecord] = field(default_factory=dict)
-    hearing: dict = field(default_factory=dict)
+    hearing: dict[str, HearingRecord] = field(default_factory=dict)
 
     def get_interactable(self) -> list[VisionRecord]:
         return [r for r in self.vision.values() if r.can_interact]
@@ -40,6 +40,15 @@ class SensoryMemory:
     def clear(self):
         self.vision.clear()
         self.hearing.clear()
+
+    def to_prompt_hearing(self) -> str:
+        if not self.hearing:
+            return ""
+        lines = ["👂 听到:"]
+        for r in self.hearing.values():
+            ad = r.auditory_data
+            lines.append(f"  {r.name} ({r.pos[0]},{r.pos[1]}) | {ad.get('sound','')} ({ad.get('volume','')})")
+        return "\n".join(lines)
 
     def to_prompt_vision(self) -> str:
         lines = []

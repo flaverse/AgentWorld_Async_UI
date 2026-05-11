@@ -188,6 +188,3 @@ class World:
 
     def get_systems(self):
         return self._systems
-
-    def get_systems(self):
-        return self._systems

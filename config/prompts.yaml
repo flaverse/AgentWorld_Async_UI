@@ -20,6 +20,7 @@ templates:
       - {name: spatial_context, provider: topology}
       - {name: interactable_section, provider: topology}
       - {name: visible_section, provider: topology, condition: "has_visible"}
+      - {name: hearing_section, provider: topology, condition: "has_hearing"}
       - {name: recent_memory, provider: runtime, condition: "has_memory"}
       - {name: action_guidance, provider: content}
       - {name: output_format, provider: content}
@@ -68,6 +69,11 @@ slots:
     template: |
       ## 👁️ 看得见但够不着 (需走近)
       {visible_text}
+
+  hearing_section:
+    provider: topology
+    template: |
+      {hearing_text}
 
   recent_memory:
     provider: runtime

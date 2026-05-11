@@ -48,6 +48,8 @@ class PromptAssembler:
             return bool(context.get("messages_text", "").strip())
         if cond == "has_visible":
             return bool(context.get("visible_text", "").strip())
+        if cond == "has_hearing":
+            return bool(context.get("hearing_text", "").strip())
         if cond == "has_ambient":
             return bool(context.get("ambient_text", "").strip())
         if cond == "is_busy":
