@@ -88,7 +88,9 @@ class LLMClient:
                     u = prov.get("baseUrl", "") or prov.get("base_url", "")
                     if k and u:
                         return u, k
-            except Exception:
+            except Exception as e:
+                from core.error_collector import errors
+                errors.log_exception("llm._find_credentials", e, f"parsing {path}")
                 continue
 
         return "", ""
@@ -151,8 +153,12 @@ class LLMClient:
                     raise RuntimeError(f"API {resp.status_code}: {resp.text[:300]}")
             except Exception as e:
                 if attempt < self.max_retries:
+                    from core.error_collector import errors
+                    errors.log_error("llm.anthropic", f"retry {attempt+1}/{self.max_retries}: {e}")
                     time.sleep(2 ** attempt)
                     continue
+                from core.error_collector import errors
+                errors.log_exception("llm.anthropic", e, f"final failure after {self.max_retries} retries")
                 raise
         return ""
 
@@ -173,7 +179,11 @@ class LLMClient:
                 return resp.choices[0].message.content or ""
             except Exception as e:
                 if attempt < self.max_retries:
+                    from core.error_collector import errors
+                    errors.log_error("llm.openai", f"retry {attempt+1}/{self.max_retries}: {e}")
                     time.sleep(2 ** attempt)
                 else:
+                    from core.error_collector import errors
+                    errors.log_exception("llm.openai", e, f"final failure")
                     raise
         return ""

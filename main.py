@@ -135,15 +135,16 @@ async def demo_loop(world, brain, systems, max_actions=5):
             # Move
             move_to = decision.get("move_to")
             if move_to and isinstance(move_to, list) and len(move_to) == 2:
-                move_time =                 agent.move_to(move_to)
+                from_pos = list(agent.pos)
+                move_time = agent.move_to(move_to)
                 agent.last_action_time = world.clock.now()
                 print(f"  🚶 移动到 ({move_to[0]},{move_to[1]})，耗时 {move_time} 分钟")
                 # Frontend event
                 await world.emit_event({
                     "event": "agent_move",
                     "agent": agent.id, "agent_name": agent.name,
-                    "from": [agent.pos[0], agent.pos[1] if move_to[0] else None],
-                    "to": move_to, "duration_ms": int(move_time * 1000 / world.time_scale),
+                    "from": from_pos, "to": move_to,
+                    "duration_ms": int(move_time * 1000 / world.time_scale),
                 })
                 systems["sensory"].update(agent, world.entities)
                 systems["interaction"].update_sensory(agent, world.entities)
@@ -242,11 +243,26 @@ async def main():
     # Start API server in a daemon thread
     start_api_server(world, host="0.0.0.0", port=8000)
     print("🌐 API server: http://0.0.0.0:8000")
-    print("   WebSocket: ws://0.0.0.0:8000/ws/agent/{id}")
+    print("   前端: http://0.0.0.0:8000")
     print()
 
-    # Run demo loop
-    await demo_loop(world, brain, systems, max_actions=5)
+    # Run demo loop as background task (keeps world alive)
+    async def safe_demo():
+        try:
+            await demo_loop(world, brain, systems, max_actions=20)
+        except Exception as e:
+            import traceback
+            print(f"[demo] crashed: {e}")
+            traceback.print_exc()
+        print("[demo] finished")
+    asyncio.create_task(safe_demo())
+
+    # Keep server alive
+    print("按 Ctrl+C 停止...")
+    try:
+        await asyncio.Event().wait()
+    except KeyboardInterrupt:
+        print("\nShutting down...")
 
 
 if __name__ == "__main__":

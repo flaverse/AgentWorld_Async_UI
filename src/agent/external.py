@@ -82,7 +82,11 @@ class ExternalAgentProxy:
             return
 
         iid = uuid.uuid4().hex[:8]
-        self.systems["interaction"].submit(iid, self.entity, target, action, self.world)
+        try:
+            self.systems["interaction"].submit(iid, self.entity, target, action, self.world)
+        except (ValueError, RuntimeError) as e:
+            await self.ws.send_json({"error": str(e)})
+            return
 
         await self.ws.send_json({
             "type": "interact_ack",

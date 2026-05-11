@@ -9,8 +9,40 @@ from core.world import World
 import uuid
 import asyncio
 import json
+import traceback
 
 router = APIRouter(prefix="/api/v1")
+
+
+# ── Error reporting ──
+
+@router.get("/errors")
+async def get_errors():
+    """Get recent error log from the collector."""
+    from core.error_collector import errors
+    return errors.get_summary()
+
+@router.delete("/errors")
+async def clear_errors():
+    from core.error_collector import errors
+    errors.clear()
+    return {"status": "cleared"}
+
+
+def safe_handler(fn):
+    """Decorator: wraps any route to catch unexpected errors."""
+    from functools import wraps
+    @wraps(fn)
+    async def wrapper(*args, **kwargs):
+        try:
+            return await fn(*args, **kwargs)
+        except HTTPException:
+            raise
+        except Exception as e:
+            from core.error_collector import errors
+            errors.log_exception(f"api.{fn.__name__}", e)
+            raise HTTPException(500, f"Internal error: {e}")
+    return wrapper
 
 
 def get_world() -> World:
@@ -22,6 +54,7 @@ def get_world() -> World:
 
 # ── World state ──
 
+@safe_handler
 @router.get("/world/state")
 async def get_world_state(focus: str | None = None):
     world = get_world()
@@ -53,6 +86,7 @@ async def get_world_state(focus: str | None = None):
 
 # ── Agent registration ──
 
+@safe_handler
 @router.post("/agents")
 async def register_agent(req: AgentRegisterRequest):
     world = get_world()
@@ -72,6 +106,7 @@ async def register_agent(req: AgentRegisterRequest):
 
 # ── Agent actions ──
 
+@safe_handler
 @router.post("/agents/{agent_id}/move")
 async def move_agent(agent_id: str, req: AgentMoveRequest):
     world = get_world()
@@ -104,6 +139,7 @@ async def move_agent(agent_id: str, req: AgentMoveRequest):
     return {"status": "moved", "pos": entity.pos, "duration_minutes": move_time}
 
 
+@safe_handler
 @router.post("/agents/{agent_id}/interact")
 async def interact_agent(agent_id: str, req: InteractRequest):
     world = get_world()
@@ -120,11 +156,15 @@ async def interact_agent(agent_id: str, req: InteractRequest):
         raise HTTPException(400, f"Target not in interaction range")
 
     iid = uuid.uuid4().hex[:8]
-    systems["interaction"].submit(iid, entity, target, req.action, world)
+    try:
+        systems["interaction"].submit(iid, entity, target, req.action, world)
+    except (ValueError, RuntimeError) as e:
+        raise HTTPException(400, str(e))
 
     return {"status": "submitted", "interaction_id": iid}
 
 
+@safe_handler
 @router.post("/agents/{agent_id}/command")
 async def command_agent(agent_id: str, req: CommandRequest):
     """人类向自主 agent 发指令 → 写入 inbox。"""
@@ -142,6 +182,7 @@ async def command_agent(agent_id: str, req: CommandRequest):
 
 # ── Sensory poll ──
 
+@safe_handler
 @router.post("/agents/{agent_id}/sensory")
 async def get_sensory(agent_id: str):
     """主动拉取当前感知数据。"""
@@ -243,23 +284,3 @@ async def ws_agent(ws: WebSocket, agent_id: str):
         pass
     finally:
         await manager.unregister_agent(agent_id)
-
-
-# ── Global observer WebSocket (frontend) ──
-
-@router.websocket("/ws/live")
-async def ws_live(ws: WebSocket):
-    """前端观察者: 接收所有 agent 事件的广播。"""
-    from api.server import add_global_ws_client, remove_global_ws_client
-
-    await ws.accept()
-    add_global_ws_client(ws)
-
-    try:
-        while True:
-            # 保持连接，接收心跳或指令（当前只收不做）
-            await ws.receive_text()
-    except WebSocketDisconnect:
-        pass
-    finally:
-        remove_global_ws_client(ws)

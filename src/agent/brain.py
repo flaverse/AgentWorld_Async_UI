@@ -66,4 +66,6 @@ class Brain:
         try:
             return json.loads(json_str)
         except json.JSONDecodeError:
+            from core.error_collector import errors
+            errors.log_llm_parse_failure("brain.decide", raw)
             return {"thinking": raw}

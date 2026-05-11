@@ -52,6 +52,8 @@ class InteractionSystem:
 
         asyncio.create_task(
             self._resolve_async(interaction_id, agent, target, action, world)
+        ).add_done_callback(
+            lambda t: self._on_task_done(t, agent, target, action, world)
         )
 
     async def _resolve_async(self, iid: str, agent, target, action: str,
@@ -97,12 +99,26 @@ class InteractionSystem:
             return ActionResult(target_id=target.id, narrative="unknown resolve type")
 
         except Exception as e:
-            import traceback
-            traceback.print_exc()
+            from core.error_collector import errors
+            errors.log_exception("interaction._resolve_with_retry", e,
+                                 f"{agent.name} -> {target.name}.{action}")
             return ActionResult(
                 target_id=target.id,
                 narrative=f"交互失败: {e}",
                 public_observation=f"{agent.name}尝试{action}但出了点问题",
+            )
+
+    def _on_task_done(self, task, agent, target, action, world):
+        """Callback: if the async runner task crashed, mark agent idle and log."""
+        if task.exception():
+            from core.error_collector import errors
+            errors.log_task_failure(f"interaction.resolve({agent.name},{action})",
+                                    task.exception())
+            agent.status = "idle"
+            agent.busy_result = ActionResult(
+                target_id=target.id,
+                narrative=f"内部错误: 裁定未完成",
+                public_observation=f"{agent.name}的交互出了点问题",
             )
 
     def apply_result(self, result: ActionResult, agent, world) -> bool:

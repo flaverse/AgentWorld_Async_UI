@@ -48,6 +48,8 @@ class InteractionResolver:
         try:
             data = json.loads(json_str)
         except json.JSONDecodeError:
+            from core.error_collector import errors
+            errors.log_llm_parse_failure("resolver.resolve", raw)
             data = {}
 
         return ActionResult(

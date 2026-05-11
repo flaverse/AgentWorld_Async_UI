@@ -1,24 +1,24 @@
 // ═══════════════════════════════════════
-// AgentWorld Pixel Frontend — Main
+// AgentWorld Pixel Frontend — Clean
 // ═══════════════════════════════════════
 
-const API = 'http://' + location.host;
-const WS  = 'ws://' + location.host + '/ws/live';
+const TILE_SIZE = 32;
+const ZOOM = 3;
+let game = null;
+let ws = null;
+let entities = {};
+let sprites = {};
+let zoneData = null;
+let eventIndex = 0;
 
-let phaserGame = null;
-let wsClient = null;
-let isRunning = false;
-
-// ── Sprites: color + emoji labels ──
-const SPRITE_PALETTE = {
-    counter_bar:    { color: 0x8B4513, icon: '🍺' },
-    table:          { color: 0x6B4226, icon: '🪑' },
-    door:           { color: 0x654321, icon: '🚪' },
-    char_male_01:   { color: 0x3498DB, icon: '🧑' },
-    char_witcher:   { color: 0xC0C0C0, icon: '⚔️' },
-    char_sorceress: { color: 0x9B59B6, icon: '🔮' },
-    char_bard:      { color: 0xE74C3C, icon: '🎵' },
-    default:        { color: 0x95A5A6, icon: '?' },
+const SPRITE_COLORS = {
+    counter_bar:    0x8B4513,
+    table:          0x6B4226,
+    door:           0x654321,
+    char_male_01:   0x3498DB,
+    char_witcher:   0xC0C0C0,
+    char_sorceress: 0x9B59B6,
+    char_bard:      0xE74C3C,
 };
 
 const ZONE_COLORS = {
@@ -28,314 +28,288 @@ const ZONE_COLORS = {
 };
 
 // ═══════════════════════════════════════
-// World Scene (Phaser)
+// Phaser Scene
 // ═══════════════════════════════════════
 class WorldScene extends Phaser.Scene {
     constructor() { super('WorldScene'); }
 
     create() {
         this.cameras.main.setBackgroundColor('#1a1a2e');
+        this.tileGfx = this.add.graphics();
         this.entitySprites = {};
-        this.tileSize  = 32;
-        this.zoomLevel = 3;
-        this.currentZone = null;
-        this.tileGraphics = null;
-        this.followTarget = null;
+        this.zoneGfx = null;
+        this.currentZoneId = null;
 
-        // Load initial state
-        fetch(API + '/api/v1/world/state')
-            .then(r => r.json())
-            .then(data => this.loadWorld(data));
+        // Keyboard: Tab to cycle camera focus
+        this.input.keyboard.on('keydown-TAB', () => this.cycleFocus());
 
-        // Start WebSocket
-        this.connectWS();
+        // Load world data, then connect WS
+        this.loadWorldState();
     }
 
-    loadWorld(data) {
-        console.log('[WorldScene] Loaded', data.entities.length, 'entities');
-        this.worldTime = data.time;
-        this.zones = data.zones;
-        this.entities = {};
-        data.entities.forEach(e => this.entities[e.id] = e);
+    async loadWorldState() {
+        try {
+            const resp = await fetch('/api/v1/world/state');
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const data = await resp.json();
+            entities = {};
+            data.entities.forEach(e => entities[e.id] = e);
+            zoneData = data.zones;
 
-        // Show first zone by default
-        const firstZone = data.zones.find(z => {
-            const agents = data.entities.filter(e => e.pos &&
-                e.zone === z.id && (e.autonomous || e.sprite));
-            return agents.length > 0;
-        });
-        this.loadZone(firstZone || data.zones[0]);
+            // Find a zone with agents
+            const agents = data.entities.filter(e => e.autonomous);
+            const focusZone = agents[0]?.zone || data.zones[0]?.id;
+            this.renderZone(focusZone);
 
-        updateHUD(data);
-        updateAgentList(data.entities);
+            // Update UI
+            updateHUD(data.time, focusZone, data.entities.length);
+            updateAgentList(data.entities);
+
+            // Connect WebSocket
+            this.connectWS();
+
+            document.getElementById('status').textContent = '● 已连接';
+        } catch (err) {
+            console.error('World load failed:', err);
+            document.getElementById('status').textContent = '✗ 加载失败';
+            setTimeout(() => this.loadWorldState(), 2000);
+        }
     }
 
-    loadZone(zoneData) {
-        if (!zoneData) return;
-        this.currentZone = zoneData;
-        console.log('[WorldScene] Zone:', zoneData.name);
+    renderZone(zoneId) {
+        this.currentZoneId = zoneId;
+        const zone = zoneData.find(z => z.id === zoneId);
+        if (!zone) return;
 
         // Clear old sprites
-        Object.values(this.entitySprites).forEach(s => s.destroy());
+        Object.values(this.entitySprites).forEach(o => {
+            if (o.gfx) o.gfx.destroy();
+            if (o.label) o.label.destroy();
+            if (o.nametag) o.nametag.destroy();
+        });
         this.entitySprites = {};
-        if (this.tileGraphics) this.tileGraphics.destroy();
+        if (this.zoneGfx) this.zoneGfx.destroy();
 
-        const ts = this.tileSize;
-        const w = zoneData.width  * ts;
-        const h = zoneData.height * ts;
+        const w = zone.width * TILE_SIZE;
+        const h = zone.height * TILE_SIZE;
+        const bg = ZONE_COLORS[zoneId] || 0x333333;
 
-        // Draw ground tiles
-        this.tileGraphics = this.add.graphics();
-        const bgColor = ZONE_COLORS[zoneData.id] || 0x333333;
-        this.tileGraphics.fillStyle(bgColor, 1);
-        this.tileGraphics.fillRect(0, 0, w, h);
+        // Draw ground
+        this.zoneGfx = this.add.graphics();
+        this.zoneGfx.fillStyle(bg, 1);
+        this.zoneGfx.fillRect(0, 0, w, h);
 
-        // Grid lines (pixel style)
-        this.tileGraphics.lineStyle(1, Phaser.Display.Color.ValueToColor(bgColor).darken(20).color, 0.3);
-        for (let x = 0; x <= zoneData.width; x++) {
-            this.tileGraphics.lineBetween(x * ts, 0, x * ts, h);
-        }
-        for (let y = 0; y <= zoneData.height; y++) {
-            this.tileGraphics.lineBetween(0, y * ts, w, y * ts);
-        }
+        // Grid
+        this.zoneGfx.lineStyle(1, Phaser.Display.Color.ValueToColor(bg).darken(30).color, 0.2);
+        for (let x = 0; x <= zone.width; x++)  this.zoneGfx.lineBetween(x*TILE_SIZE, 0, x*TILE_SIZE, h);
+        for (let y = 0; y <= zone.height; y++) this.zoneGfx.lineBetween(0, y*TILE_SIZE, w, y*TILE_SIZE);
 
-        // Draw entities in this zone
-        const zoneEntities = Object.values(this.entities).filter(
-            e => e.zone === zoneData.id
-        );
-        zoneEntities.forEach(e => this.spawnSprite(e));
+        // Spawn entities
+        const zoneEnts = Object.values(entities).filter(e => e.zone === zoneId);
+        let hasAutonomous = false;
+        zoneEnts.forEach(e => {
+            const o = this.spawnEntity(e);
+            if (e.autonomous) hasAutonomous = true;
+        });
 
-        // Camera setup
+        // Camera
         this.cameras.main.setBounds(0, 0, w, h);
-        const agentSprites = Object.entries(this.entitySprites)
-            .filter(([id]) => this.entities[id]?.autonomous);
-        if (agentSprites.length > 0) {
-            this.cameras.main.startFollow(agentSprites[0][1], true, 0.3, 0.3);
-            this.followTarget = agentSprites[0][1];
-        }
+        this.cameras.main.setZoom(ZOOM);
+        this.cameras.main.centerOn(w/2, h/2);
 
-        this.cameras.main.setZoom(this.zoomLevel);
+        // Update HUD
+        const el = document.getElementById('hud-zone');
+        if (el) el.textContent = `📍 ${zone.name}`;
     }
 
-    spawnSprite(entity) {
-        if (!entity.pos) return;
-        const ts = this.tileSize;
-        const palette = SPRITE_PALETTE[entity.sprite] || SPRITE_PALETTE['default'];
-        const x = entity.pos[0] * ts + ts / 2;
-        const y = entity.pos[1] * ts + ts / 2;
+    spawnEntity(e) {
+        if (!e.pos) return null;
+        const ts = TILE_SIZE;
+        const x = e.pos[0] * ts + ts / 2;
+        const y = e.pos[1] * ts + ts / 2;
 
-        // Colored square
+        const color = SPRITE_COLORS[e.sprite] || 0x95A5A6;
+
+        // Draw colored rectangle
         const gfx = this.add.graphics();
-        gfx.fillStyle(palette.color, 1);
-        gfx.fillRect(x - ts/3, y - ts/3, ts*2/3, ts*2/3);
+        gfx.fillStyle(color, 1);
+        const size = ts * 0.55;
+        gfx.fillRect(x - size/2, y - size/2, size, size);
+        // Pixel border
+        gfx.lineStyle(1, 0xffffff, 0.3);
+        gfx.strokeRect(x - size/2, y - size/2, size, size);
 
-        // Emoji label
-        const isAutonomous = entity.autonomous || entity.sprite === 'char_witcher'
-            || entity.sprite === 'char_sorceress' || entity.sprite === 'char_bard'
-            || entity.sprite === 'char_male_01';
-        const label = this.add.text(x, y - ts/2 - 2, palette.icon, {
-            fontSize: '0px',
-            fontFamily: 'serif',
-        }).setOrigin(0.5).setScale(0.5);
-
-        if (isAutonomous) {
-            // Name tag
-            this.add.text(x, y - ts/2 + 8, entity.name || '?', {
-                fontSize: '4px',
-                fontFamily: '"Press Start 2P", monospace',
-                color: '#f0a500',
-            }).setOrigin(0.5).setScale(0.6);
+        // Name tag (for autonomous)
+        let nametag = null;
+        if (e.autonomous) {
+            nametag = this.add.text(x, y - ts/2 - 4, e.name || e.id, {
+                fontSize: '5px', fontFamily: 'monospace',
+                color: '#f0a500', stroke: '#000', strokeThickness: 1,
+            }).setOrigin(0.5);
         }
 
-        this.entitySprites[entity.id] = { gfx, label, x, y };
+        const obj = { gfx, nametag, x, y, id: e.id, autonomous: e.autonomous };
+        this.entitySprites[e.id] = obj;
+        return obj;
     }
 
     moveSprite(entityId, to, durationMs) {
-        const s = this.entitySprites[entityId];
-        if (!s || s.node) return;
-        const ts = this.tileSize;
+        const obj = this.entitySprites[entityId];
+        if (!obj || !obj.gfx) return;
+        const ts = TILE_SIZE;
         const tx = to[0] * ts + ts / 2;
         const ty = to[1] * ts + ts / 2;
+        const d = durationMs || 500;
+
+        const targets = [obj.gfx];
+        if (obj.nametag) targets.push(obj.nametag);
 
         this.tweens.add({
-            targets: [s.gfx, s.label],
-            x: tx - s.x + (s.gfx.x || s.x),
-            y: ty - s.y + (s.gfx.y || s.y),
-            duration: Math.min(durationMs || 500, 2000),
+            targets,
+            x: tx,
+            y: ty,
+            duration: Math.min(d, 2000),
             ease: 'Linear',
-            onUpdate: () => {
-                s.gfx.x = s.gfx.x || s.x;
-                s.gfx.y = s.gfx.y || s.y;
-            }
         });
-        s.x = tx; s.y = ty;
+        obj.x = tx; obj.y = ty;
     }
 
     showBubble(entityId, text) {
-        const s = this.entitySprites[entityId];
-        if (!s) return;
-        const bubble = this.add.text(
-            s.x || s.gfx.x, (s.y || s.gfx.y) - 20, text.substring(0, 25),
-            {
-                fontSize: '5px',
-                fontFamily: '"Press Start 2P", monospace',
-                color: '#fff',
-                backgroundColor: '#222',
-                padding: { x: 3, y: 2 },
-            }
-        ).setOrigin(0.5).setScale(0.5);
+        const obj = this.entitySprites[entityId];
+        if (!obj) return;
+        const b = this.add.text(obj.x, obj.y - 22, text.substring(0, 30), {
+            fontSize: '5px', fontFamily: 'monospace',
+            color: '#fff', backgroundColor: '#222',
+            padding: { x: 2, y: 1 },
+        }).setOrigin(0.5).setDepth(10);
 
         this.tweens.add({
-            targets: bubble,
-            alpha: 0,
-            delay: 3000,
-            duration: 500,
-            onComplete: () => bubble.destroy()
+            targets: b, alpha: 0, delay: 3000, duration: 500,
+            onComplete: () => b.destroy()
         });
+    }
+
+    cycleFocus() {
+        const autonomous = Object.values(this.entitySprites).filter(o => o.autonomous);
+        if (autonomous.length === 0) return;
+        const idx = autonomous.findIndex(o => o.id === this._focusId);
+        const next = autonomous[(idx + 1) % autonomous.length];
+        this._focusId = next.id;
+        this.cameras.main.pan(next.x, next.y, 500);
     }
 
     // ── WebSocket ──
     connectWS() {
-        if (wsClient) wsClient.close();
-        wsClient = new WebSocket(WS);
+        if (ws) { ws.close(); ws = null; }
+        const url = `ws://${location.host}/ws/live`;
+        console.log('[WS] connecting:', url);
+        ws = new WebSocket(url);
 
-        wsClient.onopen = () => {
-            console.log('[WS] Connected');
-            addEvent({type: 'connected', msg: 'WebSocket 已连接'});
+        ws.onopen = () => {
+            console.log('[WS] connected');
+            document.getElementById('status').textContent = '● 已连接';
         };
 
-        wsClient.onmessage = (msg) => {
-            const e = JSON.parse(msg.data);
-            this.handleEvent(e);
+        ws.onmessage = (msg) => {
+            try {
+                const e = JSON.parse(msg.data);
+                this.handleEvent(e);
+            } catch (err) {
+                console.error('[WS] parse error:', err);
+            }
         };
 
-        wsClient.onclose = () => {
-            console.log('[WS] Disconnected');
-            setTimeout(() => { if (isRunning) this.connectWS(); }, 3000);
+        ws.onclose = () => {
+            console.log('[WS] disconnected');
+            document.getElementById('status').textContent = '○ 断开';
+            if (document.getElementById('btn-start').textContent === '⏸ PAUSE') {
+                setTimeout(() => this.connectWS(), 3000);
+            }
+        };
+
+        ws.onerror = (err) => {
+            console.error('[WS] error:', err);
         };
     }
 
     handleEvent(e) {
+        addEvent(e);
         switch (e.event) {
             case 'agent_move':
                 this.moveSprite(e.agent, e.to, e.duration_ms || 500);
-                addEvent({type: 'move', agent: e.agent, from: e.from, to: e.to});
                 break;
-
             case 'interaction_start':
                 this.showBubble(e.agent, e.bubble || e.action);
-                addEvent({type: 'interact', agent: e.agent, target: e.target, action: e.action});
                 break;
-
             case 'interaction_complete':
-                addEvent({type: 'result', agent: e.agent, observation: e.observation});
-                break;
-
-            case 'zone_change':
-                addEvent({type: 'zone', agent: e.agent, zone: e.zone?.name});
-                if (e.zone) this.loadZone(e.zone);
-                break;
-
             case 'world_time':
-                updateHUD({time: e.time});
+                if (e.time) updateHUD(e.time);
+                break;
+            case 'zone_change':
+                if (e.zone?.id) this.renderZone(e.zone.id);
                 break;
         }
     }
-
-    update() {
-        // Rotate follow target between agents
-        if (this.followTarget && Phaser.Input.Keyboard.JustDown(
-            this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.TAB)
-        )) {
-            const agents = Object.entries(this.entitySprites)
-                .filter(([id]) => this.entities[id]?.autonomous);
-            if (agents.length > 0) {
-                const idx = agents.findIndex(([id]) =>
-                    this.entitySprites[id] === this.followTarget);
-                const next = agents[(idx + 1) % agents.length];
-                this.followTarget = next[1];
-                this.cameras.main.startFollow(this.followTarget, true, 0.3, 0.3);
-            }
-        }
-    }
 }
 
 // ═══════════════════════════════════════
-// UI Functions
+// UI
 // ═══════════════════════════════════════
 
-function updateHUD(data) {
-    if (data.time) document.getElementById('hud-time').textContent = '⏱ ' + data.time;
-    if (data.zone) document.getElementById('hud-zone').textContent = '📍 ' + data.zone;
-    if (data.entities) {
-        document.getElementById('hud-entity-count').textContent =
-            data.entities.length + ' entities';
-    }
+function updateHUD(time, zone, count) {
+    if (time) document.getElementById('hud-time').textContent = '⏱ ' + time;
+    if (zone) document.getElementById('hud-zone').textContent = '📍 ' + zone;
+    if (count)  document.getElementById('hud-count').textContent = count + ' entities';
 }
 
-function updateAgentList(entities) {
-    const agents = entities.filter(e => e.autonomous || e.public_attrs);
+function updateAgentList(ents) {
     const list = document.getElementById('agent-list');
-    list.innerHTML = agents.map(a => `
-        <div class="agent-row">
-            <span class="agent-name">${a.name || a.id}</span>
-            <span class="agent-zone">${a.zone || ''}</span>
-            <span class="agent-stats">${a.status || ''}</span>
-        </div>
-    `).join('');
+    const agents = Object.values(entities).filter(e => e.autonomous);
+    list.innerHTML = agents.map(a => `<div class="agent-row">
+        <span class="agent-name">${a.name||a.id}</span>
+        <span class="agent-zone">${a.zone||''}</span>
+    </div>`).join('');
 }
 
 function addEvent(e) {
     const log = document.getElementById('event-log');
+    if (!log) return;
     const now = new Date().toLocaleTimeString();
-    let cls = '', text = '';
-
-    switch (e.type) {
-        case 'connected':
-            cls = 'event-interact'; text = '🔗 已连接'; break;
-        case 'move':
-            cls = 'event-move'; text = `${e.agent} 移动 (${e.from})→(${e.to})`; break;
-        case 'interact':
-            cls = 'event-interact'; text = `${e.agent} → ${e.target}: ${e.action}`; break;
-        case 'result':
-            cls = 'event-interact'; text = e.observation || e.msg; break;
-        case 'zone':
-            cls = 'event-move'; text = `${e.agent} 进入 ${e.zone}`; break;
-        default:
-            cls = ''; text = e.msg || JSON.stringify(e);
+    let cls = 'event-interact', text = '';
+    switch (e.event) {
+        case 'agent_move': cls='event-move'; text=`${e.agent_name||e.agent} 移动 (${e.from})→(${e.to})`; break;
+        case 'interaction_start': cls='event-interact'; text=`${e.agent_name||e.agent} → ${e.target_name||e.target}: ${e.action}`; break;
+        case 'interaction_complete': cls='event-interact'; text=e.observation||''; break;
+        case 'zone_change': cls='event-move'; text=`${e.agent_name||e.agent} → ${e.zone?.name||''}`; break;
+        case 'world_time': return; // skip
+        default: return;
     }
-
+    if (!text) return;
     const div = document.createElement('div');
     div.className = 'event-item ' + cls;
     div.innerHTML = `<span class="evt-time">${now}</span> ${text}`;
     log.insertBefore(div, log.firstChild);
-
-    if (log.children.length > 100) log.removeChild(log.lastChild);
+    while (log.children.length > 50) log.removeChild(log.lastChild);
 }
 
-function toggleSim() {
+function toggleWS() {
     const btn = document.getElementById('btn-start');
-    if (isRunning) {
-        isRunning = false;
-        btn.textContent = '▶ START';
-        btn.className = 'btn btn-start';
-        if (wsClient) wsClient.close();
-    } else {
-        isRunning = true;
+    if (btn.textContent === '▶ CONNECT') {
         btn.textContent = '⏸ PAUSE';
         btn.className = 'btn btn-pause';
-        if (phaserGame?.scene?.scenes[0]) {
-            phaserGame.scene.scenes[0].connectWS();
-        }
+        if (game?.scene?.scenes[0]) game.scene.scenes[0].connectWS();
+    } else {
+        btn.textContent = '▶ CONNECT';
+        btn.className = 'btn btn-start';
+        if (ws) { ws.close(); ws = null; }
     }
 }
 
-function stopSim() {
-    isRunning = false;
-    document.getElementById('btn-start').textContent = '▶ START';
+function stopWS() {
+    document.getElementById('btn-start').textContent = '▶ CONNECT';
     document.getElementById('btn-start').className = 'btn btn-start';
-    if (wsClient) wsClient.close();
-    addEvent({type: 'result', observation: '已停止观察'});
+    if (ws) { ws.close(); ws = null; }
+    document.getElementById('status').textContent = '○ 断开';
 }
 
 // ═══════════════════════════════════════
@@ -343,19 +317,13 @@ function stopSim() {
 // ═══════════════════════════════════════
 const config = {
     type: Phaser.AUTO,
-    width: 800,
-    height: 600,
+    width: 800, height: 600,
     parent: 'game-container',
     backgroundColor: '#1a1a2e',
-    scale: {
-        mode: Phaser.Scale.RESIZE,
-        autoCenter: Phaser.Scale.CENTER_BOTH,
-    },
+    scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH },
     scene: [WorldScene],
     pixelArt: true,
     roundPixels: true,
 };
 
-phaserGame = new Phaser.Game(config);
-isRunning = true;
-addEvent({type: 'connected', msg: '猎魔人世界已就绪'});
+game = new Phaser.Game(config);

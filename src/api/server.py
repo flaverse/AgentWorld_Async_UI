@@ -2,7 +2,7 @@
 import os
 import uvicorn
 import threading
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from core.world import World
@@ -23,15 +23,35 @@ def create_app(world: World) -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Static files (frontend)
+    # ══ Routes (order matters: WS before static) ══
+    from api.routes import router
+    app.include_router(router)
+
+    # Global observer WS
+    @app.websocket("/ws/live")
+    async def ws_live(ws: WebSocket):
+        await ws.accept()
+        add_global_ws_client(ws)
+        try:
+            while True:
+                await ws.receive_text()
+        except WebSocketDisconnect:
+            pass
+        finally:
+            remove_global_ws_client(ws)
+
+    # Static files (serve /web/* and / as index.html)
     web_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "web")
     web_dir = os.path.abspath(web_dir)
     if os.path.isdir(web_dir):
         app.mount("/web", StaticFiles(directory=web_dir), name="web")
-        app.mount("/", StaticFiles(directory=web_dir, html=True), name="root")
 
-    from api.routes import router
-    app.include_router(router)
+        # Serve index.html at / (must be AFTER WS and API routes)
+        from fastapi.responses import FileResponse
+        @app.get("/")
+        async def root():
+            return FileResponse(os.path.join(web_dir, "index.html"))
+
     return app
 
 
@@ -52,6 +72,8 @@ async def broadcast_to_frontend(data: dict):
         try:
             await ws.send_json(data)
         except Exception:
+            from core.error_collector import errors
+            errors.log_error("broadcast", f"WS send failed")
             dead.append(ws)
     for ws in dead:
         remove_global_ws_client(ws)
