@@ -114,7 +114,7 @@ async def run_one(agent, world, brain, systems, name, seconds):
                         ad = il.get_action(an)
                         if ad.target_type.value == "passive":
                             if systems["interaction"].can_interact(agent, tgt):
-                                systems["interaction"].submit(uuid.uuid4().hex[:8], agent, tgt, an, world)
+                                systems["interaction"].submit(uuid.uuid4().hex[:8], agent, tgt, an, world, story=d.get("story", ""))
                                 agent.last_action_time = world.clock.now()
                                 actions += 1
                                 log("action", agent=name, action=an, target=tgt.name, resolve=ad.resolve.value)

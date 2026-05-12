@@ -117,7 +117,8 @@ async def run_agent(agent, world, brain, assembler, systems, resolver, runtime):
                         prompt2 = assembler.assemble("interaction_resolve", rctx)
 
                         t2 = time.time()
-                        systems["interaction"].submit(uuid.uuid4().hex[:8], agent, target, action, world)
+                        systems["interaction"].submit(uuid.uuid4().hex[:8], agent, target, action, world,
+                                                      story=decision.get("story", ""))
                         agent.last_action_time = world.clock.now(); actions += 1
                         dt2 = time.time()-t2
 
