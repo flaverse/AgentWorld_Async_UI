@@ -178,8 +178,8 @@ class World:
             actions={
                 "交谈": ActionDef(
                     method="交谈",
-                    target_type=TargetType.AGENT,
-                    resolve=ResolveType.RULE,
+                    target_type=TargetType.PASSIVE,
+                    resolve=ResolveType.LLM,
                 ),
             },
         )

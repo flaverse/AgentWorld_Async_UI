@@ -169,7 +169,7 @@ slots:
       - 你可以修改周边实体的属性(ambient_effects)
       - 不禁止违规行为，但产生连锁后果
       - coins不能为负。发起方coins不够时拒绝或只收现有金额
-      - 给出简短叙事和精简公共观察
+      - 如果动作为\"交谈\": 生成一句自然的对话回复 (narrative). 社交互动主要影响 social 和 mood, 不涉及金钱。
 
   world_rules_resolve:
     provider: content

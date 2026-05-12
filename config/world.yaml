@@ -522,7 +522,8 @@ entities:
         mood: 50
       actions:
         交谈:
-          target_type: agent
+          target_type: passive
+          resolve: llm
     agent:
       autonomous: true
       speed: 1.2
@@ -560,7 +561,8 @@ entities:
         mood: 55
       actions:
         交谈:
-          target_type: agent
+          target_type: passive
+          resolve: llm
     agent:
       autonomous: true
       speed: 1.0
@@ -598,7 +600,8 @@ entities:
         mood: 80
       actions:
         交谈:
-          target_type: agent
+          target_type: passive
+          resolve: llm
     agent:
       autonomous: true
       speed: 0.9
