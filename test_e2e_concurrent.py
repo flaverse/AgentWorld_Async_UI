@@ -95,7 +95,7 @@ async def run_agent(agent, world, brain, assembler, systems, resolver, runtime):
                     trace["moved_to"] = move_to
 
                 if action:
-                    target = systems["interaction"].find_entity_at(agent.zone, agent.pos, action, world.entities)
+                    target = systems["interaction"].find_entity_at(agent.zone, agent.pos, action, world.entities, exclude_id=agent.id)
                     if target and systems["interaction"].can_interact(agent, target):
                         il = target.get("interaction")
                         ambient = world.get_ambient_entities(target, radius=2, exclude={agent.id})

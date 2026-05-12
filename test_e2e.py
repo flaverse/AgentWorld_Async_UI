@@ -107,7 +107,7 @@ async def run_one(agent, world, brain, assembler, systems, resolver, name, secon
 
             # Action
             if action:
-                target = systems["interaction"].find_entity_at(agent.zone, agent.pos, action, world.entities)
+                target = systems["interaction"].find_entity_at(agent.zone, agent.pos, action, world.entities, exclude_id=agent.id)
                 if target and systems["interaction"].can_interact(agent, target):
                     # Build LLM #2 context
                     il = target.get("interaction")
