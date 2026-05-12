@@ -71,7 +71,6 @@ class InteractionSystem:
         inter = entity.get("interaction")
         if inter:
             attrs = inter.private_attrs.copy()
-            # Add public info
             if inter.public_attrs:
                 desc += f" [{inter.public_attrs}]"
         
@@ -82,6 +81,26 @@ class InteractionSystem:
             "private_attrs": attrs,
             "is_agent": entity.has("agent") and entity.get("agent").autonomous,
         }
+
+    def find_entity_at(self, zone: str, pos: list[int], action: str,
+                       all_entities: dict) -> object | None:
+        """引擎自动从坐标匹配交互目标。
+        优先匹配有 interaction layer 的实体。多个时返回最近的。
+        action 文本可用于语义匹配(未来扩展)。
+        """
+        best = None
+        best_dist = 999
+        for e in all_entities.values():
+            if e.zone != zone or not e.has("interaction"):
+                continue
+            d = abs(pos[0] - e.pos[0]) + abs(pos[1] - e.pos[1])
+            if d < best_dist:
+                best_dist = d
+                best = e
+        # Only match if within interaction range
+        if best and best_dist <= best.get("interaction").interaction_radius:
+            return best
+        return best if best_dist <= 3 else None  # fallback: within 3 tiles
 
     def submit(self, interaction_id: str, agent, target, action: str,
                world) -> None:

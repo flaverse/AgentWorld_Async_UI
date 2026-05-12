@@ -132,14 +132,13 @@ async def demo_loop(world, brain, systems, max_actions=5):
 
             decision = await brain.decide(context)
 
-            # Move
+            # Move: independent from action
             move_to = decision.get("move_to")
             if move_to and isinstance(move_to, list) and len(move_to) == 2:
                 from_pos = list(agent.pos)
                 move_time = agent.move_to(move_to)
                 agent.last_action_time = world.clock.now()
                 print(f"  🚶 移动到 ({move_to[0]},{move_to[1]})，耗时 {move_time} 分钟")
-                # Frontend event
                 await world.emit_event({
                     "event": "agent_move",
                     "agent": agent.id, "agent_name": agent.name,
@@ -149,31 +148,28 @@ async def demo_loop(world, brain, systems, max_actions=5):
                 systems["sensory"].update(agent, world.entities, world)
                 systems["interaction"].update_sensory(agent, world.entities)
 
-            # Interact
-            target_id = decision.get("target_entity")
+            # Action: independent from move
             action_name = decision.get("action")
-            if target_id and action_name and target_id in world.entities:
-                target = world.entities[target_id]
-                inter_layer = target.get("interaction")
-                if inter_layer and inter_layer.get_action(action_name):
-                    act_def = inter_layer.get_action(action_name)
-                    if act_def.target_type.value == "passive" if hasattr(act_def, 'target_type') else act_def.get('target_type', 'passive') == 'passive':
-                        if systems["interaction"].can_interact(agent, target):
-                            iid = uuid.uuid4().hex[:8]
-                            systems["interaction"].submit(iid, agent, target, action_name, world)
-                            agent.last_action_time = world.clock.now()
-                            action_count += 1
-                            print(f"  🎯 {action_name} {target.name} → 后台裁定中...")
-                            # Frontend event
-                            await world.emit_event({
-                                "event": "interaction_start",
-                                "agent": agent.id, "agent_name": agent.name,
-                                "target": target.id, "target_name": target.name,
-                                "action": action_name,
-                                "bubble": f"{agent.name} {action_name} {target.name}",
-                            })
-                        else:
-                            print(f"  ⚠️  {target.name} 不在交互范围")
+            if action_name:
+                # Find interactible entities at current position
+                target = systems["interaction"].find_entity_at(
+                    agent.zone, agent.pos, action_name, world.entities
+                )
+                if target:
+                    if systems["interaction"].can_interact(agent, target):
+                        iid = uuid.uuid4().hex[:8]
+                        systems["interaction"].submit(iid, agent, target, action_name, world)
+                        agent.last_action_time = world.clock.now()
+                        action_count += 1
+                        print(f"  🎯 {action_name} → {target.name} → 后台裁定中...")
+                    else:
+                        print(f"  ⚠️  目标不在交互范围")
+                else:
+                    print(f"  ⚠️  附近无可交互实体匹配 \"{action_name}\"")
+
+            # Rest: nothing to do
+            if not move_to and not action_name:
+                print(f"  😴 歇会...")
 
         if agent.status == "busy":
             remaining = agent.busy_until - world.clock.now()

@@ -48,6 +48,7 @@ templates:
       - {name: target_section, provider: runtime}
       - {name: action_section, provider: runtime}
       - {name: ambient_section, provider: runtime, condition: "has_ambient"}
+      - {name: label_mapping, provider: runtime}
       - {name: world_rules_resolve, provider: content}
       - {name: resolve_guide, provider: content}
       - {name: output_format_resolve, provider: content}
@@ -138,10 +139,11 @@ slots:
     provider: content
     template: |
       ## 指引
-      你可以对附近任何实体做任何合理的事。不需要从固定列表选择。
-      - 考虑你的欲望状态和实体描述
-      - 常识、角色性格、当前处境
-      - 同坐标可能有多个独立实体
+      你可以自由决定下一步行动。move_to 和 action 是两个独立决策:
+      - move_to + action: 走过去，到了后做这件事
+      - move_to 单独: 只是走走逛逛，到了再说
+      - action 单独: 对当前位置附近的实体做这件事
+      - 两者都 null: 歇一会，发呆，看看周围。这是完全合法的选择。
 
   output_format:
     provider: content
@@ -149,18 +151,18 @@ slots:
       ## 输出格式 (严格JSON)
       {
         "thinking": "简短推理",
-        "move_to": [x, y],
-        "target_entity": "目标实体的id",
-        "action": "对目标做什么 (自由文本)"
+        "move_to": [x, y] 或 null,
+        "action": "做什么 (自由文本)" 或 null
       }
-      - move_to: 不移动时填null
-      - target_entity: 必须与上面列出的id一致。不交互时填null
-      - action: 自由文本。不交互时填null
+      - move_to: 想去哪个坐标。null=不动
+      - action: 想做什么。null=不做
+      - 两者都 null = 合法选择: 歇会/发呆/观察
 
   caller_section:
     provider: runtime
     template: |
       ## 发起方: {caller_name}
+      最近记忆: {caller_recent_memory}
       公开: {caller_public}
       私有: {caller_private}
 
@@ -181,6 +183,12 @@ slots:
       ## 周边实体 (同位置或邻格)
       {ambient_text}
       (entity_id 必须使用括号内的 id)
+
+  label_mapping:
+    provider: runtime
+    template: |
+      ## 实体 ID 映射表 (entity_id 请使用左侧 id，不要用显示名)
+      {label_table}
 
   world_rules_resolve:
     provider: content
@@ -312,7 +320,6 @@ output_schemas:
       properties:
         thinking: {type: string}
         move_to: {type: array, items: {type: integer}}
-        target_entity: {type: string}
         action: {type: string}
       required: [thinking]
   resolve_output:
