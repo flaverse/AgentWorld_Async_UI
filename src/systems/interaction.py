@@ -104,20 +104,20 @@ class InteractionSystem:
         return best if best_dist <= 3 else None
 
     def submit(self, interaction_id: str, agent, target, action: str,
-               world) -> None:
+               world, story: str = "") -> None:
         layer = target.get("interaction")
         act_def = layer.get_action(action) if layer else None
         
-        # Free-text action support: if no predefined action, treat as llm-resolved
+        # Free-text action support
         if not act_def:
-            if layer:  # entity has interaction layer but action not in list
+            if layer:
                 act_def = ActionDef(
                     method=action,
                     target_type=TargetType.PASSIVE,
                     resolve=ResolveType.LLM,
                     estimated_duration=10,
                 )
-                layer.actions[action] = act_def  # Store for _resolve_async lookup
+                layer.actions[action] = act_def
             else:
                 raise ValueError(f"No interaction layer on {target.name}")
                 
@@ -129,20 +129,20 @@ class InteractionSystem:
         agent.busy_until = world.clock.now() + est_duration
 
         asyncio.create_task(
-            self._resolve_async(interaction_id, agent, target, action, world)
+            self._resolve_async(interaction_id, agent, target, action, world, story=story)
         ).add_done_callback(
             lambda t: self._on_task_done(t, agent, target, action, world)
         )
 
     async def _resolve_async(self, iid: str, agent, target, action: str,
-                             world) -> None:
+                             world, story: str = "") -> None:
         """后台裁定。resolve=rule 直接执行, resolve=llm 调裁判（含重试）。"""
         result = await self._resolve_with_retry(agent, target, action, world,
-                                                 max_retries=2)
+                                                 max_retries=2, story=story)
         agent.busy_result = result
 
     async def _resolve_with_retry(self, agent, target, action: str,
-                                  world, max_retries: int = 2) -> ActionResult:
+                                  world, max_retries: int = 2, story: str = "") -> ActionResult:
         """执行裁定。LLM 失败时带反馈重试。原则 ⑥ LLM 最小化: rule 不调 LLM。"""
         try:
             act_def = target.get("interaction").get_action(action)
@@ -151,28 +151,33 @@ class InteractionSystem:
                 return self._exec_rule(act_def, agent, target)
 
             elif act_def.resolve == ResolveType.LLM:
-                ambient = world.get_ambient_entities(target, radius=2,
-                                                      exclude={agent.id})
-                last_raw = ""
-                for attempt in range(max_retries + 1):
-                    try:
-                        result = await self.resolver.resolve(
-                            caller=agent, target=target, action=action,
-                            ambient_entities=ambient, world=world,
-                        )
-                        if result.narrative:
-                            return result
-                    except Exception as e:
+                # v3 path: if LLM #1 provided a story, use per-agent projection
+                if story and self.resolver:
+                    result = await self._resolve_v3(agent, target, action, story, world)
+                else:
+                    # Legacy path: single LLM #2 resolver
+                    ambient = world.get_ambient_entities(target, radius=2,
+                                                          exclude={agent.id})
+                    last_raw = ""
+                    for attempt in range(max_retries + 1):
+                        try:
+                            result = await self.resolver.resolve(
+                                caller=agent, target=target, action=action,
+                                ambient_entities=ambient, world=world,
+                            )
+                            if result.narrative:
+                                return result
+                        except Exception as e:
+                            if attempt < max_retries:
+                                import asyncio as _a
+                                await _a.sleep(1)
+                                continue
+                            raise
                         if attempt < max_retries:
                             import asyncio as _a
                             await _a.sleep(1)
-                            continue
-                        raise
-                    if attempt < max_retries:
-                        import asyncio as _a
-                        await _a.sleep(1)
-                return ActionResult(target_id=target.id,
-                                    narrative="裁定未产生有效结果")
+                    return ActionResult(target_id=target.id,
+                                        narrative="裁定未产生有效结果")
 
             return ActionResult(target_id=target.id, narrative="unknown resolve type")
 
@@ -185,6 +190,80 @@ class InteractionSystem:
                 narrative=f"交互失败: {e}",
                 public_observation=f"{agent.name}尝试{action}但出了点问题",
             )
+
+    async def _resolve_v3(self, agent, target, action: str, story: str,
+                           world) -> 'ActionResult':
+        """v3 pipeline: LLM #1 story + per-agent LLM #2 projection + verify."""
+        # Build entity states for both agents
+        agent_state = self._entity_to_state_str(agent)
+        target_state = self._entity_to_state_str(target)
+
+        # Per-agent LLM #2 projection
+        agent_deltas = {}
+        target_deltas = {}
+
+        if self.resolver and agent.has("agent"):
+            try:
+                agent_deltas_raw = await self.resolver.project_deltas(
+                    story=story,
+                    entities_state=f"### 你 (视角主体)\n{agent_state}\n\n### 对方\n{target_state}"
+                )
+                if agent_deltas_raw:
+                    agent_deltas = agent_deltas_raw[0] if isinstance(agent_deltas_raw, list) else agent_deltas_raw
+            except Exception:
+                pass
+
+        if self.resolver and target.has("agent"):
+            try:
+                target_deltas_raw = await self.resolver.project_deltas(
+                    story=story,
+                    entities_state=f"### 你 (视角主体)\n{target_state}\n\n### 对方\n{agent_state}"
+                )
+                if target_deltas_raw:
+                    target_deltas = target_deltas_raw[0] if isinstance(target_deltas_raw, list) else target_deltas_raw
+            except Exception:
+                pass
+
+        # Simple bounds verification
+        ok = True
+        for eff in [{"id": agent.id, "d": agent_deltas}, {"id": target.id, "d": target_deltas}]:
+            for attr, delta in eff["d"].items():
+                e = world.entities.get(eff["id"])
+                if e and e.has("interaction"):
+                    current = e.get("interaction").private_attrs.get(attr, 0)
+                    try:
+                        current = float(current)
+                        delta = float(delta)
+                    except (TypeError, ValueError):
+                        continue
+                    new_val = current + delta
+                    if attr == "coins" and new_val < 0:
+                        ok = False
+                    elif attr != "coins" and (new_val < 0 or new_val > 100):
+                        ok = False
+
+        narrative = story or f"{agent.name}对{target.name}做了{action}"
+        memories = {}
+        if agent.has("agent"):
+            memories[agent.id] = story or narrative
+        if target.has("agent"):
+            memories[target.id] = story or narrative
+
+        return ActionResult(
+            target_id=target.id,
+            narrative=narrative,
+            public_observation=narrative[:100],
+            caller_deltas=agent_deltas if ok else {},
+            target_deltas=target_deltas if ok else {},
+            memories=memories,
+        )
+
+    def _entity_to_state_str(self, entity) -> str:
+        """Format entity state for projection prompt."""
+        inter = entity.get("interaction")
+        desc = getattr(entity, 'describe', '') or entity.name
+        attrs = inter.private_attrs if inter else {}
+        return f"{entity.name} (id={entity.id}): {desc[:60]} | attrs: {json.dumps(attrs, ensure_ascii=False) if attrs else '{}'}"
 
     def _on_task_done(self, task, agent, target, action, world):
         """Callback: if the async runner task crashed, mark agent idle and log."""

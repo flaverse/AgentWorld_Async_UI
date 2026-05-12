@@ -151,21 +151,34 @@ async def demo_loop(world, brain, systems, max_actions=5):
             # Action: independent from move
             action_name = decision.get("action")
             if action_name:
+                # Re-sense after move: prevent stale data
+                systems["sensory"].update(agent, world.entities, world)
+                systems["interaction"].update_sensory(agent, world.entities)
+
                 # Find interactible entities at current position
                 target = systems["interaction"].find_entity_at(
-                    agent.zone, agent.pos, action_name, world.entities
+                    agent.zone, agent.pos, action_name, world.entities, exclude_id=agent.id
                 )
                 if target:
-                    if systems["interaction"].can_interact(agent, target):
+                    # Guard: re-check interaction is still possible (v3)
+                    if not systems["interaction"].can_interact(agent, target):
+                        print(f"  ⚠️  {target.name} 已经不在交互范围（re-sense 检测）")
+                        agent.get("agent").memory.record(
+                            narrative=f"想找{target.name}的{action_name}，但对方已经不在附近了"
+                        )
+                    else:
+                        # Set target busy (v3: both busy during interaction)
+                        if target.has("agent") and target.get("agent").autonomous:
+                            target.status = "busy"
+
+                        story = decision.get("story", "")
                         iid = uuid.uuid4().hex[:8]
-                        systems["interaction"].submit(iid, agent, target, action_name, world)
+                        systems["interaction"].submit(iid, agent, target, action_name, world, story=story)
                         agent.last_action_time = world.clock.now()
                         action_count += 1
-                        print(f"  🎯 {action_name} → {target.name} → 后台裁定中...")
-                    else:
-                        print(f"  ⚠️  目标不在交互范围")
+                        print(f"  🎯 {action_name} → {target.name}")
                 else:
-                    print(f"  ⚠️  附近无可交互实体匹配 \"{action_name}\"")
+                    print(f"  ⚠️  附近无可交互实体匹配")
 
             # Rest: nothing to do
             if not move_to and not action_name:

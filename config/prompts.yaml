@@ -144,6 +144,9 @@ slots:
       - move_to 单独: 只是走走逛逛，到了再说
       - action 单独: 对当前位置附近的实体做这件事
       - 两者都 null: 歇一会，发呆，看看周围。这是完全合法的选择。
+      
+      如果 action 涉及和其他人的互动，在 story 字段中写一段简短叙事(50-100字)描述发生了什么。
+      故事应该自然、符合人物性格。story 可以为空(简单动作不需要)。
 
   output_format:
     provider: content
@@ -152,10 +155,12 @@ slots:
       {
         "thinking": "简短推理",
         "move_to": [x, y] 或 null,
-        "action": "做什么 (自由文本)" 或 null
+        "action": "做什么 (自由文本)" 或 null,
+        "story": "简短叙事 (50-100字, 可选)" 或 null
       }
       - move_to: 想去哪个坐标。null=不动
       - action: 想做什么。null=不做
+      - story: 交互的简短叙事。简单动作可留空
       - 两者都 null = 合法选择: 歇会/发呆/观察
 
   caller_section:
@@ -321,6 +326,7 @@ output_schemas:
         thinking: {type: string}
         move_to: {type: array, items: {type: integer}}
         action: {type: string}
+        story: {type: string}
       required: [thinking]
   resolve_output:
     type: json_object
