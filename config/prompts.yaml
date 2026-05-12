@@ -16,6 +16,7 @@ templates:
     slots:
       - {name: time_info, provider: runtime}
       - {name: persona, provider: runtime}
+      - {name: world_rules, provider: content}
       - {name: drive_state, provider: runtime}
       - {name: spatial_context, provider: topology}
       - {name: interactable_section, provider: topology}
@@ -33,6 +34,7 @@ templates:
       - {name: target_section, provider: runtime}
       - {name: action_section, provider: runtime}
       - {name: ambient_section, provider: runtime, condition: "has_ambient"}
+      - {name: world_rules_resolve, provider: content}
       - {name: resolve_guide, provider: content}
       - {name: output_format_resolve, provider: content}
     output_schema: resolve_output
@@ -53,6 +55,16 @@ slots:
       {drives_table}
       
       (高于60=需要关注, 高于80=急需满足)
+
+  world_rules:
+    provider: content
+    template: |
+      ## 世界规则 (必须遵守)
+      - **社交礼仪**: 如果之前 2 次以上对某人说话对方没回应，就别再主动搭话了。对方可能不想聊。
+      - **量力而行**: 你的 coins 不能花到负数。钱不够就别买太贵的东西。
+      - **多样化行动**: 不要反复做同一件事。试过 2-3 次后换点别的。
+      - **探索不同区域**: 不要一直待在同一个地方。去没去过的地方看看。
+      - **适可而止**: 欲望值降到 30 以下就差不多满足了。没必要降到 0。"""
 
   spatial_context:
     provider: topology
@@ -143,6 +155,14 @@ slots:
       - 不禁止违规行为，但产生连锁后果
       - coins不能为负。发起方coins不够时拒绝或只收现有金额
       - 给出简短叙事和精简公共观察
+
+  world_rules_resolve:
+    provider: content
+    template: |
+      ## 裁判规则 (必须遵守)
+      - **💰 金币铁律**: caller_deltas中coins的变化不能使caller的coins变成负数。如果caller钱不够，拒绝交易。narrative写明"钱不够"。
+      - **👎 社交疲劳**: 如果target(如吧台老板)的mood已经很低(<30)，态度应该冷淡或不耐烦。不要每次都让老板开心。
+      - **🎲 适度随机**: 同样的交互(如再次搭话)，结果应该有变化(老板这次比上次更冷淡)。持续重复会让他烦躁(mood持续下降)。"""
 
   output_format_resolve:
     provider: content

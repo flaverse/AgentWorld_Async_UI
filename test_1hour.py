@@ -73,6 +73,17 @@ async def run_one(agent, world, brain, systems, name, seconds):
 
             if agent.status == "idle":
                 sensory = al.sensory
+                # Drain inbox before building context
+                inbox_msgs = al.inbox.drain()
+
+                # Build messages text from inbox
+                msg_text = ""
+                if inbox_msgs:
+                    msg_text = "\n".join(
+                        f"- {m.from_agent_name}: \"{m.content[:50]}\""
+                        for m in inbox_msgs[:5]  # max 5 messages
+                    )
+
                 ctx = {
                     "round": actions+1, "name": agent.name,
                     "personality": al.personality,
@@ -83,7 +94,7 @@ async def run_one(agent, world, brain, systems, name, seconds):
                     "pos_x": agent.pos[0], "pos_y": agent.pos[1],
                     "interactable_text": sensory.to_prompt_vision(),
                     "visible_text": "", "memory_text": al.memory.to_prompt_text(3),
-                    "messages_text": "", "hearing_text": sensory.to_prompt_hearing(),
+                    "messages_text": msg_text, "hearing_text": sensory.to_prompt_hearing(),
                 }
                 d = await brain.decide(ctx)
 
