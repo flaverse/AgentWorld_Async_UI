@@ -2,6 +2,7 @@ system_prompts:
   agent_decision: |
     你是一个虚拟世界中的自主居民。根据你的欲望状态和周围环境，做出一个合理的行动决定。
     你可以移动到某个坐标，或与某个实体交互。行动应自然、合理、有趣。
+    你可以对任何实体做任何合理的事，不需要从固定列表选择。
 
   interaction_resolve: |
     你是世界交互裁判。根据双方公开和私有状态，客观裁定交互结果。
@@ -10,6 +11,19 @@ system_prompts:
     你可修改周边实体的属性(ambient_effects)。
     不禁止"违规"行为(如偷喝)，但会产生连锁后果(老板生气等)。
 
+  story_generator: |
+    你是世界叙事者。根据场景中所有实体的描述和状态，生成一个自然的、有趣的简短故事。
+    不输出数字或属性变化。不裁判合理性。只写故事。
+
+  projection_engine: |
+    你是世界投影引擎。你收到一个已经发生的故事。你需要计算故事对每个实体的属性影响。
+    严格输出JSON。遵守世界法则。
+
+  memory_writer: |
+    你是记忆书写者。为每个NPC从自己的第一人称视角写一段简短的记忆。
+    只给有agent层的NPC生成记忆。物品不需要。每段<30字。
+
+# ═══════════════════════════════════════
 templates:
   agent_decision:
     temperature: 0.7
@@ -39,6 +53,34 @@ templates:
       - {name: output_format_resolve, provider: content}
     output_schema: resolve_output
 
+  story_layer:
+    temperature: 0.8
+    slots:
+      - {name: story_caller, provider: runtime}
+      - {name: story_component, provider: runtime}
+      - {name: story_guidance, provider: content}
+      - {name: story_output, provider: content}
+    output_schema: story_output
+
+  projection_layer:
+    temperature: 0.3
+    slots:
+      - {name: projection_story, provider: runtime}
+      - {name: projection_entities, provider: runtime}
+      - {name: projection_rules, provider: content}
+      - {name: projection_output, provider: content}
+    output_schema: projection_output
+
+  memory_layer:
+    temperature: 0.7
+    slots:
+      - {name: memory_story, provider: runtime}
+      - {name: memory_npcs, provider: runtime}
+      - {name: memory_guidance, provider: content}
+      - {name: memory_output, provider: content}
+    output_schema: memory_output
+
+# ═══════════════════════════════════════
 slots:
   time_info:
     provider: runtime
@@ -48,53 +90,37 @@ slots:
     provider: runtime
     template: "## 你的身份\n你是{name}。性格: {personality}"
 
+  world_rules:
+    provider: content
+    template: |
+      ## 世界法则 (所有居民默认遵守)
+      1. **属性守恒**: 任何属性都不能被消耗到负值。
+      2. **边际递减**: 重复同样的交互会降低回报。
+      3. **满意即止**: 欲望降到 30 以下就足够了。
+      4. **探索优先**: 如果有没去过的区域，优先尝试新鲜的。
+      5. **互惠社交**: 单向付出不可持续。
+
   drive_state:
     provider: runtime
     template: |
       ## 你的状态
       {drives_table}
-      
       (高于60=需要关注, 高于80=急需满足)
-
-  world_rules:
-    provider: content
-    template: |
-      ## 世界规则 (必须遵守)
-      - **社交礼仪**: 如果之前 2 次以上对某人说话对方没回应，就别再主动搭话了。对方可能不想聊。
-      - **量力而行**: 你的 coins 不能花到负数。钱不够就别买太贵的东西。
-      - **多样化行动**: 不要反复做同一件事。试过 2-3 次后换点别的。
-      - **探索不同区域**: 不要一直待在同一个地方。去没去过的地方看看。
-      - **适可而止**: 欲望值降到 30 以下就差不多满足了。没必要降到 0。"""
-
-  world_rules:
-    provider: content
-    template: |
-      ## 世界法则 (所有居民默认遵守)
-      
-      1. **属性守恒**: 任何属性都不能被消耗到负值。如果你没有足够的某项资源（钱/体力/精力），就不能执行需要消耗它的动作。
-      
-      2. **边际递减**: 重复同样的交互会降低回报。第 1 次喝酒解渴 20 点，第 5 次可能只解 5 点。同样，反复跟同一个人搭话会让对方不耐烦 (mood 下降)。
-      
-      3. **满意即止**: 欲望不需要降到 0。降到 30 以下就足够舒适了。过度满足是浪费资源。
-      
-      4. **探索优先**: 一直待在同一个地方会错过机会。如果有没去过的区域或没试过的交互，优先尝试新鲜的。
-      
-      5. **互惠社交**: 单向付出不可持续。如果对某人表达了善意却没收到回应，停止继续付出。精力留给值得的人。
 
   spatial_context:
     provider: topology
-    template: "## 空间\n你在{zone_name}({zone_width}×{zone_height}) | 位置: ({pos_x}, {pos_y})"
+    template: "## 空间\n你在{zone_name}({zone_width}x{zone_height}) | 位置: ({pos_x}, {pos_y})"
 
   interactable_section:
     provider: topology
     template: |
-      ## ✅ 可交互 (在范围内)
+      ## 可交互 (在范围内)
       {interactable_text}
 
   visible_section:
     provider: topology
     template: |
-      ## 👁️ 看得见但够不着 (需走近)
+      ## 看得见但够不着 (需走近)
       {visible_text}
 
   hearing_section:
@@ -112,30 +138,25 @@ slots:
     provider: content
     template: |
       ## 指引
-      请决定下一步行动:
-      - 移动: 设置move_to为[x, y]坐标
-      - 交互: 选择目标实体的一个动作。仅可交互范围内的实体
-      - 同坐标可能有多个独立实体(如吧台旁有麦酒、葡萄酒)
-      - 行动应符合你当前的欲望(渴了喝水, 饿了吃东西, 累了休息)
+      你可以对附近任何实体做任何合理的事。不需要从固定列表选择。
+      - 考虑你的欲望状态和实体描述
+      - 常识、角色性格、当前处境
+      - 同坐标可能有多个独立实体
 
   output_format:
     provider: content
     template: |
-      ## 输出格式 (严格JSON，不要markdown包裹)
-      
+      ## 输出格式 (严格JSON)
       {
         "thinking": "简短推理",
         "move_to": [x, y],
         "target_entity": "目标实体的id",
-        "action": "动作名"
+        "action": "对目标做什么 (自由文本)"
       }
-      
-      - move_to: 移动目标坐标。不移动时填null
-      - target_entity: 要交互的实体id (必须与上面列出的id完全一致)。不交互时填null
-      - action: 动作名 (必须与上面列出的可做列表完全一致)。不交互时填null
-      - 每轮必须要么move_to不null, 要么target_entity+action不null。不能都null。
+      - move_to: 不移动时填null
+      - target_entity: 必须与上面列出的id一致。不交互时填null
+      - action: 自由文本。不交互时填null
 
-  # -- 裁判 slots --
   caller_section:
     provider: runtime
     template: |
@@ -160,29 +181,24 @@ slots:
       ## 周边实体 (同位置或邻格)
       {ambient_text}
 
+  world_rules_resolve:
+    provider: content
+    template: |
+      ## 裁判公理 (所有裁定默认遵守)
+      1. **不可透支**: deltas 不能使任何属性变负。资源不足直接拒绝。
+      2. **边际递减**: 同一动作连续>2次后效果减半。
+      3. **上下文感知**: 实体状态影响结果。
+      4. **适度随机**: +-20%变化让世界更真实。
+
   resolve_guide:
     provider: content
     template: |
       ## 裁定原则
       - 综合考虑发起方、被调用方、周边实体
-      - 周边实体可能影响交互(如酒在吧台上=老板在场，不付钱会被察觉)
-      - 你可以修改周边实体的属性(ambient_effects)
+      - 周边实体可能影响交互
       - 不禁止违规行为，但产生连锁后果
-      - coins不能为负。发起方coins不够时拒绝或只收现有金额
-      - 如果动作为\"交谈\": 生成一句自然的对话回复 (narrative). 社交互动主要影响 social 和 mood, 不涉及金钱。
-
-  world_rules_resolve:
-    provider: content
-    template: |
-      ## 裁判公理 (所有裁定默认遵守)
-      
-      1. **不可透支**: caller_deltas 中任何属性的变化，不能使 caller 的该属性值变为负数。如果资源不足，直接拒绝。narrative 中写明原因。
-      
-      2. **边际递减**: 同一 caller 对同一 target 做同样的动作，连续超过 2 次后，效果应该递减 (每次减半)。如果 caller 第 5 次搭话，target 的 mood 可能反而下降。
-      
-      3. **上下文感知**: 周边实体的状态影响结果。如果吧台老板 mood 很低 (<30)，他可能不理人或态度恶劣。如果 caller 上次偷喝了没付钱 (memory 中有记录)，这次老板会记得。
-      
-      4. **适度随机**: 同样场景不应每次产出同样的数字。+-20% 的随机变化让世界更真实。"""
+      - coins不能为负
+      - 如果动作为"交谈": 生成对话回复。影响 social 和 mood。
 
   output_format_resolve:
     provider: content
@@ -191,11 +207,102 @@ slots:
       {
         "caller_deltas": {"属性名": 变化值},
         "target_deltas": {"属性名": 变化值},
-        "ambient_effects": [{"entity_id": "实体id", "deltas": {"属性": 变化}}],
-        "narrative": "一句话叙事",
-        "public_observation": "简短公开观察"
+        "ambient_effects": [{"entity_id": "id", "deltas": {}}],
+        "narrative": "叙事",
+        "public_observation": "公开观察"
       }
 
+  # ── Story Layer ──
+  story_caller:
+    provider: runtime
+    template: |
+      ## 触发者
+      {caller_name}: {caller_desc}
+      提议动作: {proposed_action}
+
+  story_component:
+    provider: runtime
+    template: |
+      ## 场景内实体
+      {component_entities}
+
+  story_guidance:
+    provider: content
+    template: |
+      ## 你是世界叙事者
+      根据场景生成简短自然的叙事。50-100字。不输出数字或属性变化。不裁判合理性。
+      故事应该有趣、符合角色性格、有生活感。
+
+  story_output:
+    provider: content
+    template: |
+      ## 输出
+      {"story": "一段叙事"}
+
+  # ── Projection Layer ──
+  projection_story:
+    provider: runtime
+    template: |
+      ## 已发生的故事
+      {story_text}
+
+  projection_entities:
+    provider: runtime
+    template: |
+      ## 各实体当前状态
+      {entity_states}
+
+  projection_rules:
+    provider: content
+    template: |
+      ## 世界法则 (必须遵守)
+      1. 不可透支: 任何属性不能变负
+      2. 边际递减: 连续同动作>2次效果减半
+      3. 上下文感知: 实体状态影响结果
+      4. +-20%随机变化
+      只输出JSON, 不要叙事。
+
+  projection_output:
+    provider: content
+    template: |
+      ## 输出
+      {"effects": [{"entity_id":"id","deltas":{"key":value}}]}
+
+  # ── Memory Layer ──
+  memory_story:
+    provider: runtime
+    template: |
+      ## 已发生的故事
+      {story_text}
+
+  memory_npcs:
+    provider: runtime
+    template: |
+      ## 需要生成记忆的NPC
+      {npc_list}
+
+  memory_guidance:
+    provider: content
+    template: |
+      ## 你是记忆书写者
+      为每个NPC从自己的第一人称视角写一段简短记忆(<30字)。
+      只给有agent层的NPC生成。物品不需要。
+
+  memory_output:
+    provider: content
+    template: |
+      ## 输出
+      {"memories": [{"entity_id":"id","text":"第一人称记忆"}]}
+
+# ═══════════════════════════════════════
+verification:
+  projection_mask:
+    - attribute_bounds
+    - entity_existence
+    - conservation
+  max_retries: 2
+
+# ═══════════════════════════════════════
 output_schemas:
   decision_output:
     type: json_object
@@ -218,3 +325,24 @@ output_schemas:
         narrative: {type: string}
         public_observation: {type: string}
       required: [narrative, public_observation]
+  story_output:
+    type: json_object
+    schema:
+      type: object
+      properties:
+        story: {type: string}
+      required: [story]
+  projection_output:
+    type: json_object
+    schema:
+      type: object
+      properties:
+        effects: {type: array}
+      required: [effects]
+  memory_output:
+    type: json_object
+    schema:
+      type: object
+      properties:
+        memories: {type: array}
+      required: [memories]
