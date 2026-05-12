@@ -98,11 +98,19 @@ def build():
             if t.get('llm1_prompt'):
                 pdf.b('--- LLM #1 PROMPT (abbreviated) ---', 6)
                 pdf.code(t['llm1_prompt'][:500])
-        elif action and t.get('llm1_prompt'):
+        if action and t.get('llm1_prompt'):
             pdf.b('--- LLM #1 PROMPT (decision) ---', 6)
             pdf.code(t['llm1_prompt'][:400])
             pdf.b(f'--- LLM #1 OUTPUT ---')
             pdf.code(json.dumps(t.get('llm1_output',{}), ensure_ascii=False, indent=2)[:400])
+            # LLM #2 result
+            if t.get('result_narrative'):
+                pdf.b(f'--- LLM #2 RESULT (deltas + narrative) ---')
+                pdf.b(f'  caller_deltas: {t.get("result_caller_deltas",{})}')
+                pdf.b(f'  target_deltas: {t.get("result_target_deltas",{})}')
+                pdf.b(f'  ambient_effects: {t.get("result_ambient_effects",[])}')
+                narr = t["result_narrative"][:200]
+                pdf.b(f'  narrative: {narr}')
             if t.get('llm2_prompt'):
                 pdf.b(f'--- LLM #2 PROMPT (resolver) ---', 6)
                 pdf.code(t['llm2_prompt'][:400])

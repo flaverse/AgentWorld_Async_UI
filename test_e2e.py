@@ -49,6 +49,12 @@ async def run_one(agent, world, brain, assembler, systems, resolver, name, secon
             r = agent.busy_result; agent.busy_result = None
             systems["interaction"].apply_result(r, agent, world)
             log("result", agent=name, narrative=r.narrative[:150], deltas=r.caller_deltas)
+            # Attach result to last trace entry
+            if all_traces and all_traces[-1].get("agent") == name:
+                all_traces[-1]["result_narrative"] = r.narrative
+                all_traces[-1]["result_caller_deltas"] = r.caller_deltas
+                all_traces[-1]["result_target_deltas"] = r.target_deltas
+                all_traces[-1]["result_ambient_effects"] = r.ambient_effects
             pa = agent.get("interaction").private_attrs
             print(f"   result: {r.narrative[:50]}... | thirst={pa.get('thirst',0):.0f} coins={pa.get('coins',0):.0f}", flush=True)
 
