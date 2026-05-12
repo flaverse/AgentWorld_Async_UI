@@ -72,6 +72,20 @@ async def run_agent(agent, world, brain, assembler, systems, resolver, runtime):
                     "messages_text": "", "hearing_text": sensory.to_prompt_hearing(),
                 }
 
+                # P/Q/KL layer
+                from core.kl_divergence import compute_kl
+                p = agent.p_distribution if agent.p_distribution else {}
+                q_drives = {k: round(float(v), 1) for k, v in al.drives.attrs.items()}
+                q = {"pos": list(agent.pos), "zone": agent.zone,
+                     "drives": q_drives,
+                     "coins": round(float(agent.get("interaction").private_attrs.get("coins", 0))),
+                     "interactable": [r.name for r in sensory.get_interactable()],
+                     "visible": [r.name for r in sensory.get_visible_only()]}
+                kl_text = compute_kl(p, q) if p else ""
+                ctx["p_interactable"] = ", ".join(p.get("interactable", [])) if p.get("interactable") else ""
+                ctx["p_visible"] = ", ".join(p.get("visible", [])) if p.get("visible") else ""
+                ctx["kl_text"] = kl_text
+
                 prompt1 = assembler.assemble("agent_decision", ctx)
                 t1 = time.time(); decision = await brain.decide(ctx); dt1 = time.time()-t1
 
@@ -84,6 +98,8 @@ async def run_agent(agent, world, brain, assembler, systems, resolver, runtime):
                     "zone": agent.zone, "pos": list(agent.pos),
                     "drives": {k:round(v,1) for k,v in al.drives.attrs.items() if k in ("thirst","hunger","social","energy","fun","mood")},
                     "coins": round(agent.get("interaction").private_attrs.get("coins",0)),
+                    "p_distribution": agent.p_distribution.copy() if agent.p_distribution else {},
+                    "kl_text": kl_text,
                     "llm1_prompt": prompt1, "llm1_time": round(dt1,1),
                     "llm1_output": decision,
                 }
@@ -147,6 +163,16 @@ async def run_agent(agent, world, brain, assembler, systems, resolver, runtime):
                 agent_traces[name][-1]["result_caller_deltas"] = r.caller_deltas
                 agent_traces[name][-1]["result_target_deltas"] = r.target_deltas
 
+            # Snapshot P distribution
+            q_sensory = al.sensory
+            agent.p_distribution = {
+                "pos": list(agent.pos), "zone": agent.zone,
+                "drives": {k: round(float(v), 1) for k, v in al.drives.attrs.items()},
+                "coins": round(float(agent.get("interaction").private_attrs.get("coins", 0))),
+                "interactable": [r.name for r in q_sensory.get_interactable()],
+                "visible": [r.name for r in q_sensory.get_visible_only()],
+            }
+
             await asyncio.sleep(2 if agent.status=="busy" else 1.0)
 
         except Exception as e:
@@ -178,7 +204,7 @@ async def main():
     print(f"  Start: {datetime.now().strftime('%H:%M:%S')}", flush=True)
     print("="*70, flush=True)
 
-    runtime = 180  # 3 min concurrent
+    runtime = 600  # 10 min concurrent
     tasks = [run_agent(a, world, brain, assembler, systems, resolver, runtime) for a in agents]
     await asyncio.gather(*tasks)
 
@@ -188,7 +214,7 @@ async def main():
     for a in agents:
         if a.busy_result is not None:
             pending[a.name] = a
-    for _ in range(90):  # 90s drain (8*114/16 ≈ 57s needed)
+    for _ in range(120):  # 120s drain for 10min run
         if not pending: break
         for name, a in list(pending.items()):
             if a.busy_result is not None:

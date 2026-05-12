@@ -1,509 +1,583 @@
-{"ts": 0.030314207077026367, "wall": "2026-05-13T00:04:02.923361", "event": "test_start", "agents": ["geralt", "yennefer", "dandelion", "vesemir", "triss", "zoltan", "keira", "lambert"], "n_entities": 28}
-{"ts": 1.8523364067077637, "wall": "2026-05-13T00:04:04.745564", "event": "action", "agent": "杰洛特", "action": "打水", "target": "水井"}
-{"ts": 2.4553463459014893, "wall": "2026-05-13T00:04:05.348573", "event": "action", "agent": "兰伯特", "action": "喝水", "target": "水井"}
-{"ts": 2.6431562900543213, "wall": "2026-05-13T00:04:05.536366", "event": "action", "agent": "卓尔坦", "action": "走到吧台点一杯矮人烈酒", "target": "吧台"}
-{"ts": 3.854764223098755, "wall": "2026-05-13T00:04:06.747811", "event": "result", "agent": "杰洛特", "narrative": "杰洛特从井里打了一桶水，清凉甘甜", "deltas": {"thirst": -30}}
-{"ts": 4.050367593765259, "wall": "2026-05-13T00:04:06.943576", "event": "action", "agent": "维瑟米尔", "action": "向矮人老板要一杯麦酒", "target": "吧台"}
-{"ts": 4.456350803375244, "wall": "2026-05-13T00:04:07.349397", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 4.561315298080444, "wall": "2026-05-13T00:04:07.454521", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "配方书"}
-{"ts": 5.488914489746094, "wall": "2026-05-13T00:04:08.382126", "event": "action", "agent": "叶奈法", "action": "取白屈花", "target": "草药架"}
-{"ts": 5.864925146102905, "wall": "2026-05-13T00:04:08.758088", "event": "action", "agent": "兰伯特", "action": "喝水", "target": "水井"}
-{"ts": 6.051540851593018, "wall": "2026-05-13T00:04:08.944587", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 6.562495231628418, "wall": "2026-05-13T00:04:09.455541", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 7.4901769161224365, "wall": "2026-05-13T00:04:10.383223", "event": "result", "agent": "叶奈法", "narrative": "叶奈法摘了几朵白屈花，花瓣散发着淡淡的荧光。猎魔人魔药的基本材料。", "deltas": {"fun": 5, "energy": -1}}
-{"ts": 7.855234622955322, "wall": "2026-05-13T00:04:10.748414", "event": "action", "agent": "杰洛特", "action": "交谈", "target": "水井"}
-{"ts": 8.645967245101929, "wall": "2026-05-13T00:04:11.539013", "event": "result", "agent": "卓尔坦", "narrative": "卓尔坦大步走到吧台前，从兜里摸出几枚硬币拍在木台上，粗声说：‘来一杯矮人烈酒！’ 矮人老板抬眼看了看他，伸手从柜台下拎出一个陶瓶，往厚实的杯子里倒满清澈透明的烈酒。酒液微微晃动，散发出强烈的麦芽和草药香气。老板把酒杯推到卓尔坦面前，同时扫走了那几枚硬币，嘴角勉强扯了一下算是回应。卓尔坦端起酒杯一仰头", "deltas": {"coins": -5, "thirst": -25, "mood": 10, "social": 5}}
-{"ts": 9.75094199180603, "wall": "2026-05-13T00:04:12.644163", "event": "action", "agent": "维瑟米尔", "action": "拿起麦酒喝一口", "target": "吧台"}
-{"ts": 9.85658597946167, "wall": "2026-05-13T00:04:12.749632", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 9.86700701713562, "wall": "2026-05-13T00:04:12.760052", "event": "result", "agent": "兰伯特", "narrative": "兰伯特走到水井边，将木桶放下去，提起一桶清澈的井水。他大口喝了起来，冰凉的井水顺着喉咙流下，缓解了喉咙的干渴。旁边的杰洛特看了他一眼，似乎想说什么，但兰伯特没有理会，继续专注于喝水。", "deltas": {"thirst": -30, "mood": 5, "social": -2}}
-{"ts": 9.968003034591675, "wall": "2026-05-13T00:04:12.861222", "event": "action", "agent": "丹德里恩", "action": "走到吧台，招呼矮人老板来三杯上好的蜂蜜酒，然后热情地拍卓尔坦和维瑟米尔的肩膀", "target": "吧台"}
-{"ts": 10.378944873809814, "wall": "2026-05-13T00:04:13.272136", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "配方书"}
-{"ts": 10.696824312210083, "wall": "2026-05-13T00:04:13.590054", "event": "action", "agent": "叶奈法", "action": "取曼德拉草", "target": "草药架"}
-{"ts": 11.752389907836914, "wall": "2026-05-13T00:04:14.645436", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 11.969083309173584, "wall": "2026-05-13T00:04:14.862129", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 12.380923509597778, "wall": "2026-05-13T00:04:15.273969", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 12.450228452682495, "wall": "2026-05-13T00:04:15.343432", "event": "action", "agent": "特莉丝", "action": "走向杰洛特和兰伯特，打招呼", "target": "水井"}
-{"ts": 12.697933197021484, "wall": "2026-05-13T00:04:15.590979", "event": "result", "agent": "叶奈法", "narrative": "叶奈法小心翼翼地取下一株曼德拉草根，根须还在微微颤动。这东西能做出最强的治疗药水。", "deltas": {"fun": 8, "energy": -2}}
-{"ts": 12.823526382446289, "wall": "2026-05-13T00:04:15.716725", "event": "action", "agent": "卓尔坦", "action": "向维瑟米尔搭话", "target": "吧台"}
-{"ts": 13.675390243530273, "wall": "2026-05-13T00:04:16.568576", "event": "action", "agent": "杰洛特", "action": "交谈", "target": "水井"}
-{"ts": 14.451812028884888, "wall": "2026-05-13T00:04:17.344858", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 14.824610948562622, "wall": "2026-05-13T00:04:17.717657", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 15.484484195709229, "wall": "2026-05-13T00:04:18.377681", "event": "action", "agent": "丹德里恩", "action": "走到吧台，招呼矮人老板来三杯上好的蜂蜜酒，然后热情地拍卓尔坦和维瑟米尔的肩膀", "target": "吧台"}
-{"ts": 15.675071239471436, "wall": "2026-05-13T00:04:18.568263", "event": "action", "agent": "维瑟米尔", "action": "向矮人老板要一杯麦酒，然后倚在吧台上喝一口", "target": "吧台"}
-{"ts": 15.676509618759155, "wall": "2026-05-13T00:04:18.569555", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 15.88461971282959, "wall": "2026-05-13T00:04:18.777837", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "草药架"}
-{"ts": 17.203694105148315, "wall": "2026-05-13T00:04:20.096944", "event": "action", "agent": "兰伯特", "action": "走过去看看杰洛特和特莉丝在做什么", "target": "水井"}
-{"ts": 17.485068559646606, "wall": "2026-05-13T00:04:20.378114", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 17.51463770866394, "wall": "2026-05-13T00:04:20.407855", "event": "action", "agent": "叶奈法", "action": "查看字条", "target": "字条"}
-{"ts": 17.676337480545044, "wall": "2026-05-13T00:04:20.569383", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 17.78152370452881, "wall": "2026-05-13T00:04:20.674680", "event": "action", "agent": "特莉丝", "action": "交谈", "target": "水井"}
-{"ts": 17.88708209991455, "wall": "2026-05-13T00:04:20.780128", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 19.205353498458862, "wall": "2026-05-13T00:04:22.098399", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 19.516093730926514, "wall": "2026-05-13T00:04:22.409140", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 19.594759941101074, "wall": "2026-05-13T00:04:22.487988", "event": "action", "agent": "卓尔坦", "action": "向维瑟米尔搭话", "target": "吧台"}
-{"ts": 19.782483339309692, "wall": "2026-05-13T00:04:22.675529", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 20.6703097820282, "wall": "2026-05-13T00:04:23.563505", "event": "action", "agent": "维瑟米尔", "action": "拿起麦酒喝一口", "target": "吧台"}
-{"ts": 20.98388648033142, "wall": "2026-05-13T00:04:23.877147", "event": "action", "agent": "杰洛特", "action": "走向兰伯特和特莉丝", "target": "水井"}
-{"ts": 21.598429441452026, "wall": "2026-05-13T00:04:24.491475", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 21.82150363922119, "wall": "2026-05-13T00:04:24.714721", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 22.0965256690979, "wall": "2026-05-13T00:04:24.989752", "event": "action", "agent": "丹德里恩", "action": "走到吧台，招呼矮人老板来三杯上好的蜂蜜酒，然后热情地拍卓尔坦和维瑟米尔的肩膀", "target": "吧台"}
-{"ts": 22.21934175491333, "wall": "2026-05-13T00:04:25.112506", "event": "action", "agent": "特莉丝", "action": "交谈", "target": "水井"}
-{"ts": 22.287338495254517, "wall": "2026-05-13T00:04:25.180519", "event": "action", "agent": "叶奈法", "action": "查看坩埚", "target": "字条"}
-{"ts": 22.32716941833496, "wall": "2026-05-13T00:04:25.220373", "event": "action", "agent": "兰伯特", "action": "走过去看看杰洛特和特莉丝在做什么", "target": "水井"}
-{"ts": 22.671956539154053, "wall": "2026-05-13T00:04:25.565003", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 22.98477864265442, "wall": "2026-05-13T00:04:25.877825", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 23.82295274734497, "wall": "2026-05-13T00:04:26.715998", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 24.09767246246338, "wall": "2026-05-13T00:04:26.990718", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 24.220216035842896, "wall": "2026-05-13T00:04:27.113262", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 24.288612127304077, "wall": "2026-05-13T00:04:27.181658", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 24.328075170516968, "wall": "2026-05-13T00:04:27.221120", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 24.754788875579834, "wall": "2026-05-13T00:04:27.648010", "event": "action", "agent": "卓尔坦", "action": "向维瑟米尔搭话", "target": "吧台"}
-{"ts": 25.717979192733765, "wall": "2026-05-13T00:04:28.611177", "event": "action", "agent": "杰洛特", "action": "走向兰伯特和特莉丝，打招呼", "target": "水井"}
-{"ts": 25.798163652420044, "wall": "2026-05-13T00:04:28.691338", "event": "action", "agent": "维瑟米尔", "action": "拿起麦酒喝一口", "target": "吧台"}
-{"ts": 26.148483753204346, "wall": "2026-05-13T00:04:29.041690", "event": "action", "agent": "丹德里恩", "action": "向矮人老板要一杯麦酒，然后倚在吧台上喝一口", "target": "吧台"}
-{"ts": 26.756717205047607, "wall": "2026-05-13T00:04:29.649763", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 26.85431456565857, "wall": "2026-05-13T00:04:29.747490", "event": "action", "agent": "兰伯特", "action": "交谈", "target": "水井"}
-{"ts": 27.25519108772278, "wall": "2026-05-13T00:04:30.148384", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 27.29203176498413, "wall": "2026-05-13T00:04:30.185210", "event": "action", "agent": "叶奈法", "action": "阅读字条", "target": "字条"}
-{"ts": 27.718979358673096, "wall": "2026-05-13T00:04:30.612025", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 27.79948139190674, "wall": "2026-05-13T00:04:30.692527", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 28.855528354644775, "wall": "2026-05-13T00:04:31.748574", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 29.25615429878235, "wall": "2026-05-13T00:04:32.149200", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 29.29360342025757, "wall": "2026-05-13T00:04:32.186649", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 29.509692907333374, "wall": "2026-05-13T00:04:32.402892", "event": "action", "agent": "特莉丝", "action": "走向杰洛特和兰伯特，打招呼", "target": "水井"}
-{"ts": 30.01603364944458, "wall": "2026-05-13T00:04:32.909214", "event": "action", "agent": "杰洛特", "action": "交谈", "target": "水井"}
-{"ts": 30.04814124107361, "wall": "2026-05-13T00:04:32.941316", "event": "action", "agent": "卓尔坦", "action": "向丹德里恩搭话", "target": "吧台"}
-{"ts": 30.1497323513031, "wall": "2026-05-13T00:04:33.042778", "event": "result", "agent": "丹德里恩", "narrative": "你向矮人老板点了点头，把一枚银币拍在吧台上。老板咕哝了一声，粗糙的手掌滑过台面收走硬币，另一只手已经推过来一杯冒着细密泡沫的麦酒。你端起酒杯倚在吧台边沿，琥珀色的液体滑过喉咙，带着微苦的麦香和恰到好处的冰凉。矮人老板瞥了你一眼，嘴角似乎动了动——那大概算是他的笑容。", "deltas": {"coins": -5, "thirst": -20, "social": 3, "mood": 5}}
-{"ts": 31.043463468551636, "wall": "2026-05-13T00:04:33.936703", "event": "action", "agent": "维瑟米尔", "action": "向矮人老板要一杯麦酒，然后倚在吧台上喝一口", "target": "吧台"}
-{"ts": 31.511167764663696, "wall": "2026-05-13T00:04:34.404214", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 32.017109394073486, "wall": "2026-05-13T00:04:34.910155", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 32.049575090408325, "wall": "2026-05-13T00:04:34.942621", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 32.31959867477417, "wall": "2026-05-13T00:04:35.212779", "event": "action", "agent": "叶奈法", "action": "阅读字条", "target": "字条"}
-{"ts": 32.454371213912964, "wall": "2026-05-13T00:04:35.347540", "event": "action", "agent": "兰伯特", "action": "交谈", "target": "水井"}
-{"ts": 32.9195773601532, "wall": "2026-05-13T00:04:35.812775", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 33.0480694770813, "wall": "2026-05-13T00:04:35.941115", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 34.02626872062683, "wall": "2026-05-13T00:04:36.919507", "event": "action", "agent": "丹德里恩", "action": "向维瑟米尔搭话", "target": "吧台"}
-{"ts": 34.32111644744873, "wall": "2026-05-13T00:04:37.214162", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 34.45665407180786, "wall": "2026-05-13T00:04:37.349700", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 34.85051774978638, "wall": "2026-05-13T00:04:37.743685", "event": "action", "agent": "杰洛特", "action": "走向兰伯特和特莉丝，打招呼", "target": "水井"}
-{"ts": 34.92107367515564, "wall": "2026-05-13T00:04:37.814119", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 36.027416467666626, "wall": "2026-05-13T00:04:38.920462", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 36.6904616355896, "wall": "2026-05-13T00:04:39.583705", "event": "action", "agent": "卓尔坦", "action": "走到吧台，向矮人老板要一杯麦酒，然后倚在吧台上喝一口", "target": "吧台"}
-{"ts": 36.85121417045593, "wall": "2026-05-13T00:04:39.744260", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 37.36021327972412, "wall": "2026-05-13T00:04:40.253465", "event": "action", "agent": "维瑟米尔", "action": "拿起麦酒喝一口", "target": "吧台"}
-{"ts": 37.81348133087158, "wall": "2026-05-13T00:04:40.706666", "event": "action", "agent": "兰伯特", "action": "喝水", "target": "水井"}
-{"ts": 37.9045295715332, "wall": "2026-05-13T00:04:40.797753", "event": "action", "agent": "叶奈法", "action": "交谈", "target": "字条"}
-{"ts": 38.10248422622681, "wall": "2026-05-13T00:04:40.995670", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 38.691996812820435, "wall": "2026-05-13T00:04:41.585043", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 39.36186218261719, "wall": "2026-05-13T00:04:42.254909", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 39.81477236747742, "wall": "2026-05-13T00:04:42.707818", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 39.90529155731201, "wall": "2026-05-13T00:04:42.798337", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 40.10387325286865, "wall": "2026-05-13T00:04:42.996919", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 40.148088693618774, "wall": "2026-05-13T00:04:43.041257", "event": "action", "agent": "杰洛特", "action": "交谈", "target": "水井"}
-{"ts": 41.95638346672058, "wall": "2026-05-13T00:04:44.849586", "event": "action", "agent": "卓尔坦", "action": "向丹德里恩搭话", "target": "吧台"}
-{"ts": 42.12040591239929, "wall": "2026-05-13T00:04:45.013590", "event": "action", "agent": "特莉丝", "action": "走向杰洛特和兰伯特，打招呼", "target": "水井"}
-{"ts": 42.148945808410645, "wall": "2026-05-13T00:04:45.041991", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 42.224085569381714, "wall": "2026-05-13T00:04:45.117263", "event": "action", "agent": "维瑟米尔", "action": "拿起麦酒喝一口", "target": "吧台"}
-{"ts": 42.38407826423645, "wall": "2026-05-13T00:04:45.277265", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 42.63684701919556, "wall": "2026-05-13T00:04:45.530061", "event": "action", "agent": "兰伯特", "action": "打水", "target": "水井"}
-{"ts": 43.20037817955017, "wall": "2026-05-13T00:04:46.093568", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 43.77594327926636, "wall": "2026-05-13T00:04:46.669132", "event": "action", "agent": "叶奈法", "action": "与凯拉交谈", "target": "字条"}
-{"ts": 43.957642793655396, "wall": "2026-05-13T00:04:46.850689", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 44.12123918533325, "wall": "2026-05-13T00:04:47.014285", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 44.225764751434326, "wall": "2026-05-13T00:04:47.118810", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 44.385419845581055, "wall": "2026-05-13T00:04:47.278466", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 44.63800239562988, "wall": "2026-05-13T00:04:47.531048", "event": "result", "agent": "兰伯特", "narrative": "兰伯特从井里打了一桶水，清凉甘甜", "deltas": {"thirst": -30}}
-{"ts": 45.12143564224243, "wall": "2026-05-13T00:04:48.014629", "event": "action", "agent": "杰洛特", "action": "走向兰伯特和特莉丝，打招呼", "target": "水井"}
-{"ts": 45.200992584228516, "wall": "2026-05-13T00:04:48.094038", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 45.778974533081055, "wall": "2026-05-13T00:04:48.672021", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 46.243162870407104, "wall": "2026-05-13T00:04:49.136360", "event": "action", "agent": "维瑟米尔", "action": "拿起麦酒喝一口", "target": "吧台"}
-{"ts": 46.913912773132324, "wall": "2026-05-13T00:04:49.807167", "event": "action", "agent": "特莉丝", "action": "走向杰洛特和兰伯特，打招呼", "target": "水井"}
-{"ts": 47.123711824417114, "wall": "2026-05-13T00:04:50.016758", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 47.418503284454346, "wall": "2026-05-13T00:04:50.311692", "event": "action", "agent": "卓尔坦", "action": "向维瑟米尔搭话", "target": "吧台"}
-{"ts": 48.04396057128906, "wall": "2026-05-13T00:04:50.937147", "event": "action", "agent": "兰伯特", "action": "交谈", "target": "水井"}
-{"ts": 48.532618284225464, "wall": "2026-05-13T00:04:51.425805", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 48.914960861206055, "wall": "2026-05-13T00:04:51.808007", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 49.1665096282959, "wall": "2026-05-13T00:04:52.059731", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 49.34974789619446, "wall": "2026-05-13T00:04:52.242919", "event": "action", "agent": "叶奈法", "action": "与凯拉交谈", "target": "字条"}
-{"ts": 49.419312953948975, "wall": "2026-05-13T00:04:52.312358", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 50.045610666275024, "wall": "2026-05-13T00:04:52.938656", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 50.24562382698059, "wall": "2026-05-13T00:04:53.138670", "event": "result", "agent": "维瑟米尔", "narrative": "维瑟米尔端起那杯琥珀色的麦酒，泡沫细密地挂在杯壁上。他咕嘟咕嘟喝了一大口，冰凉的液体滑过喉咙，带走了几分燥热。矮人老板瞥了他一眼，铜板在柜台上叮当作响——这杯酒价值5个铜币。", "deltas": {"thirst": -15, "mood": 2}}
-{"ts": 50.272005558013916, "wall": "2026-05-13T00:04:53.165259", "event": "action", "agent": "杰洛特", "action": "走向兰伯特和特莉丝，打招呼", "target": "水井"}
-{"ts": 50.533875465393066, "wall": "2026-05-13T00:04:53.426921", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 51.168142557144165, "wall": "2026-05-13T00:04:54.061189", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 51.35075569152832, "wall": "2026-05-13T00:04:54.243801", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 52.2366099357605, "wall": "2026-05-13T00:04:55.129796", "event": "action", "agent": "特莉丝", "action": "交谈", "target": "水井"}
-{"ts": 52.27416491508484, "wall": "2026-05-13T00:04:55.167210", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 52.341830015182495, "wall": "2026-05-13T00:04:55.235064", "event": "action", "agent": "卓尔坦", "action": "向维瑟米尔搭话", "target": "吧台"}
-{"ts": 53.64863181114197, "wall": "2026-05-13T00:04:56.541826", "event": "action", "agent": "兰伯特", "action": "交谈", "target": "水井"}
-{"ts": 54.02180862426758, "wall": "2026-05-13T00:04:56.915056", "event": "action", "agent": "维瑟米尔", "action": "向卓尔坦和丹德里恩搭话", "target": "吧台"}
-{"ts": 54.04071044921875, "wall": "2026-05-13T00:04:56.933951", "event": "action", "agent": "叶奈法", "action": "查看配方书", "target": "配方书"}
-{"ts": 54.199235677719116, "wall": "2026-05-13T00:04:57.092415", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 54.23781681060791, "wall": "2026-05-13T00:04:57.130863", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 54.343315839767456, "wall": "2026-05-13T00:04:57.236361", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 54.98268365859985, "wall": "2026-05-13T00:04:57.875879", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 55.00266742706299, "wall": "2026-05-13T00:04:57.895842", "event": "action", "agent": "杰洛特", "action": "交谈", "target": "水井"}
-{"ts": 55.649290800094604, "wall": "2026-05-13T00:04:58.542337", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 56.02251124382019, "wall": "2026-05-13T00:04:58.915557", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 56.04197955131531, "wall": "2026-05-13T00:04:58.935025", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 56.20055365562439, "wall": "2026-05-13T00:04:59.093600", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 56.88615369796753, "wall": "2026-05-13T00:04:59.779344", "event": "action", "agent": "特莉丝", "action": "走向杰洛特和兰伯特，打招呼", "target": "水井"}
-{"ts": 56.98377752304077, "wall": "2026-05-13T00:04:59.876823", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 57.00344276428223, "wall": "2026-05-13T00:04:59.896489", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 58.88848400115967, "wall": "2026-05-13T00:05:01.781530", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 58.89479947090149, "wall": "2026-05-13T00:05:01.788043", "event": "action", "agent": "叶奈法", "action": "查看字条", "target": "字条"}
-{"ts": 59.266244411468506, "wall": "2026-05-13T00:05:02.159436", "event": "action", "agent": "凯拉", "action": "阅读字条", "target": "字条"}
-{"ts": 59.554574966430664, "wall": "2026-05-13T00:05:02.447756", "event": "action", "agent": "兰伯特", "action": "交谈", "target": "水井"}
-{"ts": 60.14045238494873, "wall": "2026-05-13T00:05:03.033674", "event": "action", "agent": "杰洛特", "action": "去酒馆喝一杯", "target": "酒馆入口"}
-{"ts": 60.37649154663086, "wall": "2026-05-13T00:05:03.269678", "event": "action", "agent": "维瑟米尔", "action": "向卓尔坦和丹德里恩搭话", "target": "吧台"}
-{"ts": 60.376710653305054, "wall": "2026-05-13T00:05:03.269858", "event": "action", "agent": "卓尔坦", "action": "向维瑟米尔搭话", "target": "吧台"}
-{"ts": 60.61202049255371, "wall": "2026-05-13T00:05:03.505214", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 60.8958306312561, "wall": "2026-05-13T00:05:03.788876", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 61.26711630821228, "wall": "2026-05-13T00:05:04.160162", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 61.55693960189819, "wall": "2026-05-13T00:05:04.449985", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 62.14171314239502, "wall": "2026-05-13T00:05:05.034759", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 62.377373456954956, "wall": "2026-05-13T00:05:05.270419", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 62.37759017944336, "wall": "2026-05-13T00:05:05.270636", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 62.61340284347534, "wall": "2026-05-13T00:05:05.506449", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 63.31268906593323, "wall": "2026-05-13T00:05:06.205871", "event": "action", "agent": "特莉丝", "action": "走向杰洛特和兰伯特，打招呼", "target": "水井"}
-{"ts": 63.95560598373413, "wall": "2026-05-13T00:05:06.848808", "event": "action", "agent": "叶奈法", "action": "阅读字条", "target": "字条"}
-{"ts": 64.00603818893433, "wall": "2026-05-13T00:05:06.899214", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 64.73393106460571, "wall": "2026-05-13T00:05:07.627130", "event": "action", "agent": "兰伯特", "action": "走向特莉丝，打招呼", "target": "水井"}
-{"ts": 65.31485724449158, "wall": "2026-05-13T00:05:08.207903", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 65.3195469379425, "wall": "2026-05-13T00:05:08.212728", "event": "action", "agent": "卓尔坦", "action": "向维瑟米尔搭话", "target": "吧台"}
-{"ts": 65.4914882183075, "wall": "2026-05-13T00:05:08.384676", "event": "action", "agent": "维瑟米尔", "action": "向卓尔坦搭话", "target": "吧台"}
-{"ts": 65.95708131790161, "wall": "2026-05-13T00:05:08.850127", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 66.00655031204224, "wall": "2026-05-13T00:05:08.899596", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 66.34013938903809, "wall": "2026-05-13T00:05:09.233367", "event": "action", "agent": "杰洛特", "action": "走向兰伯特和特莉丝", "target": "水井"}
-{"ts": 66.7350561618805, "wall": "2026-05-13T00:05:09.628102", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 67.12419533729553, "wall": "2026-05-13T00:05:10.017434", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 67.32030844688416, "wall": "2026-05-13T00:05:10.213354", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 67.49285864830017, "wall": "2026-05-13T00:05:10.385904", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 68.3421516418457, "wall": "2026-05-13T00:05:11.235198", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 69.12553858757019, "wall": "2026-05-13T00:05:12.018730", "event": "action", "agent": "特莉丝", "action": "交谈", "target": "水井"}
-{"ts": 69.12583518028259, "wall": "2026-05-13T00:05:12.018880", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 69.54986214637756, "wall": "2026-05-13T00:05:12.443069", "event": "action", "agent": "叶奈法", "action": "与凯拉交谈", "target": "字条"}
-{"ts": 69.58882975578308, "wall": "2026-05-13T00:05:12.482018", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 70.12782979011536, "wall": "2026-05-13T00:05:13.021045", "event": "action", "agent": "兰伯特", "action": "打水", "target": "水井"}
-{"ts": 71.02175736427307, "wall": "2026-05-13T00:05:13.914965", "event": "action", "agent": "卓尔坦", "action": "向丹德里恩搭话", "target": "吧台"}
-{"ts": 71.12743902206421, "wall": "2026-05-13T00:05:14.020485", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 71.14700245857239, "wall": "2026-05-13T00:05:14.040160", "event": "action", "agent": "杰洛特", "action": "走向兰伯特和特莉丝，打招呼", "target": "水井"}
-{"ts": 71.19668126106262, "wall": "2026-05-13T00:05:14.089854", "event": "action", "agent": "维瑟米尔", "action": "向矮人老板要一杯麦酒，然后倚在吧台上喝一口", "target": "吧台"}
-{"ts": 71.55154466629028, "wall": "2026-05-13T00:05:14.444591", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 71.5899748802185, "wall": "2026-05-13T00:05:14.483020", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 72.12894058227539, "wall": "2026-05-13T00:05:15.021987", "event": "result", "agent": "兰伯特", "narrative": "兰伯特从井里打了一桶水，清凉甘甜", "deltas": {"thirst": -30}}
-{"ts": 73.02316904067993, "wall": "2026-05-13T00:05:15.916215", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 73.14770531654358, "wall": "2026-05-13T00:05:16.040751", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 73.1981348991394, "wall": "2026-05-13T00:05:16.091180", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 73.3420877456665, "wall": "2026-05-13T00:05:16.235329", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 74.13300895690918, "wall": "2026-05-13T00:05:17.026199", "event": "action", "agent": "特莉丝", "action": "喝水", "target": "水井"}
-{"ts": 74.7347936630249, "wall": "2026-05-13T00:05:17.628007", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 75.05154514312744, "wall": "2026-05-13T00:05:17.944737", "event": "action", "agent": "叶奈法", "action": "阅读字条", "target": "字条"}
-{"ts": 75.34334015846252, "wall": "2026-05-13T00:05:18.236386", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 75.79300856590271, "wall": "2026-05-13T00:05:18.686228", "event": "action", "agent": "杰洛特", "action": "交谈", "target": "水井"}
-{"ts": 76.13418579101562, "wall": "2026-05-13T00:05:19.027232", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 76.25097870826721, "wall": "2026-05-13T00:05:19.144162", "event": "action", "agent": "卓尔坦", "action": "向维瑟米尔搭话", "target": "吧台"}
-{"ts": 76.60382342338562, "wall": "2026-05-13T00:05:19.497083", "event": "action", "agent": "维瑟米尔", "action": "向卓尔坦和丹德里恩搭话", "target": "吧台"}
-{"ts": 76.73555278778076, "wall": "2026-05-13T00:05:19.628599", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 77.05327773094177, "wall": "2026-05-13T00:05:19.946324", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 77.79413199424744, "wall": "2026-05-13T00:05:20.687178", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 78.25200271606445, "wall": "2026-05-13T00:05:21.145048", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 78.60476899147034, "wall": "2026-05-13T00:05:21.497815", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 79.76357841491699, "wall": "2026-05-13T00:05:22.656763", "event": "action", "agent": "特莉丝", "action": "走向杰洛特，打招呼并闲聊", "target": "水井"}
-{"ts": 79.9314317703247, "wall": "2026-05-13T00:05:22.824612", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 80.24495339393616, "wall": "2026-05-13T00:05:23.138185", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 81.76517796516418, "wall": "2026-05-13T00:05:24.658224", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 81.76612758636475, "wall": "2026-05-13T00:05:24.659342", "event": "action", "agent": "叶奈法", "action": "与凯拉交谈", "target": "字条"}
-{"ts": 81.88164830207825, "wall": "2026-05-13T00:05:24.774815", "event": "action", "agent": "兰伯特", "action": "交谈", "target": "水井"}
-{"ts": 81.93215131759644, "wall": "2026-05-13T00:05:24.825197", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 82.24586606025696, "wall": "2026-05-13T00:05:25.138912", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 82.27755570411682, "wall": "2026-05-13T00:05:25.170733", "event": "action", "agent": "维瑟米尔", "action": "拿起麦酒喝一口", "target": "吧台"}
-{"ts": 82.80906796455383, "wall": "2026-05-13T00:05:25.702257", "event": "action", "agent": "卓尔坦", "action": "向丹德里恩搭话", "target": "吧台"}
-{"ts": 82.83270978927612, "wall": "2026-05-13T00:05:25.725868", "event": "action", "agent": "杰洛特", "action": "进入酒馆", "target": "酒馆入口"}
-{"ts": 83.76696228981018, "wall": "2026-05-13T00:05:26.660009", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 83.88278079032898, "wall": "2026-05-13T00:05:26.775826", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 84.27856588363647, "wall": "2026-05-13T00:05:27.171612", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 84.69073343276978, "wall": "2026-05-13T00:05:27.583917", "event": "action", "agent": "特莉丝", "action": "喝水", "target": "水井"}
-{"ts": 84.81137871742249, "wall": "2026-05-13T00:05:27.704425", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 84.83383536338806, "wall": "2026-05-13T00:05:27.726881", "event": "result", "agent": "杰洛特", "narrative": "杰洛特推开酒馆门走了进去", "deltas": {}}
-{"ts": 85.98430156707764, "wall": "2026-05-13T00:05:28.877500", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 86.67280173301697, "wall": "2026-05-13T00:05:29.566048", "event": "action", "agent": "叶奈法", "action": "阅读字条", "target": "字条"}
-{"ts": 86.69236660003662, "wall": "2026-05-13T00:05:29.585412", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 86.72443962097168, "wall": "2026-05-13T00:05:29.617621", "event": "action", "agent": "维瑟米尔", "action": "向卓尔坦搭话", "target": "吧台"}
-{"ts": 86.76848411560059, "wall": "2026-05-13T00:05:29.661720", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 87.52118253707886, "wall": "2026-05-13T00:05:30.414362", "event": "action", "agent": "兰伯特", "action": "走向特莉丝，打招呼并闲聊", "target": "水井"}
-{"ts": 87.98570370674133, "wall": "2026-05-13T00:05:30.878749", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 88.13539528846741, "wall": "2026-05-13T00:05:31.028614", "event": "action", "agent": "卓尔坦", "action": "走到吧台，向矮人老板要一杯麦酒，然后倚在吧台上喝一口", "target": "吧台"}
-{"ts": 88.67462396621704, "wall": "2026-05-13T00:05:31.567670", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 88.7250759601593, "wall": "2026-05-13T00:05:31.618122", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 88.76951241493225, "wall": "2026-05-13T00:05:31.662558", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 89.52201652526855, "wall": "2026-05-13T00:05:32.415062", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 89.69580030441284, "wall": "2026-05-13T00:05:32.588980", "event": "action", "agent": "特莉丝", "action": "交谈", "target": "水井"}
-{"ts": 90.13675260543823, "wall": "2026-05-13T00:05:33.029799", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 90.24645519256592, "wall": "2026-05-13T00:05:33.139643", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 91.37447309494019, "wall": "2026-05-13T00:05:34.267733", "event": "action", "agent": "杰洛特", "action": "走向吧台，跟老朋友们打个招呼", "target": "吧台"}
-{"ts": 91.58504390716553, "wall": "2026-05-13T00:05:34.478240", "event": "action", "agent": "叶奈法", "action": "与凯拉交谈", "target": "字条"}
-{"ts": 91.69665718078613, "wall": "2026-05-13T00:05:34.589703", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 91.84789800643921, "wall": "2026-05-13T00:05:34.741088", "event": "action", "agent": "维瑟米尔", "action": "向卓尔坦搭话", "target": "吧台"}
-{"ts": 92.24780440330505, "wall": "2026-05-13T00:05:35.140851", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 92.38598847389221, "wall": "2026-05-13T00:05:35.279194", "event": "action", "agent": "兰伯特", "action": "走向特莉丝，打招呼并闲聊", "target": "水井"}
-{"ts": 93.04888963699341, "wall": "2026-05-13T00:05:35.942150", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 93.37613105773926, "wall": "2026-05-13T00:05:36.269177", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 93.5861701965332, "wall": "2026-05-13T00:05:36.479216", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 93.84885334968567, "wall": "2026-05-13T00:05:36.741899", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 93.89443683624268, "wall": "2026-05-13T00:05:36.787620", "event": "action", "agent": "卓尔坦", "action": "向维瑟米尔搭话", "target": "吧台"}
-{"ts": 94.38731384277344, "wall": "2026-05-13T00:05:37.280360", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 94.65030646324158, "wall": "2026-05-13T00:05:37.543500", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 95.05023384094238, "wall": "2026-05-13T00:05:37.943280", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 95.32858943939209, "wall": "2026-05-13T00:05:38.221763", "event": "action", "agent": "特莉丝", "action": "交谈", "target": "水井"}
-{"ts": 95.8957748413086, "wall": "2026-05-13T00:05:38.788821", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 96.35775089263916, "wall": "2026-05-13T00:05:39.250960", "event": "action", "agent": "叶奈法", "action": "阅读字条", "target": "字条"}
-{"ts": 96.65114307403564, "wall": "2026-05-13T00:05:39.544189", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 96.65226864814758, "wall": "2026-05-13T00:05:39.545507", "event": "action", "agent": "杰洛特", "action": "走到吧台，向矮人老板要一杯麦酒，然后加入老朋友们", "target": "吧台"}
-{"ts": 97.33050489425659, "wall": "2026-05-13T00:05:40.223551", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 97.41165661811829, "wall": "2026-05-13T00:05:40.304937", "event": "action", "agent": "维瑟米尔", "action": "走向吧台，跟老朋友们打个招呼", "target": "吧台"}
-{"ts": 97.79882454872131, "wall": "2026-05-13T00:05:40.692013", "event": "action", "agent": "兰伯特", "action": "走向特莉丝，打招呼", "target": "水井"}
-{"ts": 98.35962343215942, "wall": "2026-05-13T00:05:41.252670", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 98.6536545753479, "wall": "2026-05-13T00:05:41.546700", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 98.97633481025696, "wall": "2026-05-13T00:05:41.869580", "event": "action", "agent": "卓尔坦", "action": "向矮人老板要一杯矮人烈酒", "target": "吧台"}
-{"ts": 98.99512386322021, "wall": "2026-05-13T00:05:41.888282", "event": "action", "agent": "特莉丝", "action": "喝水", "target": "水井"}
-{"ts": 99.30669951438904, "wall": "2026-05-13T00:05:42.199929", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 99.41237139701843, "wall": "2026-05-13T00:05:42.305417", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 99.80009841918945, "wall": "2026-05-13T00:05:42.693145", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 100.0017957687378, "wall": "2026-05-13T00:05:42.895011", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 100.97792482376099, "wall": "2026-05-13T00:05:43.870971", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 101.30764651298523, "wall": "2026-05-13T00:05:44.200692", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 101.70461535453796, "wall": "2026-05-13T00:05:44.597812", "event": "action", "agent": "叶奈法", "action": "与凯拉交谈", "target": "字条"}
-{"ts": 101.99967360496521, "wall": "2026-05-13T00:05:44.892943", "event": "action", "agent": "杰洛特", "action": "走到吧台，向矮人老板要一杯麦酒，然后加入老朋友们", "target": "吧台"}
-{"ts": 102.00316858291626, "wall": "2026-05-13T00:05:44.896214", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 102.29648399353027, "wall": "2026-05-13T00:05:45.189724", "event": "action", "agent": "维瑟米尔", "action": "向矮人老板要一杯麦酒，然后倚在吧台上喝一口", "target": "吧台"}
-{"ts": 102.99858546257019, "wall": "2026-05-13T00:05:45.891631", "event": "result", "agent": "特莉丝", "narrative": "特莉丝走到水井边，用井边的木桶打上一桶清澈的井水。她捧起水喝了几口，清凉的井水缓解了干渴，让她精神为之一振。旁边的兰伯特注意到了她的举动，微微点了点头，似乎对她在旅途中保持朴素习惯感到些许认同。", "deltas": {"thirst": -20, "mood": 5}}
-{"ts": 103.17957949638367, "wall": "2026-05-13T00:05:46.072791", "event": "action", "agent": "兰伯特", "action": "走向酒馆入口", "target": "酒馆入口"}
-{"ts": 103.70599555969238, "wall": "2026-05-13T00:05:46.599041", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 104.00075149536133, "wall": "2026-05-13T00:05:46.893797", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 104.29752731323242, "wall": "2026-05-13T00:05:47.190573", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 105.1810896396637, "wall": "2026-05-13T00:05:48.074136", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 105.7674171924591, "wall": "2026-05-13T00:05:48.660674", "event": "action", "agent": "卓尔坦", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 105.85542845726013, "wall": "2026-05-13T00:05:48.748592", "event": "action", "agent": "特莉丝", "action": "交谈", "target": "水井"}
-{"ts": 106.13298177719116, "wall": "2026-05-13T00:05:49.026229", "event": "action", "agent": "凯拉", "action": "阅读字条", "target": "字条"}
-{"ts": 106.47964787483215, "wall": "2026-05-13T00:05:49.372897", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 106.89244771003723, "wall": "2026-05-13T00:05:49.785633", "event": "action", "agent": "叶奈法", "action": "与凯拉交谈", "target": "字条"}
-{"ts": 106.90627241134644, "wall": "2026-05-13T00:05:49.799493", "event": "action", "agent": "杰洛特", "action": "向矮人老板要一杯麦酒，然后倚在吧台上喝一口", "target": "吧台"}
-{"ts": 107.7681953907013, "wall": "2026-05-13T00:05:50.661241", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 107.83264756202698, "wall": "2026-05-13T00:05:50.725872", "event": "action", "agent": "维瑟米尔", "action": "向丹德里恩搭话，问他又写了什么新歌", "target": "吧台"}
-{"ts": 107.85623741149902, "wall": "2026-05-13T00:05:50.749283", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 108.12920045852661, "wall": "2026-05-13T00:05:51.022416", "event": "action", "agent": "兰伯特", "action": "和特莉丝打招呼并聊聊近况", "target": "水井"}
-{"ts": 108.13390827178955, "wall": "2026-05-13T00:05:51.026954", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 108.48081040382385, "wall": "2026-05-13T00:05:51.373856", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 108.89466142654419, "wall": "2026-05-13T00:05:51.787707", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 108.90713119506836, "wall": "2026-05-13T00:05:51.800176", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 109.83431601524353, "wall": "2026-05-13T00:05:52.727362", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 110.13041114807129, "wall": "2026-05-13T00:05:53.023456", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 111.18930077552795, "wall": "2026-05-13T00:05:54.082531", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 111.81273198127747, "wall": "2026-05-13T00:05:54.706017", "event": "action", "agent": "卓尔坦", "action": "向矮人老板要一杯矮人烈酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 112.00600814819336, "wall": "2026-05-13T00:05:54.899281", "event": "action", "agent": "杰洛特", "action": "向矮人老板要一杯麦酒，然后加入老朋友们", "target": "吧台"}
-{"ts": 112.17458367347717, "wall": "2026-05-13T00:05:55.067823", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 112.83889293670654, "wall": "2026-05-13T00:05:55.732149", "event": "action", "agent": "叶奈法", "action": "翻看原料篮", "target": "原料篮"}
-{"ts": 112.87626194953918, "wall": "2026-05-13T00:05:55.769453", "event": "action", "agent": "兰伯特", "action": "走向特莉丝，打招呼并聊聊近况", "target": "水井"}
-{"ts": 113.19069290161133, "wall": "2026-05-13T00:05:56.083739", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 113.29967141151428, "wall": "2026-05-13T00:05:56.192898", "event": "action", "agent": "维瑟米尔", "action": "向老朋友们打招呼，然后要一杯麦酒", "target": "吧台"}
-{"ts": 113.81422090530396, "wall": "2026-05-13T00:05:56.707267", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 114.00682854652405, "wall": "2026-05-13T00:05:56.899874", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 114.1754515171051, "wall": "2026-05-13T00:05:57.068497", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 114.46854782104492, "wall": "2026-05-13T00:05:57.361757", "event": "action", "agent": "特莉丝", "action": "和兰伯特打招呼，聊聊他最近在忙什么", "target": "水井"}
-{"ts": 114.83959984779358, "wall": "2026-05-13T00:05:57.732646", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 114.87705516815186, "wall": "2026-05-13T00:05:57.770101", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 115.30087423324585, "wall": "2026-05-13T00:05:58.193920", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 116.17960047721863, "wall": "2026-05-13T00:05:59.072815", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "字条"}
-{"ts": 116.45914006233215, "wall": "2026-05-13T00:05:59.352396", "event": "action", "agent": "杰洛特", "action": "走到吧台，向矮人老板要一杯麦酒，然后加入老朋友们", "target": "吧台"}
-{"ts": 116.46979355812073, "wall": "2026-05-13T00:05:59.362839", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 117.5848741531372, "wall": "2026-05-13T00:06:00.478090", "event": "action", "agent": "兰伯特", "action": "和特莉丝打招呼，聊聊近况", "target": "水井"}
-{"ts": 118.03595519065857, "wall": "2026-05-13T00:06:00.929191", "event": "action", "agent": "叶奈法", "action": "交谈", "target": "字条"}
-{"ts": 118.18167281150818, "wall": "2026-05-13T00:06:01.074718", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 118.32983613014221, "wall": "2026-05-13T00:06:01.223071", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 118.46026539802551, "wall": "2026-05-13T00:06:01.353311", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 118.96824765205383, "wall": "2026-05-13T00:06:01.861493", "event": "action", "agent": "卓尔坦", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 119.5866870880127, "wall": "2026-05-13T00:06:02.479733", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 119.61294960975647, "wall": "2026-05-13T00:06:02.506150", "event": "action", "agent": "维瑟米尔", "action": "走到吧台，向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 120.037109375, "wall": "2026-05-13T00:06:02.930155", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 120.33107113838196, "wall": "2026-05-13T00:06:03.224117", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 120.38793921470642, "wall": "2026-05-13T00:06:03.281107", "event": "action", "agent": "特莉丝", "action": "与兰伯特交谈", "target": "水井"}
-{"ts": 120.96917486190796, "wall": "2026-05-13T00:06:03.862221", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 121.28228068351746, "wall": "2026-05-13T00:06:04.175517", "event": "action", "agent": "杰洛特", "action": "向矮人老板要一杯麦酒，然后加入老朋友们", "target": "吧台"}
-{"ts": 121.5878517627716, "wall": "2026-05-13T00:06:04.481128", "event": "action", "agent": "凯拉", "action": "翻看原料篮", "target": "原料篮"}
-{"ts": 121.61350750923157, "wall": "2026-05-13T00:06:04.506553", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 122.38974809646606, "wall": "2026-05-13T00:06:05.282794", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 122.39796042442322, "wall": "2026-05-13T00:06:05.291150", "event": "action", "agent": "兰伯特", "action": "和特莉丝打招呼，聊聊近况", "target": "水井"}
-{"ts": 122.65671396255493, "wall": "2026-05-13T00:06:05.549959", "event": "action", "agent": "叶奈法", "action": "查看配方书", "target": "配方书"}
-{"ts": 123.28383421897888, "wall": "2026-05-13T00:06:06.176880", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 123.58960318565369, "wall": "2026-05-13T00:06:06.482649", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 123.80340099334717, "wall": "2026-05-13T00:06:06.696640", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 124.3997950553894, "wall": "2026-05-13T00:06:07.292841", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 124.43941521644592, "wall": "2026-05-13T00:06:07.332645", "event": "action", "agent": "卓尔坦", "action": "向矮人老板要一杯矮人烈酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 124.65819191932678, "wall": "2026-05-13T00:06:07.551238", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 125.35601496696472, "wall": "2026-05-13T00:06:08.249257", "event": "action", "agent": "维瑟米尔", "action": "向矮人老板要一杯麦酒，然后加入老朋友们", "target": "吧台"}
-{"ts": 125.62467193603516, "wall": "2026-05-13T00:06:08.517845", "event": "action", "agent": "特莉丝", "action": "交谈", "target": "水井"}
-{"ts": 125.80415725708008, "wall": "2026-05-13T00:06:08.697203", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 126.19600033760071, "wall": "2026-05-13T00:06:09.089253", "event": "action", "agent": "杰洛特", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 126.44073724746704, "wall": "2026-05-13T00:06:09.333783", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 126.7527129650116, "wall": "2026-05-13T00:06:09.645958", "event": "action", "agent": "凯拉", "action": "交谈", "target": "配方书"}
-{"ts": 127.35788583755493, "wall": "2026-05-13T00:06:10.250932", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 127.62587070465088, "wall": "2026-05-13T00:06:10.518917", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 127.81674861907959, "wall": "2026-05-13T00:06:10.709995", "event": "action", "agent": "叶奈法", "action": "与凯拉交谈", "target": "原料篮"}
-{"ts": 128.19874048233032, "wall": "2026-05-13T00:06:11.091786", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 128.75474286079407, "wall": "2026-05-13T00:06:11.647789", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 129.21192049980164, "wall": "2026-05-13T00:06:12.105161", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 129.66677808761597, "wall": "2026-05-13T00:06:12.560043", "event": "action", "agent": "卓尔坦", "action": "向老朋友们打招呼，然后要一杯麦酒", "target": "吧台"}
-{"ts": 129.8175389766693, "wall": "2026-05-13T00:06:12.710584", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 130.650808095932, "wall": "2026-05-13T00:06:13.544075", "event": "action", "agent": "凯拉", "action": "查看字条", "target": "字条"}
-{"ts": 130.74606680870056, "wall": "2026-05-13T00:06:13.639261", "event": "action", "agent": "兰伯特", "action": "交谈", "target": "水井"}
-{"ts": 130.99216985702515, "wall": "2026-05-13T00:06:13.885413", "event": "action", "agent": "维瑟米尔", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 131.13892650604248, "wall": "2026-05-13T00:06:14.032158", "event": "action", "agent": "杰洛特", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 131.21256923675537, "wall": "2026-05-13T00:06:14.105615", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 131.66775250434875, "wall": "2026-05-13T00:06:14.560798", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 132.67732524871826, "wall": "2026-05-13T00:06:15.570604", "event": "action", "agent": "叶奈法", "action": "与凯拉交谈", "target": "配方书"}
-{"ts": 132.74693608283997, "wall": "2026-05-13T00:06:15.639982", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 132.99366784095764, "wall": "2026-05-13T00:06:15.886714", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 133.1402575969696, "wall": "2026-05-13T00:06:16.033303", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 134.43527722358704, "wall": "2026-05-13T00:06:17.328552", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 134.54168486595154, "wall": "2026-05-13T00:06:17.434876", "event": "action", "agent": "特莉丝", "action": "交谈", "target": "水井"}
-{"ts": 134.6795654296875, "wall": "2026-05-13T00:06:17.572611", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 135.38581824302673, "wall": "2026-05-13T00:06:18.279069", "event": "action", "agent": "卓尔坦", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 136.04477381706238, "wall": "2026-05-13T00:06:18.937964", "event": "action", "agent": "兰伯特", "action": "交谈", "target": "水井"}
-{"ts": 136.43610262870789, "wall": "2026-05-13T00:06:19.329148", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 136.54262709617615, "wall": "2026-05-13T00:06:19.435673", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 136.5640881061554, "wall": "2026-05-13T00:06:19.457313", "event": "action", "agent": "杰洛特", "action": "向矮人老板要一杯麦酒，然后加入老朋友们", "target": "吧台"}
-{"ts": 136.6527054309845, "wall": "2026-05-13T00:06:19.545751", "event": "result", "agent": "凯拉", "narrative": "凯拉好奇地俯身，小心翼翼地拿起那张压在坩埚下的字条。字条上的字迹潦草而急促，像是匆忙写下的。上面写着：\n\n『致学徒——\n\n我出去采些曼德拉草根，傍晚前回来。坩埚里的底料已经熬了两个时辰，记住：\n1. 每半个时辰搅拌一次，方向必须顺时针。\n2. 如果液体变成深紫色，立刻加入三片白屈菜叶。\n3. 别碰架", "deltas": {"social": 5, "mood": 3}}
-{"ts": 137.06439399719238, "wall": "2026-05-13T00:06:19.957590", "event": "action", "agent": "维瑟米尔", "action": "向老朋友们打招呼，然后要一杯麦酒", "target": "吧台"}
-{"ts": 137.38725399971008, "wall": "2026-05-13T00:06:20.280300", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 137.53529381752014, "wall": "2026-05-13T00:06:20.428518", "event": "action", "agent": "叶奈法", "action": "取曼德拉草根和白屈花", "target": "草药架"}
-{"ts": 138.04542469978333, "wall": "2026-05-13T00:06:20.938471", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 138.56493306159973, "wall": "2026-05-13T00:06:21.457979", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 139.06580996513367, "wall": "2026-05-13T00:06:21.958856", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 139.53670954704285, "wall": "2026-05-13T00:06:22.429755", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 140.20064783096313, "wall": "2026-05-13T00:06:23.093864", "event": "action", "agent": "特莉丝", "action": "与兰伯特交谈", "target": "水井"}
-{"ts": 140.48338985443115, "wall": "2026-05-13T00:06:23.376632", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 140.64209246635437, "wall": "2026-05-13T00:06:23.535325", "event": "action", "agent": "凯拉", "action": "查看坩埚", "target": "炼金坩埚"}
-{"ts": 140.6927363872528, "wall": "2026-05-13T00:06:23.585966", "event": "action", "agent": "卓尔坦", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 140.77644228935242, "wall": "2026-05-13T00:06:23.669612", "event": "action", "agent": "兰伯特", "action": "和特莉丝打招呼，聊聊近况", "target": "水井"}
-{"ts": 141.23289918899536, "wall": "2026-05-13T00:06:24.126147", "event": "action", "agent": "杰洛特", "action": "走到吧台，向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 142.20140314102173, "wall": "2026-05-13T00:06:25.094449", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 142.48509526252747, "wall": "2026-05-13T00:06:25.378141", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 142.64367246627808, "wall": "2026-05-13T00:06:25.536718", "event": "result", "agent": "凯拉", "narrative": "凯拉凑近坩埚——里面煮着半成品魔药，闻起来像猫眼药水。", "deltas": {}}
-{"ts": 142.69411754608154, "wall": "2026-05-13T00:06:25.587163", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 142.77757263183594, "wall": "2026-05-13T00:06:25.670618", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 143.23444199562073, "wall": "2026-05-13T00:06:26.127488", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 143.32844042778015, "wall": "2026-05-13T00:06:26.221676", "event": "action", "agent": "维瑟米尔", "action": "向矮人老板要一杯矮人烈酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 143.44023394584656, "wall": "2026-05-13T00:06:26.333453", "event": "action", "agent": "叶奈法", "action": "与凯拉交谈", "target": "字条"}
-{"ts": 144.7066888809204, "wall": "2026-05-13T00:06:27.599897", "event": "action", "agent": "特莉丝", "action": "和兰伯特打招呼并闲聊", "target": "水井"}
-{"ts": 145.3301911354065, "wall": "2026-05-13T00:06:28.223237", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 145.44172954559326, "wall": "2026-05-13T00:06:28.334775", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 145.73798179626465, "wall": "2026-05-13T00:06:28.631228", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 145.88406801223755, "wall": "2026-05-13T00:06:28.777300", "event": "action", "agent": "卓尔坦", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 146.4244303703308, "wall": "2026-05-13T00:06:29.317675", "event": "action", "agent": "杰洛特", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 146.55015349388123, "wall": "2026-05-13T00:06:29.443400", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "草药架"}
-{"ts": 146.70784068107605, "wall": "2026-05-13T00:06:29.600886", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 147.73922276496887, "wall": "2026-05-13T00:06:30.632269", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 147.8848192691803, "wall": "2026-05-13T00:06:30.777865", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 148.07448744773865, "wall": "2026-05-13T00:06:30.967713", "event": "action", "agent": "叶奈法", "action": "翻看原料篮", "target": "原料篮"}
-{"ts": 148.42639708518982, "wall": "2026-05-13T00:06:31.319443", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 148.55096220970154, "wall": "2026-05-13T00:06:31.444008", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 149.04492163658142, "wall": "2026-05-13T00:06:31.938131", "event": "action", "agent": "维瑟米尔", "action": "向丹德里恩搭话，问他又写了什么新歌", "target": "吧台"}
-{"ts": 149.41652703285217, "wall": "2026-05-13T00:06:32.309713", "event": "action", "agent": "兰伯特", "action": "和特莉丝打招呼，聊聊近况", "target": "水井"}
-{"ts": 149.71423077583313, "wall": "2026-05-13T00:06:32.607445", "event": "action", "agent": "特莉丝", "action": "和兰伯特打招呼，聊聊近况", "target": "水井"}
-{"ts": 150.07614588737488, "wall": "2026-05-13T00:06:32.969192", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 151.0462064743042, "wall": "2026-05-13T00:06:33.939252", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 151.2813069820404, "wall": "2026-05-13T00:06:34.174548", "event": "action", "agent": "丹德里恩", "action": "热情地搂住卓尔坦和维瑟米尔的肩膀，大笑着说：'瞧瞧这是谁来了！北境最勇敢的猎魔人和最忠实的矮人朋友！来来来，今天我请客——老板，再来三杯蜂蜜酒！'", "target": "吧台"}
-{"ts": 151.417884349823, "wall": "2026-05-13T00:06:34.310930", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 151.42779088020325, "wall": "2026-05-13T00:06:34.321027", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "原料篮"}
-{"ts": 151.6155993938446, "wall": "2026-05-13T00:06:34.508846", "event": "action", "agent": "卓尔坦", "action": "向矮人老板要一杯矮人烈酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 151.6520709991455, "wall": "2026-05-13T00:06:34.545300", "event": "action", "agent": "杰洛特", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 151.7156798839569, "wall": "2026-05-13T00:06:34.608725", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 152.70059609413147, "wall": "2026-05-13T00:06:35.593826", "event": "action", "agent": "叶奈法", "action": "交谈", "target": "草药架"}
-{"ts": 153.28240275382996, "wall": "2026-05-13T00:06:36.175449", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 153.42896699905396, "wall": "2026-05-13T00:06:36.322013", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 153.5326704978943, "wall": "2026-05-13T00:06:36.425862", "event": "action", "agent": "维瑟米尔", "action": "向矮人老板要一杯矮人烈酒", "target": "吧台"}
-{"ts": 153.6162827014923, "wall": "2026-05-13T00:06:36.509328", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 153.6536796092987, "wall": "2026-05-13T00:06:36.546725", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 154.64750909805298, "wall": "2026-05-13T00:06:37.540693", "event": "action", "agent": "特莉丝", "action": "与兰伯特交谈", "target": "水井"}
-{"ts": 154.702086687088, "wall": "2026-05-13T00:06:37.595133", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 155.5354127883911, "wall": "2026-05-13T00:06:38.428459", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 156.6491641998291, "wall": "2026-05-13T00:06:39.542210", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 156.921284198761, "wall": "2026-05-13T00:06:39.814524", "event": "action", "agent": "杰洛特", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 157.3668897151947, "wall": "2026-05-13T00:06:40.260111", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "原料篮"}
-{"ts": 157.4424967765808, "wall": "2026-05-13T00:06:40.335759", "event": "action", "agent": "卓尔坦", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 157.4449212551117, "wall": "2026-05-13T00:06:40.338151", "event": "action", "agent": "丹德里恩", "action": "跳上吧台旁的高脚凳，拨动鲁特琴的琴弦，大声宣布：'诸位！让我为你们唱一首新作——献给白果园的春天与重逢的老友们！'然后开始弹唱一首欢快的歌谣。", "target": "吧台"}
-{"ts": 158.03130769729614, "wall": "2026-05-13T00:06:40.924547", "event": "action", "agent": "叶奈法", "action": "与凯拉交谈", "target": "原料篮"}
-{"ts": 158.83890533447266, "wall": "2026-05-13T00:06:41.732104", "event": "action", "agent": "维瑟米尔", "action": "向矮人老板要一杯麦酒，然后倚在吧台上喝一口", "target": "吧台"}
-{"ts": 158.92250895500183, "wall": "2026-05-13T00:06:41.815554", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 159.36830615997314, "wall": "2026-05-13T00:06:42.261352", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 159.44372749328613, "wall": "2026-05-13T00:06:42.336773", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 159.4460747241974, "wall": "2026-05-13T00:06:42.339120", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 159.49343061447144, "wall": "2026-05-13T00:06:42.386627", "event": "action", "agent": "兰伯特", "action": "进入酒馆", "target": "酒馆入口"}
-{"ts": 159.55339646339417, "wall": "2026-05-13T00:06:42.446601", "event": "action", "agent": "特莉丝", "action": "和兰伯特打招呼，聊聊近况", "target": "酒馆入口"}
-{"ts": 160.03249883651733, "wall": "2026-05-13T00:06:42.925545", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 160.84033131599426, "wall": "2026-05-13T00:06:43.733377", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 161.49544167518616, "wall": "2026-05-13T00:06:44.388488", "event": "result", "agent": "兰伯特", "narrative": "兰伯特推开酒馆门走了进去", "deltas": {}}
-{"ts": 161.55590748786926, "wall": "2026-05-13T00:06:44.448953", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 161.90365934371948, "wall": "2026-05-13T00:06:44.796896", "event": "action", "agent": "卓尔坦", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 161.94743394851685, "wall": "2026-05-13T00:06:44.840681", "event": "action", "agent": "杰洛特", "action": "走到吧台，向矮人老板要一杯麦酒，然后加入老朋友们", "target": "吧台"}
-{"ts": 162.91649651527405, "wall": "2026-05-13T00:06:45.809695", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "原料篮"}
-{"ts": 163.30643939971924, "wall": "2026-05-13T00:06:46.199633", "event": "action", "agent": "叶奈法", "action": "翻看原料篮", "target": "原料篮"}
-{"ts": 163.37742352485657, "wall": "2026-05-13T00:06:46.270662", "event": "action", "agent": "丹德里恩", "action": "跳上吧台旁的高脚凳，拨动鲁特琴的琴弦，大声宣布：'诸位！让我为你们唱一首新作——献给白果园的春天与重逢的老友们！'然后开始弹唱一首欢快的歌谣。", "target": "吧台"}
-{"ts": 163.9048228263855, "wall": "2026-05-13T00:06:46.797869", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 163.94832468032837, "wall": "2026-05-13T00:06:46.841370", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 164.19925665855408, "wall": "2026-05-13T00:06:47.092496", "event": "action", "agent": "维瑟米尔", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 164.6467936038971, "wall": "2026-05-13T00:06:47.539938", "event": "action", "agent": "特莉丝", "action": "和兰伯特打招呼，聊聊近况", "target": "酒馆入口"}
-{"ts": 164.91735744476318, "wall": "2026-05-13T00:06:47.810403", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 165.30815482139587, "wall": "2026-05-13T00:06:48.201201", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 165.37865233421326, "wall": "2026-05-13T00:06:48.271698", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 166.2007930278778, "wall": "2026-05-13T00:06:49.093839", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 166.64772057533264, "wall": "2026-05-13T00:06:49.540766", "event": "result", "agent": "特莉丝", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 167.08246517181396, "wall": "2026-05-13T00:06:49.975718", "event": "action", "agent": "杰洛特", "action": "走到吧台，向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 167.22122240066528, "wall": "2026-05-13T00:06:50.114468", "event": "action", "agent": "卓尔坦", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 167.84713530540466, "wall": "2026-05-13T00:06:50.740335", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "原料篮"}
-{"ts": 168.26568293571472, "wall": "2026-05-13T00:06:51.158939", "event": "action", "agent": "兰伯特", "action": "走向吧台", "target": "吧台"}
-{"ts": 168.641987323761, "wall": "2026-05-13T00:06:51.535187", "event": "action", "agent": "叶奈法", "action": "与凯拉交谈", "target": "原料篮"}
-{"ts": 168.8296821117401, "wall": "2026-05-13T00:06:51.722939", "event": "action", "agent": "维瑟米尔", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 169.0835621356964, "wall": "2026-05-13T00:06:51.976608", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 169.17713522911072, "wall": "2026-05-13T00:06:52.070372", "event": "action", "agent": "丹德里恩", "action": "跳上吧台旁的高脚凳，拨动鲁特琴的琴弦，大声宣布：'诸位！让我为你们唱一首新作——献给白果园的春天与重逢的老友们！'然后开始弹唱一首欢快的歌谣。", "target": "吧台"}
-{"ts": 169.22269082069397, "wall": "2026-05-13T00:06:52.115737", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 169.84881949424744, "wall": "2026-05-13T00:06:52.741865", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 169.88370084762573, "wall": "2026-05-13T00:06:52.776888", "event": "action", "agent": "特莉丝", "action": "进入酒馆", "target": "酒馆入口"}
-{"ts": 170.64456272125244, "wall": "2026-05-13T00:06:53.537609", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 170.83117628097534, "wall": "2026-05-13T00:06:53.724222", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 171.17995190620422, "wall": "2026-05-13T00:06:54.072998", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 171.88515520095825, "wall": "2026-05-13T00:06:54.778201", "event": "result", "agent": "特莉丝", "narrative": "特莉丝推开酒馆门走了进去", "deltas": {}}
-{"ts": 172.45496463775635, "wall": "2026-05-13T00:06:55.348159", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "原料篮"}
-{"ts": 172.9167103767395, "wall": "2026-05-13T00:06:55.809975", "event": "action", "agent": "杰洛特", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 173.00061774253845, "wall": "2026-05-13T00:06:55.893819", "event": "action", "agent": "卓尔坦", "action": "向老朋友们打招呼，然后要一杯麦酒", "target": "吧台"}
-{"ts": 173.8599407672882, "wall": "2026-05-13T00:06:56.753183", "event": "action", "agent": "叶奈法", "action": "与凯拉交谈", "target": "原料篮"}
-{"ts": 174.27020454406738, "wall": "2026-05-13T00:06:57.163250", "event": "result", "agent": "兰伯特", "narrative": "兰伯特大步走向吧台，从口袋里掏出五枚硬币拍在木制台面上，发出清脆的声响。矮人老板抬起眼皮瞥了他一眼，伸手拿起一枚硬币用拇指弹了一下，听到那熟悉的叮当声后才满意地点点头，转身从身后取出一杯琥珀色的麦酒，泡沫细密地溢出杯沿。他将酒杯重重放在兰伯特面前，泡沫轻轻晃动。兰伯特端起酒杯，向矮人老板微微颔首致意", "deltas": {"social": 15.0, "mood": 5.0, "coins": -5}}
-{"ts": 174.27474808692932, "wall": "2026-05-13T00:06:57.167981", "event": "action", "agent": "维瑟米尔", "action": "走到吧台，向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 174.4563102722168, "wall": "2026-05-13T00:06:57.349356", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 174.9175500869751, "wall": "2026-05-13T00:06:57.810596", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 175.00152564048767, "wall": "2026-05-13T00:06:57.894572", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 175.43380522727966, "wall": "2026-05-13T00:06:58.327041", "event": "action", "agent": "丹德里恩", "action": "跳上吧台旁的高脚凳，拨动鲁特琴的琴弦，大声宣布：'诸位！让我为你们唱一首新作——献给白果园的春天与重逢的老友们！'然后开始弹唱一首欢快的歌谣。", "target": "吧台"}
-{"ts": 175.86074924468994, "wall": "2026-05-13T00:06:58.753795", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 176.27760696411133, "wall": "2026-05-13T00:06:59.170653", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 177.30013036727905, "wall": "2026-05-13T00:07:00.193377", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "原料篮"}
-{"ts": 177.43585777282715, "wall": "2026-05-13T00:07:00.328903", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 177.65587258338928, "wall": "2026-05-13T00:07:00.549148", "event": "action", "agent": "杰洛特", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 178.68862438201904, "wall": "2026-05-13T00:07:01.581822", "event": "action", "agent": "叶奈法", "action": "翻看原料篮", "target": "原料篮"}
-{"ts": 178.72620010375977, "wall": "2026-05-13T00:07:01.619405", "event": "action", "agent": "特莉丝", "action": "查看公告板上的委托", "target": "公告板"}
-{"ts": 179.00017142295837, "wall": "2026-05-13T00:07:01.893382", "event": "action", "agent": "兰伯特", "action": "向维瑟米尔、卓尔坦和杰洛特举起酒杯，咧嘴笑道：'看看这是谁——凯尔莫罕的老骨头和矮人铁砧！今天是什么风把你们都吹到白果园来了？'", "target": "吧台"}
-{"ts": 179.17386531829834, "wall": "2026-05-13T00:07:02.067072", "event": "action", "agent": "卓尔坦", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 179.30137753486633, "wall": "2026-05-13T00:07:02.194423", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 179.46436071395874, "wall": "2026-05-13T00:07:02.357551", "event": "action", "agent": "维瑟米尔", "action": "拿起吧台上的麦酒喝一口", "target": "吧台"}
-{"ts": 179.65710926055908, "wall": "2026-05-13T00:07:02.550156", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 181.91980171203613, "wall": "2026-05-13T00:07:04.813077", "event": "action", "agent": "丹德里恩", "action": "跳上吧台旁的高脚凳，拨动鲁特琴的琴弦，大声宣布：'诸位！让我为你们唱一首新作——献给白果园的春天与重逢的老友们！'然后开始弹唱一首欢快的歌谣。", "target": "吧台"}
-{"ts": 182.80525708198547, "wall": "2026-05-13T00:07:05.698522", "event": "action", "agent": "杰洛特", "action": "向矮人老板要一杯麦酒，然后热情地加入老朋友们", "target": "吧台"}
-{"ts": 183.19596099853516, "wall": "2026-05-13T00:07:06.089146", "event": "action", "agent": "凯拉", "action": "与叶奈法交谈", "target": "原料篮"}
-{"ts": 185.19723773002625, "wall": "2026-05-13T00:07:08.090284", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 185.197340965271, "wall": "2026-05-13T00:07:08.090387", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 185.19738960266113, "wall": "2026-05-13T00:07:08.090435", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 185.19742465019226, "wall": "2026-05-13T00:07:08.090470", "event": "result", "agent": "维瑟米尔", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 185.19746780395508, "wall": "2026-05-13T00:07:08.090513", "event": "result", "agent": "特莉丝", "narrative": "特莉丝走向酒馆角落的公告板，目光扫过一张张泛黄的委托书。大多数是猎杀水鬼、寻找失踪家畜之类的寻常任务，但有一张用红蜡封口的羊皮纸吸引了她的注意——上面画着一只风格诡异的乌鸦图案，署名处潦草地写着“神秘委托人”。公告板木框上刻着几个模糊的旧刻痕，似乎是前任猎魔人留下的暗号标记。", "deltas": {}}
-{"ts": 185.19750332832336, "wall": "2026-05-13T00:07:08.090548", "event": "result", "agent": "卓尔坦", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 185.19754457473755, "wall": "2026-05-13T00:07:08.090590", "event": "result", "agent": "凯拉", "narrative": "unknown resolve type", "deltas": {}}
-{"ts": 185.1975724697113, "wall": "2026-05-13T00:07:08.090618", "event": "result", "agent": "兰伯特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 0.0298159122467041, "wall": "2026-05-13T03:06:40.109478", "event": "test_start", "agents": ["geralt", "yennefer", "dandelion", "vesemir", "triss", "zoltan", "keira", "lambert"], "n_entities": 28}
+{"ts": 1.8399951457977295, "wall": "2026-05-13T03:06:41.919788", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用井边的木桶打水喝", "target": "水井"}
+{"ts": 2.28389835357666, "wall": "2026-05-13T03:06:42.363710", "event": "action", "agent": "叶奈法", "action": "走到配方书前，翻阅这本皮制笔记本，寻找关于稀有魔法材料的记载", "target": "配方书"}
+{"ts": 4.2865564823150635, "wall": "2026-05-13T03:06:44.366218", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 5.841452360153198, "wall": "2026-05-13T03:06:45.921114", "event": "result", "agent": "杰洛特", "narrative": "杰洛特大步走向广场中央的水井，木桶在井绳的牵引下吱呀作响地落入水中。他提起一桶清澈的井水，仰头畅饮，冰凉的液体顺着喉咙流下，缓解了干渴。水珠顺着他的胡须滴落，他随手抹了一把嘴，感觉精神振作了些。井水微甜，带着石头和苔藓的气息。", "deltas": {"thirst": -30, "energy": 3, "mood": 5, "hunger": -2}}
+{"ts": 6.799905776977539, "wall": "2026-05-13T03:06:46.879704", "event": "action", "agent": "叶奈法", "action": "走到配方书前，翻阅这本皮制笔记本，寻找关于稀有魔法材料的记载", "target": "配方书"}
+{"ts": 8.80155348777771, "wall": "2026-05-13T03:06:48.881215", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 10.97058629989624, "wall": "2026-05-13T03:06:51.050390", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的内容。", "target": "配方书"}
+{"ts": 12.971395015716553, "wall": "2026-05-13T03:06:53.051056", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 15.15833568572998, "wall": "2026-05-13T03:06:55.238145", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的内容。", "target": "配方书"}
+{"ts": 17.159754037857056, "wall": "2026-05-13T03:06:57.239415", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 20.69506335258484, "wall": "2026-05-13T03:07:00.774858", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，向她打招呼并询问她来草药小屋寻找什么材料", "target": "配方书"}
+{"ts": 22.696819067001343, "wall": "2026-05-13T03:07:02.776480", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 24.767249822616577, "wall": "2026-05-13T03:07:04.847093", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找与稀有魔法材料相关的记载。", "target": "配方书"}
+{"ts": 28.770145177841187, "wall": "2026-05-13T03:07:08.849806", "event": "result", "agent": "叶奈法", "narrative": "叶奈法蹲下身，手指轻轻拂过配方书泛黄的书脊，随后翻开厚重的封面。书页间飘落几粒干枯的草药碎屑，带着陈年的草木气息。她目光专注，指尖顺着目录滑行，停在了“稀有魔法材料——共鸣基质与星尘树脂”的章节。她微微皱眉，仿佛在思考某种复杂配方的替代方案。", "deltas": {"mood": 5, "energy": -3}}
+{"ts": 29.703738689422607, "wall": "2026-05-13T03:07:09.783513", "event": "action", "agent": "杰洛特", "action": "走向兰伯特，打个招呼，问问他在白果园做什么", "target": "水井"}
+{"ts": 30.8445463180542, "wall": "2026-05-13T03:07:10.924362", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的内容。", "target": "配方书"}
+{"ts": 32.846381187438965, "wall": "2026-05-13T03:07:12.926043", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 35.70656752586365, "wall": "2026-05-13T03:07:15.786229", "event": "result", "agent": "杰洛特", "narrative": "杰洛特放下水桶，抹了把湿漉漉的胡须，朝广场另一侧走去。兰伯特正靠在一棵歪脖子树上，百无聊赖地削着一根树枝。\n\n“兰伯特。”杰洛特走近，用一贯平淡的语气打了个招呼，“没想到在白果园碰上你。凯尔莫罕待腻了，还是又接了哪儿的烂摊子？”\n\n兰伯特抬头，嘴角扯出一个似笑非笑的弧度：“哈，杰洛特，你还是老样子，", "deltas": {"social": 8, "mood": 5, "energy": -2}}
+{"ts": 36.19494676589966, "wall": "2026-05-13T03:07:16.274757", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的内容。", "target": "配方书"}
+{"ts": 38.196061849594116, "wall": "2026-05-13T03:07:18.275723", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 40.753251791000366, "wall": "2026-05-13T03:07:20.833071", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的内容。", "target": "配方书"}
+{"ts": 42.75479221343994, "wall": "2026-05-13T03:07:22.834453", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 45.75294017791748, "wall": "2026-05-13T03:07:25.832743", "event": "action", "agent": "叶奈法", "action": "走到(4,2)的配方书前，蹲下身翻开那本厚重的皮制笔记本，仔细浏览寻找关于稀有魔法材料的记载，特别是与高等吸血鬼或古代遗迹相关的材料。", "target": "配方书"}
+{"ts": 47.754077434539795, "wall": "2026-05-13T03:07:27.833739", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 49.84227967262268, "wall": "2026-05-13T03:07:29.922096", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找与稀有魔法材料相关的记载。", "target": "配方书"}
+{"ts": 53.84410309791565, "wall": "2026-05-13T03:07:33.923765", "event": "result", "agent": "叶奈法", "narrative": "叶奈法蹲下身，手指拂过配方书泛黄的书页。书页间夹着一张干枯的鼠尾草书签，标记着关于‘曼德拉草根提取’的章节。她专注地阅读着，偶尔抬眼扫过草药架上的瓶罐，似乎在比对配方与实物。旁边的字条随风微微掀动一角，上面潦草的字迹隐约可见‘……需在满月之夜研磨……’。", "deltas": {"energy": -5.0, "fun": 3.0}}
+{"ts": 56.36835312843323, "wall": "2026-05-13T03:07:36.448158", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的内容。", "target": "配方书"}
+{"ts": 58.36895704269409, "wall": "2026-05-13T03:07:38.448618", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 60.917978286743164, "wall": "2026-05-13T03:07:40.997824", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的内容。", "target": "配方书"}
+{"ts": 62.68052935600281, "wall": "2026-05-13T03:07:42.760312", "event": "action", "agent": "杰洛特", "action": "走向兰伯特，拍拍他的肩膀，示意他去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 62.920252323150635, "wall": "2026-05-13T03:07:42.999913", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 64.6819953918457, "wall": "2026-05-13T03:07:44.761656", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 65.80976796150208, "wall": "2026-05-13T03:07:45.889586", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 67.27521419525146, "wall": "2026-05-13T03:07:47.355001", "event": "action", "agent": "杰洛特", "action": "走向兰伯特，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 67.81053566932678, "wall": "2026-05-13T03:07:47.890197", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 69.2757625579834, "wall": "2026-05-13T03:07:49.355424", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 70.23488450050354, "wall": "2026-05-13T03:07:50.314694", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于稀有魔法材料的记载，特别是与高等吸血鬼或古代遗迹相关的材料。", "target": "配方书"}
+{"ts": 71.80006098747253, "wall": "2026-05-13T03:07:51.879845", "event": "action", "agent": "杰洛特", "action": "走向兰伯特，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 72.23597741127014, "wall": "2026-05-13T03:07:52.315638", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 73.80155873298645, "wall": "2026-05-13T03:07:53.881220", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 74.6300299167633, "wall": "2026-05-13T03:07:54.709841", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 76.48376250267029, "wall": "2026-05-13T03:07:56.563580", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 76.63061237335205, "wall": "2026-05-13T03:07:56.710274", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 78.48472142219543, "wall": "2026-05-13T03:07:58.564382", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 78.56090259552002, "wall": "2026-05-13T03:07:58.640674", "event": "action", "agent": "丹德里恩", "action": "走到散桌(3,5)坐下，掏出鲁特琴开始弹唱一首新编的叙事诗", "target": "散桌"}
+{"ts": 79.4013123512268, "wall": "2026-05-13T03:07:59.481125", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，向她打招呼并询问她来草药小屋寻找什么材料", "target": "配方书"}
+{"ts": 80.51283764839172, "wall": "2026-05-13T03:08:00.592627", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝", "target": "水井"}
+{"ts": 80.56135082244873, "wall": "2026-05-13T03:08:00.641012", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 81.40234041213989, "wall": "2026-05-13T03:08:01.482002", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 82.51395225524902, "wall": "2026-05-13T03:08:02.593613", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 82.83035111427307, "wall": "2026-05-13T03:08:02.910155", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于稀有魔法材料的记载，特别是与高等吸血鬼或古代遗迹相关的材料。", "target": "配方书"}
+{"ts": 84.98072862625122, "wall": "2026-05-13T03:08:05.060518", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 86.31146907806396, "wall": "2026-05-13T03:08:06.391264", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌，对丹德里恩的交互说：嘿，朋友！介不介意我坐这儿？我正想找人聊聊新写的叙事诗。", "target": "散桌"}
+{"ts": 86.83288240432739, "wall": "2026-05-13T03:08:06.912544", "event": "result", "agent": "叶奈法", "narrative": "叶奈法蹲下身，翻开那本厚重的皮制配方书。书页在指尖沙沙作响，她快速浏览着目录——高等吸血鬼、古代遗迹、太阳石、月之尘……她的目光停留在“高等吸血鬼诱捕剂”的条目上，旁边用潦草的字迹写着：“需要结合月之尘与吸血鬼唾液，在满月下调制。”她皱了皱眉，又翻到古代遗迹相关的章节，上面记载着“传送门稳定剂”的配", "deltas": {"energy": -5, "mood": 5, "fun": 3}}
+{"ts": 86.98221611976624, "wall": "2026-05-13T03:08:07.061877", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 88.31225323677063, "wall": "2026-05-13T03:08:08.391914", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 88.32139253616333, "wall": "2026-05-13T03:08:08.401180", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝", "target": "水井"}
+{"ts": 88.53192472457886, "wall": "2026-05-13T03:08:08.611726", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 92.3228189945221, "wall": "2026-05-13T03:08:12.402480", "event": "result", "agent": "杰洛特", "narrative": "杰洛特走到水井边，将木桶沉入清凉的水中。他提起满满一桶水，仰头畅饮，冰凉甘甜的井水顺着喉咙流下，缓解了干渴。水花溅在脸上，让他精神一振。水井的石头在月光下泛着微光，仿佛也在享受这份宁静。", "deltas": {"thirst": -30.0, "energy": 5.0, "mood": 8.0}}
+{"ts": 92.53407526016235, "wall": "2026-05-13T03:08:12.613736", "event": "result", "agent": "叶奈法", "narrative": "叶奈法放下配方书，起身走到坩埚前。坩埚里墨绿色的液体正咕嘟咕嘟冒着泡，散发着苦涩的草药味。她小心地抬起坩埚的一角，抽出下面压着的那张泛黄的字条。字迹潦草而急促，像是匆忙间写下的备忘——上面记载着几种稀有材料的获取地点和替代方案，包括凯尔莫罕地下密室的远古精灵血、月之尘的提纯方法，以及一段关于‘共鸣水", "deltas": {"fun": 2.0, "mood": 3.0}}
+{"ts": 95.18178606033325, "wall": "2026-05-13T03:08:15.261577", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 96.75701594352722, "wall": "2026-05-13T03:08:16.836826", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于凯尔莫罕地下密室或稀有魔法材料的消息。", "target": "配方书"}
+{"ts": 97.18315243721008, "wall": "2026-05-13T03:08:17.262813", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 98.76016974449158, "wall": "2026-05-13T03:08:18.839831", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 99.2401819229126, "wall": "2026-05-13T03:08:19.319985", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 101.24137043952942, "wall": "2026-05-13T03:08:21.321032", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 102.63785099983215, "wall": "2026-05-13T03:08:22.717655", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于凯尔莫罕地下密室或稀有魔法材料的消息。", "target": "配方书"}
+{"ts": 104.11492085456848, "wall": "2026-05-13T03:08:24.194781", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 104.63909983634949, "wall": "2026-05-13T03:08:24.718761", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 105.17504286766052, "wall": "2026-05-13T03:08:25.254829", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴开始弹唱一首新编的叙事诗", "target": "散桌"}
+{"ts": 106.11591911315918, "wall": "2026-05-13T03:08:26.195580", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 107.17659950256348, "wall": "2026-05-13T03:08:27.256260", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 107.96195197105408, "wall": "2026-05-13T03:08:28.041757", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于凯尔莫罕地下密室或稀有魔法材料的消息。", "target": "配方书"}
+{"ts": 108.52062630653381, "wall": "2026-05-13T03:08:28.600417", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 109.96343445777893, "wall": "2026-05-13T03:08:30.043095", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 110.52202343940735, "wall": "2026-05-13T03:08:30.601684", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 112.3110044002533, "wall": "2026-05-13T03:08:32.390805", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的内容。", "target": "配方书"}
+{"ts": 114.31204414367676, "wall": "2026-05-13T03:08:34.391705", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 116.14740800857544, "wall": "2026-05-13T03:08:36.227199", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 116.26127910614014, "wall": "2026-05-13T03:08:36.341089", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于稀有魔法材料的记载，特别是与高等吸血鬼或古代遗迹相关的材料。", "target": "配方书"}
+{"ts": 118.14862489700317, "wall": "2026-05-13T03:08:38.228286", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 120.42378234863281, "wall": "2026-05-13T03:08:40.503640", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 122.26391220092773, "wall": "2026-05-13T03:08:42.343573", "event": "result", "agent": "叶奈法", "narrative": "叶奈法蹲下身，修长的手指拂过配方书泛黄的书页，发出沙沙的轻响。她的目光如鹰隼般扫过一行行潦草的配方与注解——从基础的白屈花煎剂到复杂的变形魔药，每一页都承载着无数实验的记忆。翻到后半部时，她的指尖停驻在一页边缘被反复摩挲过的羊皮纸上：\n\n「高等吸血鬼的血液样本——需在月蚀之夜采集，保存于铅衬水晶瓶中", "deltas": {"energy": -5, "mood": 5}}
+{"ts": 122.42549896240234, "wall": "2026-05-13T03:08:42.505160", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 124.40492820739746, "wall": "2026-05-13T03:08:44.484733", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 126.09253406524658, "wall": "2026-05-13T03:08:46.172357", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于凯尔莫罕地下密室或稀有魔法材料的消息", "target": "配方书"}
+{"ts": 126.29941773414612, "wall": "2026-05-13T03:08:46.379209", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴开始弹唱一首新编的叙事诗", "target": "散桌"}
+{"ts": 126.40602707862854, "wall": "2026-05-13T03:08:46.485688", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 128.0943205356598, "wall": "2026-05-13T03:08:48.173981", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 128.3010709285736, "wall": "2026-05-13T03:08:48.380732", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 128.81326985359192, "wall": "2026-05-13T03:08:48.893069", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 129.5186369419098, "wall": "2026-05-13T03:08:49.598443", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 130.81443572044373, "wall": "2026-05-13T03:08:50.894098", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 132.1871256828308, "wall": "2026-05-13T03:08:52.266917", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝", "target": "水井"}
+{"ts": 133.51973628997803, "wall": "2026-05-13T03:08:53.599397", "event": "result", "agent": "叶奈法", "narrative": "叶奈法放下配方书，转身走向冒着热气的炼金坩埚。她蹲下身，修长的手指探向坩埚底部，抽出那张被蒸汽浸润得微微卷曲的字条。字迹潦草而匆忙，墨迹有些洇开，但仍可辨认：\n\n『紧急备忘：\n1. 黑曜石粉尘——史凯利格沉没神殿，注意守护石像鬼。\n2. 高等吸血鬼血液——月蚀之夜，铅衬水晶瓶。\n3. 暗影追踪者药剂", "deltas": {}}
+{"ts": 136.1887083053589, "wall": "2026-05-13T03:08:56.268369", "event": "result", "agent": "杰洛特", "narrative": "杰洛特走向广场中央的水井，目光警惕地扫视四周——酒馆门口有熟悉的身影，但他暂时不想分心。他熟练地将木桶沉入井中，清澈的井水发出悦耳的声响。提起水桶，他仰头畅饮，冰凉甘甜的井水顺着喉咙流下，缓解了多日来的干渴。水井似乎因被使用而微微泛起涟漪，仿佛也在回应这份互动。", "deltas": {"thirst": -30.0, "energy": 5.0, "mood": 3.0}}
+{"ts": 136.90023803710938, "wall": "2026-05-13T03:08:56.980088", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于史凯利格沉没神殿或稀有魔法材料的消息。", "target": "配方书"}
+{"ts": 138.9014699459076, "wall": "2026-05-13T03:08:58.981131", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 138.97609663009644, "wall": "2026-05-13T03:08:59.055890", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 140.97751331329346, "wall": "2026-05-13T03:09:01.057175", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 142.22566533088684, "wall": "2026-05-13T03:09:02.305473", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于史凯利格沉没神殿或稀有魔法材料的消息。", "target": "配方书"}
+{"ts": 142.89216923713684, "wall": "2026-05-13T03:09:02.971965", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴开始弹唱一首新编的叙事诗", "target": "散桌"}
+{"ts": 143.03389358520508, "wall": "2026-05-13T03:09:03.113692", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 144.22704434394836, "wall": "2026-05-13T03:09:04.306706", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 144.8935432434082, "wall": "2026-05-13T03:09:04.973205", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 145.0351104736328, "wall": "2026-05-13T03:09:05.114772", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 147.1651554107666, "wall": "2026-05-13T03:09:07.244972", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于史凯利格沉没神殿或稀有魔法材料的消息。", "target": "配方书"}
+{"ts": 147.93961596488953, "wall": "2026-05-13T03:09:08.019440", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 149.16575694084167, "wall": "2026-05-13T03:09:09.245418", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 149.94110703468323, "wall": "2026-05-13T03:09:10.020768", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 151.19263815879822, "wall": "2026-05-13T03:09:11.272423", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝", "target": "水井"}
+{"ts": 151.54605889320374, "wall": "2026-05-13T03:09:11.625854", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于稀有魔法材料的记载，特别是与高等吸血鬼或古代遗迹相关的材料。", "target": "配方书"}
+{"ts": 151.67605924606323, "wall": "2026-05-13T03:09:11.755838", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌，对丹德里恩的交互说：嘿，朋友！介不介意我坐这儿？我正想找人聊聊新写的叙事诗。", "target": "散桌"}
+{"ts": 153.54704594612122, "wall": "2026-05-13T03:09:13.626707", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 153.67654514312744, "wall": "2026-05-13T03:09:13.756207", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 155.19612979888916, "wall": "2026-05-13T03:09:15.275791", "event": "result", "agent": "杰洛特", "narrative": "杰洛特警惕地扫视四周后，将木桶沉入井中。清澈的井水被提上来，他大口喝下——冰凉的液体瞬间缓解了干渴，精神也为之一振。井边的石头传来潮湿的凉意，仿佛这座老井也在默默回应他的到来。", "deltas": {"thirst": -25, "energy": 5, "mood": 3}}
+{"ts": 155.49966406822205, "wall": "2026-05-13T03:09:15.579463", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 156.91164588928223, "wall": "2026-05-13T03:09:16.991427", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴开始弹唱一首新编的叙事诗", "target": "散桌"}
+{"ts": 157.5008261203766, "wall": "2026-05-13T03:09:17.580488", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 157.80933547019958, "wall": "2026-05-13T03:09:17.889127", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 158.91233682632446, "wall": "2026-05-13T03:09:18.991998", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 159.81033635139465, "wall": "2026-05-13T03:09:19.889998", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 160.40701270103455, "wall": "2026-05-13T03:09:20.486814", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料的消息。", "target": "配方书"}
+{"ts": 162.40753602981567, "wall": "2026-05-13T03:09:22.487197", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 162.58852624893188, "wall": "2026-05-13T03:09:22.668313", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 164.40448641777039, "wall": "2026-05-13T03:09:24.484301", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于稀有魔法材料的记载，特别是与高等吸血鬼或古代遗迹相关的材料。", "target": "配方书"}
+{"ts": 164.5893576145172, "wall": "2026-05-13T03:09:24.669020", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 165.46830463409424, "wall": "2026-05-13T03:09:25.548092", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，对丹德里恩的交互说：嘿，朋友！介不介意我坐这儿？我正想找人聊聊新写的叙事诗。", "target": "散桌"}
+{"ts": 166.4053454399109, "wall": "2026-05-13T03:09:26.485007", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 167.4696409702301, "wall": "2026-05-13T03:09:27.549302", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 167.48119139671326, "wall": "2026-05-13T03:09:27.560994", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 169.25622868537903, "wall": "2026-05-13T03:09:29.336063", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料的消息。", "target": "配方书"}
+{"ts": 169.48193740844727, "wall": "2026-05-13T03:09:29.561598", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 169.70811891555786, "wall": "2026-05-13T03:09:29.787894", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴开始弹唱一首新编的叙事诗，同时朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！", "target": "散桌"}
+{"ts": 171.25762963294983, "wall": "2026-05-13T03:09:31.337291", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 172.32917261123657, "wall": "2026-05-13T03:09:32.408989", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 172.53548121452332, "wall": "2026-05-13T03:09:32.615281", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于稀有魔法材料的记载。", "target": "配方书"}
+{"ts": 174.32982230186462, "wall": "2026-05-13T03:09:34.409483", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 175.71137642860413, "wall": "2026-05-13T03:09:35.791038", "event": "result", "agent": "丹德里恩", "narrative": "丹德里恩大步流星走到靠窗的散桌（table_01）坐下，阳光正好斜照在桌面上。他放下鲁特琴，手指轻拨琴弦，一段欢快的前奏随即流淌而出——正是他昨晚在旅店灵感迸发新编的叙事诗，讲述一位红发女巫与白狼在雪山之巅的奇遇。\n\n唱到精彩处，他朝吧台方向扬了扬下巴，中气十足地喊道：“老板！老规矩——一碟烤得滋滋", "deltas": {"coins": -8, "hunger": 15, "thirst": 10, "social": 5, "fun": 10, "mood": 8, "energy": -5}}
+{"ts": 176.5376923084259, "wall": "2026-05-13T03:09:36.617353", "event": "result", "agent": "叶奈法", "narrative": "你蹲下身子，手指轻轻拂过配方书泛黄的书页。这本厚重的皮制笔记本记录着各种炼金配方，从基础的燕子魔药到复杂的暴雪药剂。你的目光停留在一页关于“高等白屈花萃取”的记载上——上面提到，要炼制出最纯净的曼德拉草根精华，必须先以月光浸润的白屈花粉作为基底。研钵里正好有白屈花粉，而草药架上似乎还挂着几株曼德拉草", "deltas": {"energy": -2, "fun": 1, "social": -1}}
+{"ts": 177.12589740753174, "wall": "2026-05-13T03:09:37.205681", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 179.1279947757721, "wall": "2026-05-13T03:09:39.207656", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 179.35039687156677, "wall": "2026-05-13T03:09:39.430222", "event": "action", "agent": "叶奈法", "action": "走到草药架(3,2)前，伸手取下标注着曼德拉草根的瓶子，仔细查看根须是否完整新鲜。", "target": "草药架"}
+{"ts": 183.3542459011078, "wall": "2026-05-13T03:09:43.433907", "event": "result", "agent": "叶奈法", "narrative": "你伸手取下那个标注着曼德拉草根的玻璃瓶，瓶身冰凉，透过磨砂玻璃隐约可见几根蜷曲的根须。你拧开木塞，一股泥土与辛辣的气息扑面而来——根须依然饱满，带着微微的弹性，是上好的材料。你满意地点了点头，将这瓶珍贵的原料轻轻放在研钵旁。现在，月光浸润的白屈花粉和新鲜的曼德拉草根都已备齐，下一步就是研磨与萃取。", "deltas": {"energy": -2.0, "mood": 3.0}}
+{"ts": 184.92460012435913, "wall": "2026-05-13T03:09:45.004391", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 185.0346221923828, "wall": "2026-05-13T03:09:45.114416", "event": "action", "agent": "叶奈法", "action": "走到研钵(3,3)前，将白屈花粉倒入研钵，开始研磨成更细腻的粉末，为后续萃取曼德拉草根精华做准备。", "target": "研钵"}
+{"ts": 186.9255394935608, "wall": "2026-05-13T03:09:47.005201", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 189.0370843410492, "wall": "2026-05-13T03:09:49.116745", "event": "result", "agent": "叶奈法", "narrative": "你端起研钵，将其中的白屈花粉缓缓倒入石臼中。石杵握在手中，传来温润的触感。你开始有节奏地研磨，石杵与石臼碰撞发出有规律的沙沙声。白屈花粉在你的力道下逐渐变得更加细腻，一股清苦的草药香气在空气中弥散开来。你的动作专注而平稳，仿佛在进行一场古老的仪式。几分钟后，你停下动作，看着研钵中那层如丝绒般细腻的淡", "deltas": {"energy": -5, "fun": 2, "mood": 3}}
+{"ts": 189.26795363426208, "wall": "2026-05-13T03:09:49.347740", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 191.2685284614563, "wall": "2026-05-13T03:09:51.348190", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 193.22134637832642, "wall": "2026-05-13T03:09:53.301141", "event": "action", "agent": "叶奈法", "action": "先走到炼金坩埚(5,3)前，查看那锅墨绿色液体的成分和状态；然后转向凯拉(8,3)，优雅地向她打招呼，询问她来草药小屋寻找什么材料，并试探她对稀有魔法材料是否有所了解。", "target": "炼金坩埚"}
+{"ts": 195.22280621528625, "wall": "2026-05-13T03:09:55.302467", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 195.56735801696777, "wall": "2026-05-13T03:09:55.647148", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 196.8186321258545, "wall": "2026-05-13T03:09:56.898441", "event": "action", "agent": "叶奈法", "action": "走到(4,2)的配方书前，蹲下身翻开那本厚重的皮制笔记本，寻找关于曼德拉草根萃取的具体步骤，同时留意是否有稀有魔法材料的记载。", "target": "配方书"}
+{"ts": 199.56897449493408, "wall": "2026-05-13T03:09:59.648635", "event": "result", "agent": "杰洛特", "narrative": "杰洛特走向兰伯特，拍了拍他的肩膀。兰伯特回头，咧嘴一笑：“终于想起请我喝一杯了？走，正渴着呢。”两人并肩走进酒馆，在吧台前坐下。杰洛特点了两杯麦酒和一份烤野猪肉。兰伯特一边大口喝酒，一边抱怨最近的委托有多烦人。几杯下肚，杰洛特感觉饥饿和口渴都缓解了不少，心情也轻松了些——虽然钱包轻了20克朗。", "deltas": {"hunger": -15, "thirst": -10, "social": 5, "energy": -5, "fun": 8, "mood": 3, "coins": -20}}
+{"ts": 204.82235503196716, "wall": "2026-05-13T03:10:04.902017", "event": "result", "agent": "叶奈法", "narrative": "你蹲下身，指尖轻轻抚过那本厚重皮制笔记本的封面——皮革已经因岁月而变得柔软温润，边缘泛黄的纸页透着一股陈旧的墨香和淡淡的草药味。你翻开书页，沙沙的翻纸声在静谧的小屋里格外清晰。\n\n你的目光停在了一页上，标题是用褪色的墨水写下的古语：“曼德拉草根——萃取与精炼”。下方画着精细的图解：根须需要切碎后浸泡", "deltas": {"energy": -3, "mood": 3}}
+{"ts": 205.17894911766052, "wall": "2026-05-13T03:10:05.258731", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝", "target": "水井"}
+{"ts": 206.5317850112915, "wall": "2026-05-13T03:10:06.611568", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后继续弹唱，并朝卓尔坦的方向点头致意。", "target": "散桌"}
+{"ts": 208.51769876480103, "wall": "2026-05-13T03:10:08.597524", "event": "action", "agent": "叶奈法", "action": "继续翻阅配方书，找到关于月影兰的那一页，仔细阅读所有记载，包括采集方法、用途以及可能出现的遗迹地点。", "target": "配方书"}
+{"ts": 208.53223252296448, "wall": "2026-05-13T03:10:08.611894", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 209.1808431148529, "wall": "2026-05-13T03:10:09.260504", "event": "result", "agent": "杰洛特", "narrative": "杰洛特走到广场中央的水井旁，熟练地将木桶系在绳上，摇入井中。清澈的井水在月色下泛着微光，他提起满满一桶，捧起冰凉的水大口喝下。井水甘甜解渴，仿佛也洗去了几分酒后的燥热与疲惫。他抹了抹嘴，感觉精神为之一振。", "deltas": {"thirst": -20.0, "energy": 3.0, "mood": 2.0, "coins": 0.0}}
+{"ts": 210.51919674873352, "wall": "2026-05-13T03:10:10.598858", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 212.13736748695374, "wall": "2026-05-13T03:10:12.217179", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 217.1805601119995, "wall": "2026-05-13T03:10:17.260341", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向再喊一声：老板，烤香肠和麦酒好了没？然后转向卓尔坦，笑着说：嘿，卓尔坦！过来坐，这首新曲子你觉得怎么样？", "target": "散桌"}
+{"ts": 219.18234133720398, "wall": "2026-05-13T03:10:19.262002", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 220.14144039154053, "wall": "2026-05-13T03:10:20.221101", "event": "result", "agent": "叶奈法", "narrative": "你转身走向那口冒着热气的炼金坩埚，小心翼翼地抬起它的一角。压在下面的是一张泛黄的羊皮纸，边缘被坩埚的热气熏得微微卷曲。你展开字条，上面的字迹潦草而急促，显然是匆忙写下的：\n\n\"杰洛特——\n\n紧急！北方边境的尼弗迦德侦察队正在逼近白果园。维瑟米尔已经带着Ciri往凯尔莫罕撤离了。我在老地方留了补给和一", "deltas": {"social": 0.5, "mood": 3.0, "energy": -0.5}}
+{"ts": 220.46132373809814, "wall": "2026-05-13T03:10:20.541124", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝", "target": "水井"}
+{"ts": 223.66103720664978, "wall": "2026-05-13T03:10:23.740846", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于月影兰或古老遗迹的消息。", "target": "配方书"}
+{"ts": 224.46370244026184, "wall": "2026-05-13T03:10:24.543364", "event": "result", "agent": "杰洛特", "narrative": "杰洛特走到广场中央的水井旁，将木桶系在绳上，摇入井中。冰凉清澈的井水被提上来，他捧起水大口喝下，甘甜解渴，也洗去了几分疲惫。井水让他精神一振，连腹中的饥饿感都缓解了一些。", "deltas": {"thirst": -40, "hunger": -5, "energy": 5, "mood": 3}}
+{"ts": 225.66292214393616, "wall": "2026-05-13T03:10:25.742584", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 226.26173996925354, "wall": "2026-05-13T03:10:26.341529", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝", "target": "水井"}
+{"ts": 228.26265335083008, "wall": "2026-05-13T03:10:28.342315", "event": "result", "agent": "杰洛特", "narrative": "杰洛特走到广场中央的水井旁，熟练地将木桶系在绳上，摇入井中。清澈的井水在月色下泛着微光，他提起满满一桶，捧起冰凉的水大口喝下。井水甘甜解渴，仿佛也洗去了几分酒后的燥热与疲惫。他抹了抹嘴，感觉精神为之一振。", "deltas": {"thirst": -35, "energy": 3, "mood": 2}}
+{"ts": 230.0713803768158, "wall": "2026-05-13T03:10:30.151197", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，同时拿出那张字条，问她是否见过类似的笔迹或知道关于尼弗迦德逼近白果园的消息。", "target": "配方书"}
+{"ts": 230.23650336265564, "wall": "2026-05-13T03:10:30.316276", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向再喊一声：老板，烤香肠和麦酒好了没？然后转向卓尔坦，笑着说：嘿，卓尔坦！过来坐，这首新曲子你觉得怎么样？", "target": "散桌"}
+{"ts": 230.92449831962585, "wall": "2026-05-13T03:10:31.004303", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 232.07242918014526, "wall": "2026-05-13T03:10:32.152090", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 232.23705744743347, "wall": "2026-05-13T03:10:32.316718", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 232.92576813697815, "wall": "2026-05-13T03:10:33.005430", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 235.2593834400177, "wall": "2026-05-13T03:10:35.339172", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 235.39837765693665, "wall": "2026-05-13T03:10:35.478156", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后继续弹唱新编的叙事诗，同时朝卓尔坦的方向点头致意。", "target": "散桌"}
+{"ts": 235.67479372024536, "wall": "2026-05-13T03:10:35.754598", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，将字条递给她看，神情严肃地低声说：‘凯拉，你看这个——尼弗迦德侦察队正在逼近白果园，杰洛特和Ciri已经往凯尔莫罕撤离了。我需要尽快赶去，但在这之前，你在这间草药小屋有没有发现什么稀有魔法材料的线索？特别是与古代遗迹或高等吸血鬼相关的？时间紧迫。’", "target": "配方书"}
+{"ts": 237.26155066490173, "wall": "2026-05-13T03:10:37.341212", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 237.3991026878357, "wall": "2026-05-13T03:10:37.478764", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 237.67581629753113, "wall": "2026-05-13T03:10:37.755477", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 239.8104214668274, "wall": "2026-05-13T03:10:39.890220", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 241.01648473739624, "wall": "2026-05-13T03:10:41.096301", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于月影兰或古老遗迹的消息。", "target": "配方书"}
+{"ts": 241.81190013885498, "wall": "2026-05-13T03:10:41.891561", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 242.26289558410645, "wall": "2026-05-13T03:10:42.342667", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴开始弹唱一首新编的叙事诗，同时朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！", "target": "散桌"}
+{"ts": 243.01784873008728, "wall": "2026-05-13T03:10:43.097509", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 246.16122889518738, "wall": "2026-05-13T03:10:46.241073", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于稀有魔法材料的记载，特别是与高等吸血鬼或古代遗迹相关的材料。", "target": "配方书"}
+{"ts": 246.67697763442993, "wall": "2026-05-13T03:10:46.756757", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝", "target": "水井"}
+{"ts": 248.16301035881042, "wall": "2026-05-13T03:10:48.242672", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 250.26534175872803, "wall": "2026-05-13T03:10:50.345003", "event": "result", "agent": "丹德里恩", "narrative": "丹德里恩迈着轻快的步伐走到靠窗的散桌旁，将鲁特琴搁在膝上。他清了清嗓子，手指拨动琴弦，一段欢快的前奏在酒馆里流淌开来。\n\n“哦——听我说，关于白狼与丁香的故事，那可不是你们听过的版本！”他一边唱一边朝吧台挤了挤眼。\n\n老板从吧台后探出头，嘟囔了一句：“又是新曲子？行吧，烤香肠和麦酒马上来！”\n\n琴声", "deltas": {"coins": -8.0, "hunger": 10.0, "thirst": 15.0, "social": 5.0, "energy": -5.0, "fun": 8.0, "mood": 5.0}}
+{"ts": 250.6797595024109, "wall": "2026-05-13T03:10:50.759421", "event": "result", "agent": "杰洛特", "narrative": "杰洛特警惕地扫视四周后，走向水井。他熟练地将木桶沉入清澈的井水中，提起一桶冰凉的水，大口畅饮。井水甘甜解渴，让他精神一振，但独饮的举动显得有些孤僻。", "deltas": {"thirst": -30.0, "energy": 5.0, "mood": 3.0, "social": -2.0}}
+{"ts": 251.41047763824463, "wall": "2026-05-13T03:10:51.490290", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于月影兰或古老遗迹的消息。", "target": "配方书"}
+{"ts": 253.03901028633118, "wall": "2026-05-13T03:10:53.118794", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 253.41189217567444, "wall": "2026-05-13T03:10:53.491554", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 255.04055166244507, "wall": "2026-05-13T03:10:55.120213", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 256.26574778556824, "wall": "2026-05-13T03:10:56.345541", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于稀有魔法材料的记载，特别是与高等吸血鬼或古代遗迹相关的材料。", "target": "配方书"}
+{"ts": 257.116263628006, "wall": "2026-05-13T03:10:57.196074", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 257.33354687690735, "wall": "2026-05-13T03:10:57.413342", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，烤香肠和麦酒好了没？然后转向卓尔坦，笑着说：嘿，卓尔坦！过来坐，这首新曲子你觉得怎么样？", "target": "散桌"}
+{"ts": 258.2667248249054, "wall": "2026-05-13T03:10:58.346386", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 259.11762714385986, "wall": "2026-05-13T03:10:59.197288", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 259.3348162174225, "wall": "2026-05-13T03:10:59.414478", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 261.11129665374756, "wall": "2026-05-13T03:11:01.191118", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容，然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料的消息。", "target": "配方书"}
+{"ts": 261.3363814353943, "wall": "2026-05-13T03:11:01.416175", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 263.11212396621704, "wall": "2026-05-13T03:11:03.191786", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 263.33709716796875, "wall": "2026-05-13T03:11:03.416759", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 266.12726187705994, "wall": "2026-05-13T03:11:06.207062", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 266.1776282787323, "wall": "2026-05-13T03:11:06.257396", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，烤香肠和麦酒好了没？然后转向卓尔坦，笑着说：嘿，卓尔坦！过来坐，这首新曲子你觉得怎么样？", "target": "散桌"}
+{"ts": 266.62820267677307, "wall": "2026-05-13T03:11:06.708028", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料的消息。", "target": "配方书"}
+{"ts": 268.1285548210144, "wall": "2026-05-13T03:11:08.208216", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 268.1790363788605, "wall": "2026-05-13T03:11:08.258697", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 268.62883043289185, "wall": "2026-05-13T03:11:08.708491", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 269.05847549438477, "wall": "2026-05-13T03:11:09.138287", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝", "target": "水井"}
+{"ts": 272.27332615852356, "wall": "2026-05-13T03:11:12.353148", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料的消息。", "target": "配方书"}
+{"ts": 273.06076979637146, "wall": "2026-05-13T03:11:13.140431", "event": "result", "agent": "杰洛特", "narrative": "杰洛特稳步走向广场中央的水井。他取下腰间挂着的木桶，熟练地沉入井中，提起一桶清澈冰凉的井水。他仰头大口喝下，甘甜的井水顺着喉咙流下，缓解了旅途的干渴。冰凉的触感也让他精神一振，心情略微好转。水井本身只是静静地矗立在那里，一如既往地提供着恩惠。", "deltas": {"thirst": -20.0, "hunger": 0.0, "mood": 2.0}}
+{"ts": 274.27488255500793, "wall": "2026-05-13T03:11:14.354544", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 274.7693762779236, "wall": "2026-05-13T03:11:14.849159", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁继续弹唱新编的叙事诗，同时朝吧台方向喊一声：老板，烤香肠和麦酒好了没？", "target": "散桌"}
+{"ts": 276.4733781814575, "wall": "2026-05-13T03:11:16.553169", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 276.77017402648926, "wall": "2026-05-13T03:11:16.849835", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 277.2890124320984, "wall": "2026-05-13T03:11:17.368808", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料的消息。", "target": "配方书"}
+{"ts": 278.4742169380188, "wall": "2026-05-13T03:11:18.553878", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 279.2899491786957, "wall": "2026-05-13T03:11:19.369611", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 279.3003761768341, "wall": "2026-05-13T03:11:19.380163", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后继续弹唱新编的叙事诗，同时朝卓尔坦的方向点头致意。", "target": "散桌"}
+{"ts": 280.8266112804413, "wall": "2026-05-13T03:11:20.906412", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 281.30260705947876, "wall": "2026-05-13T03:11:21.382269", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 282.8208577632904, "wall": "2026-05-13T03:11:22.900660", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料的消息。", "target": "配方书"}
+{"ts": 282.8274314403534, "wall": "2026-05-13T03:11:22.907092", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 284.8219459056854, "wall": "2026-05-13T03:11:24.901607", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 285.4685273170471, "wall": "2026-05-13T03:11:25.548335", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 287.04936957359314, "wall": "2026-05-13T03:11:27.129164", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 287.47006249427795, "wall": "2026-05-13T03:11:27.549724", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 288.5350127220154, "wall": "2026-05-13T03:11:28.614797", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁继续弹唱新编的叙事诗，同时朝吧台方向喊一声：老板，烤香肠和麦酒好了没？然后转向卓尔坦，笑着说：嘿，卓尔坦！过来坐，这首新曲子你觉得怎么样？", "target": "散桌"}
+{"ts": 289.0510277748108, "wall": "2026-05-13T03:11:29.130689", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 289.7823016643524, "wall": "2026-05-13T03:11:29.862097", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 290.53630089759827, "wall": "2026-05-13T03:11:30.615963", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 290.74027585983276, "wall": "2026-05-13T03:11:30.820081", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料的消息。", "target": "配方书"}
+{"ts": 291.78328013420105, "wall": "2026-05-13T03:11:31.862941", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 293.507954120636, "wall": "2026-05-13T03:11:33.587727", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后继续弹唱新编的叙事诗，同时朝卓尔坦的方向点头致意。", "target": "散桌"}
+{"ts": 295.5095236301422, "wall": "2026-05-13T03:11:35.589185", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 296.74235820770264, "wall": "2026-05-13T03:11:36.822020", "event": "result", "agent": "叶奈法", "narrative": "你优雅地转身，走向小屋门口附近那位穿着蓝色长裙、正低头端详着草药架上几株干枯植物的女术士凯拉。你抬手打了个招呼，她抬起头，紫色的眼眸闪烁着好奇的光芒。你带着一丝慵懒的语调问道：“凯拉，是什么风把你吹到托蜜拉的草药小屋来了？在找什么稀罕的材料吗？还是说，你听到了什么关于稀有魔法材料的消息？”\n\n凯拉微", "deltas": {"social": 3.0, "mood": 2.0, "energy": -1.0}}
+{"ts": 297.4623556137085, "wall": "2026-05-13T03:11:37.542169", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 298.5981249809265, "wall": "2026-05-13T03:11:38.677903", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴开始弹唱一首新编的叙事诗，同时朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！", "target": "散桌"}
+{"ts": 299.46377182006836, "wall": "2026-05-13T03:11:39.543433", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 299.57880663871765, "wall": "2026-05-13T03:11:39.658607", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 300.5991835594177, "wall": "2026-05-13T03:11:40.678845", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 300.65206360816956, "wall": "2026-05-13T03:11:40.731841", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝", "target": "水井"}
+{"ts": 301.57939767837524, "wall": "2026-05-13T03:11:41.659059", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 303.4231741428375, "wall": "2026-05-13T03:11:43.502963", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后继续弹唱新编的叙事诗，同时朝卓尔坦的方向点头致意。", "target": "散桌"}
+{"ts": 304.6545419692993, "wall": "2026-05-13T03:11:44.734203", "event": "result", "agent": "杰洛特", "narrative": "杰洛特走到水井边，放下木桶。绳索吱呀作响，木桶沉入清凉的水中。他提起满满一桶水，捧起清澈的井水大口喝下。冰凉的液体滑过喉咙，解了燃眉之渴，也让紧绷的神经稍稍放松。水井似乎也因为被使用而心情好了些。", "deltas": {"thirst": -30.0, "hunger": -5.0, "energy": 5.0, "mood": 3.0}}
+{"ts": 305.424489736557, "wall": "2026-05-13T03:11:45.504150", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 306.32087111473083, "wall": "2026-05-13T03:11:46.400681", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。然后回到凯拉(8,3)身边，将字条内容与她分享，询问她是否知道更多关于辛特拉废墟月之尘的细节，以及她是否愿意一同前往探索。", "target": "配方书"}
+{"ts": 306.9617803096771, "wall": "2026-05-13T03:11:47.041575", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 308.217675447464, "wall": "2026-05-13T03:11:48.297453", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴开始弹唱一首新编的叙事诗，同时朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！", "target": "散桌"}
+{"ts": 308.32326674461365, "wall": "2026-05-13T03:11:48.402928", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 308.96300888061523, "wall": "2026-05-13T03:11:49.042670", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 309.6816532611847, "wall": "2026-05-13T03:11:49.761473", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 310.21850085258484, "wall": "2026-05-13T03:11:50.298162", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 313.1579940319061, "wall": "2026-05-13T03:11:53.237789", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，准备等他回应后招呼他过来坐。", "target": "散桌"}
+{"ts": 314.28123116493225, "wall": "2026-05-13T03:11:54.361050", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 315.15946769714355, "wall": "2026-05-13T03:11:55.239129", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 315.70630717277527, "wall": "2026-05-13T03:11:55.785968", "event": "result", "agent": "叶奈法", "narrative": "叶奈法走到小屋角落的炼金坩埚旁，从坩埚下抽出那张被热气熏得微微卷边的字条。字迹潦草却有力，是凯拉·梅兹的笔迹——你一眼就认出来了。\n\n字条上写着：\n\n『叶，\n\n曼德拉草根我拿走了三株，别瞪我。作为交换，我在研钵里留了些新磨的白屈花粉——品质上等，够你煮三锅燕子魔药。\n\n另外，关于你上次问的“月之尘”", "deltas": {"social": 3, "mood": 2, "energy": -1}}
+{"ts": 316.28265166282654, "wall": "2026-05-13T03:11:56.362313", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 318.3516495227814, "wall": "2026-05-13T03:11:58.431450", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，准备等他回应后招呼他过来坐。", "target": "散桌"}
+{"ts": 318.96691727638245, "wall": "2026-05-13T03:11:59.046726", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 319.2139849662781, "wall": "2026-05-13T03:11:59.293784", "event": "action", "agent": "叶奈法", "action": "走向研钵(3,3)查看凯拉留下的白屈花粉品质，然后走向凯拉(8,3)，将字条递给她看，微笑道：‘凯拉，你的字条我看到了。月之尘矿脉的活体实验听起来很有趣——你愿意详细说说吗？或许我们可以合作。’", "target": "研钵"}
+{"ts": 320.35279750823975, "wall": "2026-05-13T03:12:00.432459", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 320.9676613807678, "wall": "2026-05-13T03:12:01.047323", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 321.2147297859192, "wall": "2026-05-13T03:12:01.294391", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 322.85910630226135, "wall": "2026-05-13T03:12:02.938892", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后继续弹唱新编的叙事诗，同时朝卓尔坦的方向点头致意。", "target": "散桌"}
+{"ts": 322.9828472137451, "wall": "2026-05-13T03:12:03.062636", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 323.9949007034302, "wall": "2026-05-13T03:12:04.074783", "event": "action", "agent": "叶奈法", "action": "走向研钵(3,3)查看凯拉留下的白屈花粉品质，然后走向凯拉(8,3)，将字条递给她看，微笑道：‘凯拉，你的字条我看到了。月之尘矿脉的活体实验听起来很有趣——你愿意详细说说吗？或许我们可以合作。’", "target": "研钵"}
+{"ts": 324.86083698272705, "wall": "2026-05-13T03:12:04.940498", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 324.98435068130493, "wall": "2026-05-13T03:12:05.064012", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 325.9963550567627, "wall": "2026-05-13T03:12:06.076016", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 328.01556038856506, "wall": "2026-05-13T03:12:08.095339", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后继续弹唱新编的叙事诗，同时朝卓尔坦的方向点头致意。", "target": "散桌"}
+{"ts": 330.0166962146759, "wall": "2026-05-13T03:12:10.096358", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 330.2206425666809, "wall": "2026-05-13T03:12:10.300440", "event": "action", "agent": "叶奈法", "action": "先走到研钵(3,3)前，查看凯拉留下的白屈花粉品质；然后走向凯拉(8,3)，优雅地转身面对她，微笑道：‘凯拉，你的字条我看到了。白屈花粉品质确实上等，多谢。关于月之尘矿脉和那个疯炼金术士的活体实验——你愿意详细说说吗？或许我们可以合作，我对稀有材料向来很有兴趣。’", "target": "研钵"}
+{"ts": 332.2233901023865, "wall": "2026-05-13T03:12:12.303051", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 332.9983448982239, "wall": "2026-05-13T03:12:13.078131", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后继续弹唱新编的叙事诗，同时朝卓尔坦的方向点头致意。", "target": "散桌"}
+{"ts": 333.61143827438354, "wall": "2026-05-13T03:12:13.691217", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝", "target": "水井"}
+{"ts": 334.99947237968445, "wall": "2026-05-13T03:12:15.079134", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 335.3310685157776, "wall": "2026-05-13T03:12:15.410892", "event": "action", "agent": "叶奈法", "action": "先走到(5,1)拿起坩埚下的字条快速扫一眼内容，然后走向凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料的消息。", "target": "配方书"}
+{"ts": 337.33248805999756, "wall": "2026-05-13T03:12:17.412150", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 337.6136028766632, "wall": "2026-05-13T03:12:17.693264", "event": "result", "agent": "杰洛特", "narrative": "杰洛特走到广场中央的水井旁，将木桶沉入清凉的水中。伴随着绳索的吱呀声，一桶清澈的井水被提了上来。他仰头畅饮，冰凉的液体滑过喉咙，瞬间缓解了干渴。井水似乎让他精神一振，但水井本身只是一个无生命的物件，除了水波微微晃动外，没有任何反应。", "deltas": {"thirst": -0.58, "energy": 2.0, "mood": 1.0}}
+{"ts": 337.911758184433, "wall": "2026-05-13T03:12:17.991555", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴开始弹唱一首新编的叙事诗，同时朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！", "target": "散桌"}
+{"ts": 338.7803168296814, "wall": "2026-05-13T03:12:18.860142", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 339.9144959449768, "wall": "2026-05-13T03:12:19.994157", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 340.16372299194336, "wall": "2026-05-13T03:12:20.243534", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 342.1649241447449, "wall": "2026-05-13T03:12:22.244586", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 342.93105602264404, "wall": "2026-05-13T03:12:23.010860", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 344.56720304489136, "wall": "2026-05-13T03:12:24.647034", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 344.93187975883484, "wall": "2026-05-13T03:12:25.011541", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 346.5685694217682, "wall": "2026-05-13T03:12:26.648230", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 346.78620886802673, "wall": "2026-05-13T03:12:26.865870", "event": "result", "agent": "叶奈法", "narrative": "叶奈法轻巧地绕过堆满草药的木架，走到冒着热气的坩埚旁。她指尖拈起那张被压得有些发皱的字条，展开后，那潦草的字迹跃入眼帘——那是用炭笔匆匆写下的配方备忘录。\n\n字条上写着：\n“**基（基）础燕子魔药改良版（实验性）**\n注意：标准配方中白屈花用量过多，导致药性过烈，对猎魔人突变体质尚可，但对普通人而言", "deltas": {"energy": -2, "hunger": -1, "thirst": -1}}
+{"ts": 348.25407123565674, "wall": "2026-05-13T03:12:28.333849", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 348.65206384658813, "wall": "2026-05-13T03:12:28.731856", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于稀有魔法材料的记载，特别是与高等吸血鬼或古代遗迹相关的材料。", "target": "配方书"}
+{"ts": 349.2771909236908, "wall": "2026-05-13T03:12:29.356995", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 350.25605940818787, "wall": "2026-05-13T03:12:30.335721", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 351.2784175872803, "wall": "2026-05-13T03:12:31.358079", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 352.21355748176575, "wall": "2026-05-13T03:12:32.293349", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝", "target": "水井"}
+{"ts": 353.4753155708313, "wall": "2026-05-13T03:12:33.555114", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 354.65525555610657, "wall": "2026-05-13T03:12:34.734916", "event": "result", "agent": "叶奈法", "narrative": "叶奈法蹲下身，翻开脚边那本厚重的皮制配方书。书页因年岁而泛黄，边缘卷曲，散发出陈旧的羊皮纸和干草药混合的气味。她的手指沿着目录索引滑动，掠过‘基础魔药’、‘油膏制备’、‘解毒剂’等章节，最终停在了‘稀有魔法材料’的部分。\n\n她翻到对应页面，仔细阅读。书页上记载着几种与高等吸血鬼相关的材料：‘吸血鬼唾", "deltas": {"energy": -5, "fun": 2}}
+{"ts": 355.4761278629303, "wall": "2026-05-13T03:12:35.555789", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 356.2158842086792, "wall": "2026-05-13T03:12:36.295545", "event": "result", "agent": "杰洛特", "narrative": "杰洛特稳步走向广场中央的水井，取下腰间挂着的木桶，熟练地抛入井中。木桶撞击水面发出沉闷的回响，随后被提起，清澈冰凉的井水在阳光下闪烁。他仰头畅饮，冰凉的液体滑过干渴的喉咙，仿佛带走了旅途的疲惫。几滴水珠沿着他的胡须滴落，他放下木桶，长舒一口气，眼神中恢复了几分神采。", "deltas": {"thirst": -20.0, "energy": 2.0, "mood": 3.0}}
+{"ts": 357.81748938560486, "wall": "2026-05-13T03:12:37.897311", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料或古代遗迹的消息。", "target": "配方书"}
+{"ts": 358.0089557170868, "wall": "2026-05-13T03:12:38.088731", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 358.8007912635803, "wall": "2026-05-13T03:12:38.880584", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 359.8187184333801, "wall": "2026-05-13T03:12:39.898380", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 360.01040840148926, "wall": "2026-05-13T03:12:40.090070", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 360.8018093109131, "wall": "2026-05-13T03:12:40.881470", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 362.8226065635681, "wall": "2026-05-13T03:12:42.902419", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料或古代遗迹的消息。", "target": "配方书"}
+{"ts": 362.9537777900696, "wall": "2026-05-13T03:12:43.033572", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 363.2281241416931, "wall": "2026-05-13T03:12:43.307931", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 364.8237247467041, "wall": "2026-05-13T03:12:44.903386", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 364.9544348716736, "wall": "2026-05-13T03:12:45.034096", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 365.22938895225525, "wall": "2026-05-13T03:12:45.309050", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 367.4537272453308, "wall": "2026-05-13T03:12:47.533540", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料或古代遗迹的消息。", "target": "配方书"}
+{"ts": 367.81160616874695, "wall": "2026-05-13T03:12:47.891414", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 368.0680088996887, "wall": "2026-05-13T03:12:48.147809", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 369.45468640327454, "wall": "2026-05-13T03:12:49.534348", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 369.8125114440918, "wall": "2026-05-13T03:12:49.892173", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 370.0692775249481, "wall": "2026-05-13T03:12:50.148938", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 372.49788665771484, "wall": "2026-05-13T03:12:52.577692", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料或古代遗迹的消息。", "target": "配方书"}
+{"ts": 372.7607612609863, "wall": "2026-05-13T03:12:52.840546", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 373.7472231388092, "wall": "2026-05-13T03:12:53.827035", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝。", "target": "水井"}
+{"ts": 374.4984505176544, "wall": "2026-05-13T03:12:54.578111", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 374.761376619339, "wall": "2026-05-13T03:12:54.841038", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 377.1362748146057, "wall": "2026-05-13T03:12:57.216083", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于稀有魔法材料的记载，特别是与月影兰或古代遗迹相关的信息。", "target": "配方书"}
+{"ts": 377.7497453689575, "wall": "2026-05-13T03:12:57.829407", "event": "result", "agent": "杰洛特", "narrative": "杰洛特稳步走向广场中央的石砌水井，井水在正午阳光下泛着清冽的波光。他熟练地放下木桶，绳索摩擦井沿发出吱呀声。提起满满一桶水后，他俯身畅饮——冰凉甘甜的井水瞬间缓解了喉咙的干渴。水井似乎因为被使用而微微焕发出生机，石壁上古老的水痕仿佛加深了些许。", "deltas": {"thirst": -0.23708467817306517, "energy": -1.0, "mood": 2.0}}
+{"ts": 379.1372027397156, "wall": "2026-05-13T03:12:59.216864", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 380.38350224494934, "wall": "2026-05-13T03:13:00.463317", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于稀有魔法材料的记载，特别是与月影兰或古代遗迹相关的信息。", "target": "配方书"}
+{"ts": 380.72498965263367, "wall": "2026-05-13T03:13:00.804771", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 382.4399724006653, "wall": "2026-05-13T03:13:02.519762", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 382.72607040405273, "wall": "2026-05-13T03:13:02.805732", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 384.385324716568, "wall": "2026-05-13T03:13:04.464986", "event": "result", "agent": "叶奈法", "narrative": "叶奈法蹲下身，指尖轻轻拂过配方书泛黄的书页。她的目光在目录上快速扫过，最终停在一段关于'月影兰与古代精灵遗迹共鸣'的记载上。书页边缘画着一朵在月光下绽放的银色兰花，旁边用褪色的墨水标注着：'仅于月圆之夜，在精灵废墟的裂隙中生长。采集时需以银器割取，否则药效尽失。'她眉头微蹙，似乎在思考什么——这株草", "deltas": {"energy": -5, "fun": 2, "social": -2}}
+{"ts": 384.440762758255, "wall": "2026-05-13T03:13:04.520424", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 384.7430202960968, "wall": "2026-05-13T03:13:04.822814", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 386.74393606185913, "wall": "2026-05-13T03:13:06.823597", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 387.6106207370758, "wall": "2026-05-13T03:13:07.690399", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 388.4432113170624, "wall": "2026-05-13T03:13:08.523021", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于月影兰或古代精灵遗迹的消息。", "target": "配方书"}
+{"ts": 389.6115629673004, "wall": "2026-05-13T03:13:09.691224", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 389.82312512397766, "wall": "2026-05-13T03:13:09.902930", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 390.4446566104889, "wall": "2026-05-13T03:13:10.524318", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 391.60617661476135, "wall": "2026-05-13T03:13:11.685966", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 391.8247582912445, "wall": "2026-05-13T03:13:11.904419", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 394.36131525039673, "wall": "2026-05-13T03:13:14.441121", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条快速阅读内容，然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于月影兰或古代精灵遗迹的消息。", "target": "配方书"}
+{"ts": 394.44223713874817, "wall": "2026-05-13T03:13:14.522034", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 396.3623983860016, "wall": "2026-05-13T03:13:16.442060", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 396.44287943840027, "wall": "2026-05-13T03:13:16.522540", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 397.4938135147095, "wall": "2026-05-13T03:13:17.573595", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝。", "target": "水井"}
+{"ts": 397.60844564437866, "wall": "2026-05-13T03:13:17.688107", "event": "result", "agent": "丹德里恩", "narrative": "丹德里恩将鲁特琴轻放在洒满阳光的散桌上，琴弦反射着温暖的光。他朝吧台方向扬了扬手，声音带着吟游诗人特有的爽朗：“老板！一碟烤香肠，一杯麦酒！”然后他转向窗边那个矮壮的身影——卓尔坦·齐瓦，笑着招手，“嘿，老友！过来坐！我刚从诺维格瑞回来，脑子里蹦了段新曲子，你得听听这旋律是不是够劲儿！”卓尔坦放下嘴", "deltas": {"coins": -17.0, "hunger": 20.0, "thirst": 15.0, "social": 10.0, "energy": 0.0, "fun": 15.0, "mood": 7.0}}
+{"ts": 399.82568883895874, "wall": "2026-05-13T03:13:19.905500", "event": "action", "agent": "叶奈法", "action": "蹲下身，继续翻阅配方书，找到月影兰那一页的完整记载，仔细阅读采集方法、用途以及可能出现的遗迹地点，并记下关键信息。", "target": "配方书"}
+{"ts": 400.88706731796265, "wall": "2026-05-13T03:13:20.966900", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，拿起麦酒喝一大口，撕下一块烤香肠塞进嘴里，然后对卓尔坦笑着说：'老友，听听这段旋律——'接着轻拨鲁特琴弦，弹出一段轻快的曲调。", "target": "散桌"}
+{"ts": 401.49574637413025, "wall": "2026-05-13T03:13:21.575408", "event": "result", "agent": "杰洛特", "narrative": "杰洛特走向那口石砌水井，井水清澈见底。他熟练地将木桶沉入水中，提起一桶清凉的井水，仰头痛饮。冰凉甘甜的井水顺着喉咙流下，瞬间缓解了旅途的干渴，让他精神为之一振。水井只是安静地立在那里，仿佛对这位猎魔人的打扰毫不在意，但井水的深度似乎因被汲取而略微下降了一线。", "deltas": {"thirst": -30, "hunger": 2, "energy": 2, "mood": 3}}
+{"ts": 401.82675886154175, "wall": "2026-05-13T03:13:21.906420", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 402.8894946575165, "wall": "2026-05-13T03:13:22.969156", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 403.6942801475525, "wall": "2026-05-13T03:13:23.774076", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 404.7784073352814, "wall": "2026-05-13T03:13:24.858248", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料或古代遗迹的消息。", "target": "配方书"}
+{"ts": 405.69612765312195, "wall": "2026-05-13T03:13:25.775789", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 406.15951776504517, "wall": "2026-05-13T03:13:26.239288", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，拿起麦酒喝一大口，撕下一块烤香肠塞进嘴里，然后对卓尔坦笑着说：'老友，听听这段旋律——'接着轻拨鲁特琴弦，弹出一段轻快的曲调。", "target": "散桌"}
+{"ts": 406.7794187068939, "wall": "2026-05-13T03:13:26.859080", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 407.5110456943512, "wall": "2026-05-13T03:13:27.590846", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 408.1609673500061, "wall": "2026-05-13T03:13:28.240628", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 408.37913036346436, "wall": "2026-05-13T03:13:28.458940", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 409.5122015476227, "wall": "2026-05-13T03:13:29.591862", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 411.2507667541504, "wall": "2026-05-13T03:13:31.330545", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，拿起麦酒喝一大口，撕下一块烤香肠塞进嘴里，然后对卓尔坦笑着说：'老友，听听这段旋律——'接着轻拨鲁特琴弦，弹出一段轻快的曲调。", "target": "散桌"}
+{"ts": 411.7137143611908, "wall": "2026-05-13T03:13:31.793529", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 413.2522568702698, "wall": "2026-05-13T03:13:33.331918", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 413.7151429653168, "wall": "2026-05-13T03:13:33.794804", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 414.3831286430359, "wall": "2026-05-13T03:13:34.462790", "event": "result", "agent": "叶奈法", "narrative": "你走到坩埚前，小心地拿起压在底下的那张泛黄字条。墨迹有些褪色，但还能辨认出潦草的字迹：\n\n**“致后来的炼金术士——**\n\n*若你看到这张字条，说明坩埚里的魔药已经煮到了第三阶段。墨绿色的液体，对吧？别慌，那是对的。*\n\n*现在，你需要：*\n*1. 从草药架上取三片曼德拉草叶（左边第二个罐子，别拿错", "deltas": {"fun": 0.5, "mood": 0.5}}
+{"ts": 414.9197487831116, "wall": "2026-05-13T03:13:34.999540", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝", "target": "水井"}
+{"ts": 416.24694442749023, "wall": "2026-05-13T03:13:36.326734", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 418.0934839248657, "wall": "2026-05-13T03:13:38.173290", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料或古代遗迹的消息。", "target": "配方书"}
+{"ts": 418.24775528907776, "wall": "2026-05-13T03:13:38.327416", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 418.9223871231079, "wall": "2026-05-13T03:13:39.002048", "event": "result", "agent": "杰洛特", "narrative": "杰洛特走到水井边，放下木桶，绳索吱呀作响。清凉的井水被提上来，他俯身大口畅饮。甘冽的水流缓解了喉咙的干渴，也让因赶路而疲惫的身体恢复了些许活力。井水微甜，似乎还带着一丝若有若无的草药味——这口井的水质不错。水井的石沿因常年湿润生了一层薄薄的青苔，摸上去滑腻而凉爽。", "deltas": {"thirst": -40.0, "hunger": -5.0, "energy": 5.0, "mood": 3.0}}
+{"ts": 420.09564900398254, "wall": "2026-05-13T03:13:40.175310", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 421.0610291957855, "wall": "2026-05-13T03:13:41.140820", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 422.1505811214447, "wall": "2026-05-13T03:13:42.230367", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 423.06167459487915, "wall": "2026-05-13T03:13:43.141336", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 423.22240805625916, "wall": "2026-05-13T03:13:43.302227", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料或古代遗迹的消息。", "target": "配方书"}
+{"ts": 424.15246963500977, "wall": "2026-05-13T03:13:44.232131", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 425.1129381656647, "wall": "2026-05-13T03:13:45.192733", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 425.22357535362244, "wall": "2026-05-13T03:13:45.303237", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 427.8567564487457, "wall": "2026-05-13T03:13:47.936554", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于稀有魔法材料的记载，特别是与月影兰或古代遗迹相关的信息。", "target": "配方书"}
+{"ts": 429.8585114479065, "wall": "2026-05-13T03:13:49.938173", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 429.9699659347534, "wall": "2026-05-13T03:13:50.049752", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西", "target": "水井"}
+{"ts": 431.1158859729767, "wall": "2026-05-13T03:13:51.195547", "event": "result", "agent": "丹德里恩", "narrative": "丹德里恩在靠窗的散桌坐下，阳光正好洒在木桌面上。他朝吧台喊了一声，老板应声开始准备。随后转向角落里的卓尔坦，笑着招手。卓尔坦正端着一杯酒，看到丹德里恩便咧嘴一笑，扛着他那把著名的剑走了过来，靴子踏在木地板上咚咚响。他重重坐下，椅子吱呀一声，拍了拍桌子说：“新曲子？可别又是唱那些漂亮姑娘的，上次那首让", "deltas": {"coins": -17, "hunger": 20, "thirst": 15, "social": 15, "mood": 10, "energy": -5}}
+{"ts": 431.97096610069275, "wall": "2026-05-13T03:13:52.050628", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 433.18952679634094, "wall": "2026-05-13T03:13:53.269354", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容；然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料或古代遗迹的消息。", "target": "配方书"}
+{"ts": 433.45079040527344, "wall": "2026-05-13T03:13:53.530569", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向再喊一声：老板，烤香肠和麦酒好了没？然后转向卓尔坦，笑着说：嘿，卓尔坦！过来坐，这首新曲子你觉得怎么样？", "target": "散桌"}
+{"ts": 434.2704074382782, "wall": "2026-05-13T03:13:54.350210", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 435.1909122467041, "wall": "2026-05-13T03:13:55.270573", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 435.45313453674316, "wall": "2026-05-13T03:13:55.532796", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 436.2719376087189, "wall": "2026-05-13T03:13:56.351598", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 436.9898273944855, "wall": "2026-05-13T03:13:57.069647", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于稀有魔法材料的记载，特别是与月影兰或古代精灵遗迹相关的信息。", "target": "配方书"}
+{"ts": 437.75332832336426, "wall": "2026-05-13T03:13:57.833106", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦，笑着说：嘿，老友，这首新曲子可不是唱漂亮姑娘的——是关于一只会说话的猪和一位被诅咒的骑士的故事！", "target": "散桌"}
+{"ts": 437.8864245414734, "wall": "2026-05-13T03:13:57.966213", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝。", "target": "水井"}
+{"ts": 439.7549874782562, "wall": "2026-05-13T03:13:59.834649", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 439.88758540153503, "wall": "2026-05-13T03:13:59.967247", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 440.99289441108704, "wall": "2026-05-13T03:14:01.072556", "event": "result", "agent": "叶奈法", "narrative": "叶奈法蹲下身，纤细的手指抚过配方书泛黄的书页。她翻到关于月影兰的章节，上面记载着这种只在满月下绽放的银蓝色花朵，是制作高等隐身魔药的关键材料。书中还提到，月影兰常生长在精灵遗迹周围，尤其是那些仍残留着魔法能量的废墟。另一页则记载着古代精灵的炼金术符号，与普通配方书中的标注截然不同。叶奈法皱起眉头——", "deltas": {"energy": -5, "fun": 5, "mood": 3}}
+{"ts": 442.28695130348206, "wall": "2026-05-13T03:14:02.366747", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 443.0780725479126, "wall": "2026-05-13T03:14:03.157860", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 444.2886018753052, "wall": "2026-05-13T03:14:04.368263", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 445.0114312171936, "wall": "2026-05-13T03:14:05.091350", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条仔细阅读上面的全部内容；然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于月影兰或古代精灵遗迹的消息。", "target": "配方书"}
+{"ts": 445.08019399642944, "wall": "2026-05-13T03:14:05.159855", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 445.5114908218384, "wall": "2026-05-13T03:14:05.591282", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝。", "target": "水井"}
+{"ts": 447.0132899284363, "wall": "2026-05-13T03:14:07.092951", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 448.1800310611725, "wall": "2026-05-13T03:14:08.259827", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 449.5129928588867, "wall": "2026-05-13T03:14:09.592654", "event": "result", "agent": "杰洛特", "narrative": "杰洛特快步走向广场中央的水井，他熟练地放下木桶，听着木桶撞击水面发出沉闷的声响。片刻后，他提起装满清冽井水的木桶，仰头畅饮。冰凉的井水顺着喉咙流下，瞬间驱散了喉咙的干渴，也让他在旅途中紧绷的神经稍稍放松。水井的井水似乎取之不尽，水位没有任何变化。", "deltas": {"thirst": -38.0, "energy": 3.0, "mood": 2.0}}
+{"ts": 450.18209290504456, "wall": "2026-05-13T03:14:10.261754", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 450.19025111198425, "wall": "2026-05-13T03:14:10.270084", "event": "action", "agent": "叶奈法", "action": "先走到(5,1)拿起坩埚下那张字条，仔细阅读上面的全部内容；然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于月影兰或古代精灵遗迹的消息。", "target": "配方书"}
+{"ts": 451.7608644962311, "wall": "2026-05-13T03:14:11.840659", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 452.19135427474976, "wall": "2026-05-13T03:14:12.271016", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 452.38255524635315, "wall": "2026-05-13T03:14:12.462341", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 453.7620966434479, "wall": "2026-05-13T03:14:13.841758", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 453.8186173439026, "wall": "2026-05-13T03:14:13.898417", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 455.53032541275024, "wall": "2026-05-13T03:14:15.610126", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 457.53174591064453, "wall": "2026-05-13T03:14:17.611407", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 458.3861086368561, "wall": "2026-05-13T03:14:18.465770", "event": "result", "agent": "丹德里恩", "narrative": "你朝吧台潇洒地打了个响指，点了一碟烤香肠和一杯麦酒——老板点头示意，很快一个学徒端着托盘小跑过来，将冒着热气的香肠和泛起细腻泡沫的麦酒搁在你面前。油脂在香肠表面滋滋作响，麦酒的香气混着麦芽甜味飘散开来。你转头看见卓尔坦正坐在角落翻看一张羊皮纸地图，便扬起手朝他招呼。卓尔坦抬起头，胡子一翘，咧嘴笑着站", "deltas": {"coins": -7.0, "hunger": 15.0, "thirst": 10.0, "social": 5.0, "mood": 8.0}}
+{"ts": 459.53470277786255, "wall": "2026-05-13T03:14:19.614493", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 459.8227996826172, "wall": "2026-05-13T03:14:19.902461", "event": "result", "agent": "叶奈法", "narrative": "叶奈法放下配方书，走向冒着热气的炼金坩埚。她注意到坩埚下压着一张泛黄的字条，字迹潦草却透着某种急迫。她小心地将字条抽出，指尖感受到纸张的粗糙质感。\n\n字条上写着几行匆忙的笔记：\n\n\"月影兰的提取需要配合曼德拉草根——但顺序至关重要。先研磨曼德拉草根至粉末状，在满月的光辉下加入三滴精灵泪（或同等效果的", "deltas": {"energy": -1.5, "mood": 2.0}}
+{"ts": 461.30369806289673, "wall": "2026-05-13T03:14:21.383535", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，拿起麦酒喝一大口，撕下一块烤香肠塞进嘴里，然后对卓尔坦笑着说：'老友，听听这段旋律——'接着轻拨鲁特琴弦，弹出一段轻快的曲调。", "target": "散桌"}
+{"ts": 461.535475730896, "wall": "2026-05-13T03:14:21.615137", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 462.7240889072418, "wall": "2026-05-13T03:14:22.803869", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用井边的木桶打水喝", "target": "水井"}
+{"ts": 462.9425768852234, "wall": "2026-05-13T03:14:23.022376", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于月影兰或古代精灵遗迹的消息。", "target": "配方书"}
+{"ts": 463.305447101593, "wall": "2026-05-13T03:14:23.385108", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 464.94416189193726, "wall": "2026-05-13T03:14:25.023824", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 466.11875653266907, "wall": "2026-05-13T03:14:26.198575", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，拿起麦酒喝一大口，撕下一块烤香肠塞进嘴里，然后对卓尔坦笑着说：'老友，听听这段旋律——'接着轻拨鲁特琴弦，弹出一段轻快的曲调。", "target": "散桌"}
+{"ts": 466.7256062030792, "wall": "2026-05-13T03:14:26.805268", "event": "result", "agent": "杰洛特", "narrative": "杰洛特大步走向广场中央的水井，目光警惕地扫过四周的阴影。他熟练地解下井边的木桶，抛入井中，清澈的井水在阳光下泛起涟漪。提起木桶，他仰头畅饮，冰冷甘甜的水流顺着喉咙滑下，驱散了喉咙的干渴。他抹了把嘴，感觉精神一振，心情也因这简单的满足而好转了几分。水井似乎因被人使用而显得更有生气。", "deltas": {"thirst": -0.13206022548675536, "energy": -0.5, "mood": 2.0}}
+{"ts": 468.1204376220703, "wall": "2026-05-13T03:14:28.200099", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 468.35978174209595, "wall": "2026-05-13T03:14:28.439599", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容；然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于月影兰或古代精灵遗迹的消息。", "target": "配方书"}
+{"ts": 468.68313479423523, "wall": "2026-05-13T03:14:28.762922", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 470.3606517314911, "wall": "2026-05-13T03:14:30.440313", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 470.684445142746, "wall": "2026-05-13T03:14:30.764107", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 471.11973690986633, "wall": "2026-05-13T03:14:31.199533", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，拿起麦酒喝一大口，撕下一块烤香肠塞进嘴里，然后对卓尔坦笑着说：'老友，听听这段旋律——'接着轻拨鲁特琴弦，弹出一段轻快的曲调。", "target": "散桌"}
+{"ts": 472.87672328948975, "wall": "2026-05-13T03:14:32.956525", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 473.1221716403961, "wall": "2026-05-13T03:14:33.201832", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 474.718816280365, "wall": "2026-05-13T03:14:34.798622", "event": "action", "agent": "叶奈法", "action": "拿起坩埚下的字条，然后走向小屋门口附近的凯拉(8,3)，将字条递给她看，用略带玩味和试探的语气说：‘凯拉，看来你对这间小屋的收藏很感兴趣。这张字条上提到有人指责你偷了配方——而且提到了月影兰的提取方法。我正好在寻找一些稀有的魔法材料，也许我们可以坦诚地谈谈，看看彼此能交换什么信息。’", "target": "配方书"}
+{"ts": 474.8774764537811, "wall": "2026-05-13T03:14:34.957138", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 476.4047155380249, "wall": "2026-05-13T03:14:36.484490", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 476.7205195426941, "wall": "2026-05-13T03:14:36.800181", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 477.792409658432, "wall": "2026-05-13T03:14:37.872223", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 478.40575408935547, "wall": "2026-05-13T03:14:38.485415", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 479.1820673942566, "wall": "2026-05-13T03:14:39.261879", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 479.7938108444214, "wall": "2026-05-13T03:14:39.873472", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 480.70188760757446, "wall": "2026-05-13T03:14:40.781679", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝。", "target": "水井"}
+{"ts": 481.1830344200134, "wall": "2026-05-13T03:14:41.262695", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 481.2832429409027, "wall": "2026-05-13T03:14:41.363019", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 482.70613169670105, "wall": "2026-05-13T03:14:42.785935", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 483.2844076156616, "wall": "2026-05-13T03:14:43.364069", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 484.70390939712524, "wall": "2026-05-13T03:14:44.783571", "event": "result", "agent": "杰洛特", "narrative": "杰洛特稳步走向广场中央的水井。他取下腰间挂着的木桶，熟练地沉入井中，提起一桶清澈冰凉的井水。水珠顺着桶沿滴落，在阳光下闪烁。他仰头畅饮，冰凉的井水顺着喉咙流下，瞬间驱散了喉咙的干渴，也让他因赶路而疲惫的精神为之一振。几滴井水溅到脸上，带来一阵清爽。", "deltas": {"thirst": -30.0, "energy": 2.0, "mood": 3.0, "hunger": -1.0}}
+{"ts": 485.28597140312195, "wall": "2026-05-13T03:14:45.365745", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 488.7085225582123, "wall": "2026-05-13T03:14:48.788184", "event": "result", "agent": "叶奈法", "narrative": "你走到坩埚旁，弯腰拾起压在底下的那张字条。字迹潦草却有力，上面写着：\n\n“魔药配方——‘夜莺之息’\n材料：曼德拉草根（1份）、白屈花粉（1份）、新鲜泉水（1份）\n步骤：\n1. 将曼德拉草根切碎，放入研钵研磨成泥。\n2. 加入白屈花粉，继续研磨至均匀。\n3. 将混合物倒入坩埚，注入泉水，小火熬煮至墨绿", "deltas": {"energy": -0.5, "fun": 5.0}}
+{"ts": 489.2878096103668, "wall": "2026-05-13T03:14:49.367471", "event": "result", "agent": "丹德里恩", "narrative": "丹德里恩大步走到靠窗的散桌旁，鲁特琴在阳光下闪着温润的光。他把琴搁在桌上，朝吧台吆喝了一声，然后冲卓尔坦热情地招手。卓尔坦咧嘴一笑，端着酒杯挪了过来，重重坐下，椅子吱呀作响：“哈！又有新曲儿？上次那首《狼与菊》还没听够呢，不过你弹的嘛，总不会差。快，让俺听听！”", "deltas": {"coins": -12, "hunger": 15, "thirst": 10, "social": 5, "mood": 5}}
+{"ts": 490.0206115245819, "wall": "2026-05-13T03:14:50.100413", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于月影兰的记载，包括采集方法、用途以及可能出现的遗迹地点。", "target": "配方书"}
+{"ts": 490.05392479896545, "wall": "2026-05-13T03:14:50.133697", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 492.0549530982971, "wall": "2026-05-13T03:14:52.134615", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 492.30142879486084, "wall": "2026-05-13T03:14:52.381200", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦，笑着说：嘿，老友，这首新曲子可不是唱漂亮姑娘的——是关于一只会说话的猪和一位被诅咒的骑士的故事！", "target": "散桌"}
+{"ts": 494.3026762008667, "wall": "2026-05-13T03:14:54.382338", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 494.6066188812256, "wall": "2026-05-13T03:14:54.686454", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 496.0240812301636, "wall": "2026-05-13T03:14:56.103743", "event": "result", "agent": "叶奈法", "narrative": "你蹲下身，手指拂过那本厚重的皮制配方书泛黄的书页。书页间夹杂着干枯的草茎和褪色的墨水标注，你翻到“月影兰”条目——字体纤细而优雅，像是凯拉的笔迹。上面写着：\n\n**月影兰** (*Lunaria Nocturna*)  \n采集：仅在满月之夜于古战场或废弃神庙的废墟中盛开。茎叶带银色斑点，花朵呈淡紫色", "deltas": {"energy": -2, "fun": 3, "mood": 2}}
+{"ts": 496.60773062705994, "wall": "2026-05-13T03:14:56.687392", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 496.7460799217224, "wall": "2026-05-13T03:14:56.825863", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，烤香肠和麦酒好了没？然后转向卓尔坦，笑着说：嘿，老友，这首新曲子可不是唱漂亮姑娘的——是关于一只会说话的猪和一位被诅咒的骑士的故事！", "target": "散桌"}
+{"ts": 498.7470283508301, "wall": "2026-05-13T03:14:58.826689", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 499.0333812236786, "wall": "2026-05-13T03:14:59.113167", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 500.2166302204132, "wall": "2026-05-13T03:15:00.296472", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带玩味和试探的语气说：‘凯拉，看来你对这间小屋的收藏很感兴趣。我刚刚翻阅了那本配方书，发现了关于月影兰的记载——满月之夜在古战场或废弃神庙盛开，能制成夜视药剂。你对此了解多少？也许我们可以坦诚地交换一些信息，我对稀有魔法材料向来很有兴趣。’", "target": "配方书"}
+{"ts": 501.0341410636902, "wall": "2026-05-13T03:15:01.113803", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 501.7559359073639, "wall": "2026-05-13T03:15:01.835728", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦，笑着说：嘿，老友，这首新曲子可不是唱漂亮姑娘的——是关于一只会说话的猪和一位被诅咒的骑士的故事！接着轻拨鲁特琴弦，弹出一段欢快的前奏。", "target": "散桌"}
+{"ts": 502.21734714508057, "wall": "2026-05-13T03:15:02.297008", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 502.2265582084656, "wall": "2026-05-13T03:15:02.306328", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝", "target": "水井"}
+{"ts": 503.75699949264526, "wall": "2026-05-13T03:15:03.836661", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 505.95286083221436, "wall": "2026-05-13T03:15:06.032679", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带玩味和试探的语气说：‘凯拉，看来你对这间小屋的收藏很感兴趣。我刚刚翻阅了那本配方书，发现了关于月影兰的记载——满月之夜在古战场或废弃神庙盛开，能制成夜视药剂。你对此了解多少？也许我们可以坦诚地交换一些信息，我对稀有魔法材料向来很有兴趣。’", "target": "配方书"}
+{"ts": 506.228319644928, "wall": "2026-05-13T03:15:06.307980", "event": "result", "agent": "杰洛特", "narrative": "杰洛特走向广场中央的石砌水井，井水清澈见底。他熟练地将木桶沉入井中，提起一桶清凉的井水，仰头痛饮。冰凉的井水顺着喉咙流下，瞬间缓解了干渴，让他精神一振。水井似乎因为被打扰而微微波动，仿佛有些不悦。", "deltas": {"thirst": -30, "energy": 2, "mood": 5}}
+{"ts": 507.1729793548584, "wall": "2026-05-13T03:15:07.252761", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 507.9541118144989, "wall": "2026-05-13T03:15:08.033773", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 508.3649334907532, "wall": "2026-05-13T03:15:08.444714", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 509.17409324645996, "wall": "2026-05-13T03:15:09.253754", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 510.36661314964294, "wall": "2026-05-13T03:15:10.446274", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 512.503871679306, "wall": "2026-05-13T03:15:12.583660", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 512.5883872509003, "wall": "2026-05-13T03:15:12.668182", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容；然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带玩味和试探的语气说：‘凯拉，看来你对这间小屋的收藏很感兴趣。我刚刚翻阅了那本配方书，发现了关于月影兰的记载——满月之夜在古战场或废弃神庙盛开，能制成夜视药剂。这张字条上提到有人指责你偷了配方——你对此有什么想说的吗？也许我们可以坦诚地交换一些信息，我对稀有魔法材料向来很有兴趣。’", "target": "配方书"}
+{"ts": 513.2424256801605, "wall": "2026-05-13T03:15:13.322210", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 514.5044984817505, "wall": "2026-05-13T03:15:14.584160", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 514.5889937877655, "wall": "2026-05-13T03:15:14.668655", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 515.2433199882507, "wall": "2026-05-13T03:15:15.322981", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 517.2209134101868, "wall": "2026-05-13T03:15:17.300690", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 517.6243369579315, "wall": "2026-05-13T03:15:17.704148", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容；然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料或古代遗迹的消息。", "target": "配方书"}
+{"ts": 518.0671699047089, "wall": "2026-05-13T03:15:18.146964", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 519.222177028656, "wall": "2026-05-13T03:15:19.301838", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 519.6250472068787, "wall": "2026-05-13T03:15:19.704708", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 520.0686228275299, "wall": "2026-05-13T03:15:20.148284", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 521.1101095676422, "wall": "2026-05-13T03:15:21.189916", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝。", "target": "水井"}
+{"ts": 521.5155832767487, "wall": "2026-05-13T03:15:21.595393", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 522.0310220718384, "wall": "2026-05-13T03:15:22.110888", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 523.1115913391113, "wall": "2026-05-13T03:15:23.191253", "event": "result", "agent": "杰洛特", "narrative": "杰洛特走到水井边，将木桶沉入清澈的井水中。提起时，冰凉的水珠在阳光下闪烁。他仰头畅饮，干渴的喉咙得到滋润，精神也为之一振。井水甘甜，让他恢复了体力。", "deltas": {"thirst": -38.17858363962176, "energy": 5}}
+{"ts": 524.0327587127686, "wall": "2026-05-13T03:15:24.112420", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 525.4140257835388, "wall": "2026-05-13T03:15:25.493817", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 527.3515295982361, "wall": "2026-05-13T03:15:27.431325", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 527.4151017665863, "wall": "2026-05-13T03:15:27.494764", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 527.5206649303436, "wall": "2026-05-13T03:15:27.600326", "event": "result", "agent": "叶奈法", "narrative": "叶奈法从坩埚下抽出那张泛黄的字条，指尖拂过上面潦草的字迹。字条上写着：\n\n『基础愈合魔药配方（试作）\n材料：白屈花粉（研碎）、曼德拉草根（切片）、纯净水。\n步骤：1. 将曼德拉草根放入坩埚，中火熬煮至液体呈墨绿色。\n2. 加入白屈花粉，顺时针搅拌七圈。\n3. 转小火，静置至微温。\n4. 倒入水晶瓶，", "deltas": {"energy": -1.0, "mood": 1.5}}
+{"ts": 529.3528101444244, "wall": "2026-05-13T03:15:29.432472", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 529.8100368976593, "wall": "2026-05-13T03:15:29.889834", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 531.4345936775208, "wall": "2026-05-13T03:15:31.514399", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于月影兰或古代精灵遗迹的消息。", "target": "配方书"}
+{"ts": 531.8110339641571, "wall": "2026-05-13T03:15:31.890695", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 532.1188023090363, "wall": "2026-05-13T03:15:32.198579", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 533.1890976428986, "wall": "2026-05-13T03:15:33.268902", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 533.435938835144, "wall": "2026-05-13T03:15:33.515600", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 534.1195244789124, "wall": "2026-05-13T03:15:34.199185", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 536.5447471141815, "wall": "2026-05-13T03:15:36.624572", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带玩味和试探的语气说：‘凯拉，看来你对这间小屋的收藏很感兴趣。我刚刚翻阅了那本配方书，发现了关于月影兰的记载——满月之夜在古战场或废弃神庙盛开，能制成夜视药剂。这张字条上提到有人指责你偷了配方——你对此有什么想说的吗？也许我们可以坦诚地交换一些信息，我对稀有魔法材料向来很有兴趣。’", "target": "配方书"}
+{"ts": 537.1848080158234, "wall": "2026-05-13T03:15:37.264583", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 538.5461013317108, "wall": "2026-05-13T03:15:38.625763", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 539.1857535839081, "wall": "2026-05-13T03:15:39.265415", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 539.1912336349487, "wall": "2026-05-13T03:15:39.270895", "event": "result", "agent": "杰洛特", "narrative": "杰洛特离开水井，大步走向广场另一侧的长椅，兰伯特正百无聊赖地坐在那里擦拭他的猎魔人银剑。杰洛特走近后拍了拍他的肩膀，兰伯特抬起头，嘴角扯出一个懒散的笑。\n\n“怎么，水井里的水喝够了？终于想起还有酒馆这种好地方了？”兰伯特收起剑，站起身，拍了拍裤腿上的尘土，“走吧，正好我也饿了。不过你请客，上次打牌你", "deltas": {"thirst": 0, "hunger": 0, "coins": 0, "social": 5, "mood": 3, "energy": -2}}
+{"ts": 540.2034449577332, "wall": "2026-05-13T03:15:40.283249", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 542.1006591320038, "wall": "2026-05-13T03:15:42.180435", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦，笑着说：嘿，老友，这首新曲子可不是唱漂亮姑娘的——是关于一只会说话的猪和一位被诅咒的骑士的故事！接着轻拨鲁特琴弦，弹出一段欢快的前奏。", "target": "散桌"}
+{"ts": 544.1013822555542, "wall": "2026-05-13T03:15:44.181044", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 544.2068235874176, "wall": "2026-05-13T03:15:44.286485", "event": "result", "agent": "叶奈法", "narrative": "叶奈法从坩埚下抽出那张泛黄的字条，指尖拂过上面潦草的字迹。字条上写着：\n\n『基础愈合魔药配方（试作）\n材料：白屈花粉（研碎）、曼德拉草根（切片）、纯净水。\n步骤：1. 将曼德拉草根放入坩埚，中火熬煮至液体呈墨绿色。\n2. 加入白屈花粉，顺时针搅拌七圈。\n3. 转小火，静置至微温。\n4. 倒入水晶瓶，", "deltas": {"mood": 2.0, "social": 1.0}}
+{"ts": 545.0428454875946, "wall": "2026-05-13T03:15:45.122638", "event": "action", "agent": "杰洛特", "action": "走向兰伯特，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 547.0445985794067, "wall": "2026-05-13T03:15:47.124261", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 547.2522795200348, "wall": "2026-05-13T03:15:47.332059", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 547.636726140976, "wall": "2026-05-13T03:15:47.716540", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条仔细阅读上面的全部内容；然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带玩味和试探的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于月影兰或古代精灵遗迹的消息。", "target": "配方书"}
+{"ts": 549.2550392150879, "wall": "2026-05-13T03:15:49.334700", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 549.6374118328094, "wall": "2026-05-13T03:15:49.717074", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 552.1127698421478, "wall": "2026-05-13T03:15:52.192579", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带玩味和试探的语气说：‘凯拉，看来你对这间小屋的收藏很感兴趣。我刚刚翻阅了那本配方书，发现了关于月影兰的记载——满月之夜在古战场或废弃神庙盛开，能制成夜视药剂。这张字条上提到有人指责你偷了配方——你对此有什么想说的吗？也许我们可以坦诚地交换一些信息，我对稀有魔法材料向来很有兴趣。’", "target": "配方书"}
+{"ts": 552.1793401241302, "wall": "2026-05-13T03:15:52.259108", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 552.8492546081543, "wall": "2026-05-13T03:15:52.929072", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝", "target": "水井"}
+{"ts": 554.1138813495636, "wall": "2026-05-13T03:15:54.193543", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 554.1806464195251, "wall": "2026-05-13T03:15:54.260307", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 554.849865436554, "wall": "2026-05-13T03:15:54.929527", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 556.6485533714294, "wall": "2026-05-13T03:15:56.728336", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 557.1504933834076, "wall": "2026-05-13T03:15:57.230299", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于月影兰的记载，包括采集方法、用途以及可能出现的遗迹地点。", "target": "配方书"}
+{"ts": 558.6491723060608, "wall": "2026-05-13T03:15:58.728834", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 559.151960849762, "wall": "2026-05-13T03:15:59.231622", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 560.5312812328339, "wall": "2026-05-13T03:16:00.611118", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条，仔细阅读上面的全部内容。", "target": "配方书"}
+{"ts": 561.6568374633789, "wall": "2026-05-13T03:16:01.736621", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 563.6590206623077, "wall": "2026-05-13T03:16:03.738682", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 565.8465323448181, "wall": "2026-05-13T03:16:05.926312", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 566.5336647033691, "wall": "2026-05-13T03:16:06.613325", "event": "result", "agent": "叶奈法", "narrative": "你走到冒着热气的坩埚前，弯腰抽出压在底下的那张字条。纸页因水汽而微微发潮，字迹潦草却有力——是某位炼金术士匆忙留下的笔记。上面写着：\n\n『白屈花与曼德拉草根，研磨成粉后按3:1混合，投入沸腾的硨磲水。待液体转为琥珀色，加入一滴夜莺的眼泪。切记：搅拌方向必须逆时针，否则药性会逆转成剧毒。』\n\n下面还有", "deltas": {"energy": -2.0, "fun": 3.0, "mood": 2.0}}
+{"ts": 567.8484737873077, "wall": "2026-05-13T03:16:07.928135", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 570.2595415115356, "wall": "2026-05-13T03:16:10.339343", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于月影兰或其他稀有魔法材料的记载，特别是与古代遗迹或高等吸血鬼相关的信息。", "target": "配方书"}
+{"ts": 570.8443176746368, "wall": "2026-05-13T03:16:10.924091", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 571.6328988075256, "wall": "2026-05-13T03:16:11.712711", "event": "action", "agent": "杰洛特", "action": "走向水井(7,6)，用木桶打水喝。", "target": "水井"}
+{"ts": 572.2611789703369, "wall": "2026-05-13T03:16:12.340841", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 572.8449096679688, "wall": "2026-05-13T03:16:12.924571", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 575.4684591293335, "wall": "2026-05-13T03:16:15.548276", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于月影兰或其他稀有魔法材料的记载，特别是与古代遗迹或高等吸血鬼相关的信息。", "target": "配方书"}
+{"ts": 575.6364378929138, "wall": "2026-05-13T03:16:15.716099", "event": "result", "agent": "杰洛特", "narrative": "杰洛特弯腰将木桶沉入水井，清凉的井水在午后的阳光下泛着幽蓝的光。他提起木桶，大口饮下——水流顺着下巴滴落，打湿了衣领。水井发出轻微的咕噜声，仿佛在抱怨被人打扰了宁静。兰伯特在不远处喊道：“喂，别喝太饱，酒馆的麦芽酒可比这个带劲多了！”杰洛特放下木桶，抹了把嘴，感到精神恢复了不少。", "deltas": {"thirst": -30, "energy": 5, "mood": 3}}
+{"ts": 576.1152746677399, "wall": "2026-05-13T03:16:16.195078", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 577.4705715179443, "wall": "2026-05-13T03:16:17.550233", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 577.934451341629, "wall": "2026-05-13T03:16:18.014231", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 578.1166830062866, "wall": "2026-05-13T03:16:18.196344", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 579.9356763362885, "wall": "2026-05-13T03:16:20.015338", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 579.9451599121094, "wall": "2026-05-13T03:16:20.025000", "event": "action", "agent": "叶奈法", "action": "走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于月影兰或古代精灵遗迹的消息。", "target": "配方书"}
+{"ts": 580.8071928024292, "wall": "2026-05-13T03:16:20.886987", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 581.9459233283997, "wall": "2026-05-13T03:16:22.025585", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 582.0201399326324, "wall": "2026-05-13T03:16:22.099927", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 582.8085386753082, "wall": "2026-05-13T03:16:22.888200", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 584.021586894989, "wall": "2026-05-13T03:16:24.101248", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 584.4925334453583, "wall": "2026-05-13T03:16:24.572358", "event": "action", "agent": "叶奈法", "action": "走到(5,1)拿起坩埚下那张字条，仔细阅读上面的全部内容；然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料或古代遗迹的消息。", "target": "配方书"}
+{"ts": 585.9703860282898, "wall": "2026-05-13T03:16:26.050182", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 585.9711573123932, "wall": "2026-05-13T03:16:26.050938", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 586.4941926002502, "wall": "2026-05-13T03:16:26.573854", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 587.9727108478546, "wall": "2026-05-13T03:16:28.052373", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 587.9731941223145, "wall": "2026-05-13T03:16:28.052856", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 588.9973652362823, "wall": "2026-05-13T03:16:29.077184", "event": "action", "agent": "叶奈法", "action": "走到(5,1)位置，拿起坩埚下那张字条仔细阅读上面的全部内容；然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带好奇的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于稀有魔法材料或古代遗迹的消息。", "target": "配方书"}
+{"ts": 590.5992388725281, "wall": "2026-05-13T03:16:30.679056", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 590.99937915802, "wall": "2026-05-13T03:16:31.079040", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 591.4561140537262, "wall": "2026-05-13T03:16:31.535903", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 592.6000635623932, "wall": "2026-05-13T03:16:32.679725", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 593.4569256305695, "wall": "2026-05-13T03:16:33.536587", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 593.6378219127655, "wall": "2026-05-13T03:16:33.717671", "event": "action", "agent": "叶奈法", "action": "走到(5,1)拿起坩埚下的字条，仔细阅读上面的全部内容；然后走向小屋门口附近的凯拉(8,3)，优雅地抬手打招呼，用略带玩味和试探的语气询问她来托蜜拉的草药小屋寻找什么材料，并试探她是否知道关于月影兰或古代精灵遗迹的消息。", "target": "配方书"}
+{"ts": 595.6391179561615, "wall": "2026-05-13T03:16:35.718779", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 596.2688794136047, "wall": "2026-05-13T03:16:36.348656", "event": "action", "agent": "丹德里恩", "action": "走到(3,5)的散桌坐下，掏出鲁特琴放在桌上，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 597.6975016593933, "wall": "2026-05-13T03:16:37.777285", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 598.2152254581451, "wall": "2026-05-13T03:16:38.295037", "event": "action", "agent": "叶奈法", "action": "蹲下身，翻开脚边那本厚重的皮制配方书，仔细浏览寻找关于稀有魔法材料的记载，特别是与月影兰或古代精灵遗迹相关的信息。", "target": "配方书"}
+{"ts": 598.2697885036469, "wall": "2026-05-13T03:16:38.349450", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 599.6988134384155, "wall": "2026-05-13T03:16:39.778474", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 601.1850028038025, "wall": "2026-05-13T03:16:41.264792", "event": "action", "agent": "丹德里恩", "action": "坐在散桌旁，朝吧台方向喊一声：老板，来一碟烤香肠和一杯麦酒！然后转向卓尔坦的方向，笑着招手说：嘿，卓尔坦！过来坐，我刚编了首新曲子，你可得听听给点意见！", "target": "散桌"}
+{"ts": 602.7201297283173, "wall": "2026-05-13T03:16:42.799931", "event": "action", "agent": "杰洛特", "action": "走向兰伯特(20,10)，拍拍他的肩膀，示意一起去酒馆喝一杯吃点东西。", "target": "水井"}
+{"ts": 604.7219977378845, "wall": "2026-05-13T03:16:44.801659", "event": "result", "agent": "杰洛特", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 604.7221059799194, "wall": "2026-05-13T03:16:44.801767", "event": "result", "agent": "叶奈法", "narrative": "unknown resolve type", "deltas": {}}
+{"ts": 604.722146987915, "wall": "2026-05-13T03:16:44.801808", "event": "result", "agent": "丹德里恩", "narrative": "unknown resolve type", "deltas": {}}
