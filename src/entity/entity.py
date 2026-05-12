@@ -13,7 +13,8 @@ class Entity:
     last_action_time: float = 0.0
 
     layers: dict = field(default_factory=dict)
-    _world: object = None  # weak ref to World, set during registration
+    describe: str = ""
+    _world: object = None
 
     def has(self, layer_name: str) -> bool:
         return layer_name in self.layers

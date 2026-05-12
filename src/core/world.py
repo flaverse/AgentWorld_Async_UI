@@ -50,6 +50,7 @@ class World:
                 name=ent_def["name"],
                 zone=ent_def["zone"],
                 pos=list(ent_def.get("pos", [0, 0])),
+                describe=ent_def.get("describe", ""),
             )
 
             if "visual" in ent_def:
@@ -165,7 +166,8 @@ class World:
         from agent.inbox import Inbox
         from agent.memory import AgentMemory
 
-        entity = Entity(id=agent_id, name=name, zone=zone, pos=pos)
+        entity = Entity(id=agent_id, name=name, zone=zone, pos=pos,
+                        describe=f"{name} (外部访客)")
         entity.layers["visual"] = VisualLayer(
             visible_radius=20,
             sprite=sprite,
