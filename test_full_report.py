@@ -135,7 +135,7 @@ async def main():
             await asyncio.sleep(1)
 
         pa = agent.get("interaction").private_attrs
-        stats = {"name": name, "actions": acts, "zone_changes": zc, "errors": errs,
+        stats = {"name": name, "agent": name, "actions": acts, "zone_changes": zc, "errors": errs,
                  "zone": agent.zone, "thirst": round(pa.get("thirst", 0), 1),
                  "coins": round(pa.get("coins", 0), 1), "mood": round(pa.get("mood", 0), 1),
                  "memories": [e.get("narrative", "")[:80] for e in al.memory.entries[-3:]]}
