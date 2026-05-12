@@ -216,6 +216,14 @@ class InteractionSystem:
 
         if agent.has("agent"):
             agent.get("agent").memory.record(narrative=result.narrative)
+
+        # NPC-to-NPC: target also gets the narrative in its memory
+        if result.target_id and result.target_id in world.entities:
+            target_entity = world.entities[result.target_id]
+            if target_entity.has("agent"):
+                target_entity.get("agent").memory.record(narrative=result.narrative)
+
+        if agent.has("agent"):
             if hasattr(agent.get("agent"), "knowledge") and agent.get("agent").knowledge:
                 target_name = world.entities.get(result.target_id, None)
                 target_name = target_name.name if target_name else result.target_id
