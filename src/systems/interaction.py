@@ -2,7 +2,7 @@ import json
 import asyncio
 import uuid
 from dataclasses import dataclass, field
-from layers.interaction import TargetType, ResolveType
+from layers.interaction import TargetType, ResolveType, ActionDef
 
 
 @dataclass
@@ -37,12 +37,70 @@ class InteractionSystem:
             if eid in all_entities:
                 record.can_interact = self.can_interact(agent, all_entities[eid])
 
+    def build_component(self, center, all_entities: dict, radius: int = 3) -> list[dict]:
+        """构建交互分量: 从 center 出发，空间 BFS 收集半径内所有实体。
+        
+        返回: [{entity_id, name, describe, private_attrs}, ...]
+        用于 Story/Projection 管线的 context 构建。
+        """
+        component = []
+        seen = {center.id}
+        
+        # ① 中心实体
+        comp = self._entity_to_component_entry(center)
+        if comp:
+            component.append(comp)
+        
+        # ② 半径 R 内的所有实体
+        for e in all_entities.values():
+            if e.id in seen or e.zone != center.zone:
+                continue
+            d = center.distance_to(e)
+            if d <= radius:
+                seen.add(e.id)
+                comp = self._entity_to_component_entry(e)
+                if comp:
+                    component.append(comp)
+        
+        return component
+    
+    def _entity_to_component_entry(self, entity) -> dict | None:
+        """将 Entity 转换为 component entry dict。"""
+        desc = getattr(entity, 'describe', None) or entity.name
+        attrs = {}
+        inter = entity.get("interaction")
+        if inter:
+            attrs = inter.private_attrs.copy()
+            # Add public info
+            if inter.public_attrs:
+                desc += f" [{inter.public_attrs}]"
+        
+        return {
+            "entity_id": entity.id,
+            "name": entity.name,
+            "describe": desc,
+            "private_attrs": attrs,
+            "is_agent": entity.has("agent") and entity.get("agent").autonomous,
+        }
+
     def submit(self, interaction_id: str, agent, target, action: str,
                world) -> None:
         layer = target.get("interaction")
-        act_def = layer.get_action(action)
+        act_def = layer.get_action(action) if layer else None
+        
+        # Free-text action support: if no predefined action, treat as llm-resolved
         if not act_def:
-            raise ValueError(f"Unknown action: {action}")
+            if layer:  # entity has interaction layer but action not in list
+                # Create a synthetic ActionDef for free-text actions
+                act_def = ActionDef(
+                    method=action,
+                    target_type=TargetType.PASSIVE,
+                    resolve=ResolveType.LLM,
+                    estimated_duration=10,
+                )
+            else:
+                raise ValueError(f"No interaction layer on {target.name}")
+                
         if not self.can_interact(agent, target):
             raise RuntimeError(f"{agent.name} too far from {target.name}")
 
