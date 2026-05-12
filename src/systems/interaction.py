@@ -91,13 +91,13 @@ class InteractionSystem:
         # Free-text action support: if no predefined action, treat as llm-resolved
         if not act_def:
             if layer:  # entity has interaction layer but action not in list
-                # Create a synthetic ActionDef for free-text actions
                 act_def = ActionDef(
                     method=action,
                     target_type=TargetType.PASSIVE,
                     resolve=ResolveType.LLM,
                     estimated_duration=10,
                 )
+                layer.actions[action] = act_def  # Store for _resolve_async lookup
             else:
                 raise ValueError(f"No interaction layer on {target.name}")
                 

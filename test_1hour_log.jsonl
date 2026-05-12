@@ -1,4 +1,0 @@
-{"ts": 0.02955937385559082, "wall": "2026-05-12T14:19:12.818749", "event": "test_start", "n_entities": 28, "n_zones": 3, "agents": ["geralt", "yennefer", "dandelion", "vesemir", "triss", "zoltan", "keira", "lambert"]}
-{"ts": 0.02967548370361328, "wall": "2026-05-12T14:19:12.818865", "event": "agent_begin", "agent": "杰洛特"}
-{"ts": 45.731717586517334, "wall": "2026-05-12T14:19:58.520908", "event": "action", "agent": "杰洛特", "action": "进入酒馆", "target": "酒馆入口", "resolve": "rule"}
-{"ts": 47.73511028289795, "wall": "2026-05-12T14:20:00.524301", "event": "result", "agent": "杰洛特", "narrative": "杰洛特推开酒馆门走了进去", "deltas": {}, "zone_change": true}
