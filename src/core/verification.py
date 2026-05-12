@@ -77,11 +77,21 @@ def check_attribute_bounds(effects: list, entities: dict) -> CheckPassed | Check
 def check_entity_existence(effects: list, entities: dict) -> CheckPassed | CheckFailure:
     for eff in effects:
         eid = eff.get("entity_id", "")
-        if eid and eid not in entities:
+        if not eid:
+            continue
+        if eid in entities:
+            continue
+        # Fallback: try to find by name
+        found = False
+        for entity in entities.values():
+            if getattr(entity, 'name', '') == eid:
+                found = True
+                break
+        if not found:
             return CheckFailure(
                 code="entity_existence",
                 message=f"effects 引用了不存在的实体: {eid}",
-                fix_hint="移除该 entity 的 effects 条目或确保 entity_id 正确",
+                fix_hint="移除该 entity 的 effects 条目或确保 entity_id 正确 (使用 id 而非显示名)",
             )
     return CheckPassed()
 

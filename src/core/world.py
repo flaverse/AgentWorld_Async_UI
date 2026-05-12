@@ -124,6 +124,7 @@ class World:
             d = center.distance_to(entity)
             if d <= radius and entity.has("visual") and entity.has("interaction"):
                 ambient.append({
+                    "entity_id": entity.id,
                     "name": entity.name,
                     "distance": d,
                     "visual": entity.get("visual").see(d),

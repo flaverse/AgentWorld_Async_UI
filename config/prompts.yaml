@@ -180,6 +180,7 @@ slots:
     template: |
       ## 周边实体 (同位置或邻格)
       {ambient_text}
+      (entity_id 必须使用括号内的 id)
 
   world_rules_resolve:
     provider: content

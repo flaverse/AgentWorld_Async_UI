@@ -66,12 +66,13 @@ class InteractionResolver:
             return ""
         lines = []
         for a in ambient:
+            eid = a.get("entity_id", "?")
             name = a.get("name", "?")
             visual = a.get("visual", {})
             look = visual.get("look", "")
             hint = a.get("private_hint", {})
             lines.append(
-                f"  - {name}(距离{a.get('distance','?')}): "
+                f"  - {name} (id={eid}) 距离{a.get('distance','?')}: "
                 f"视={look}, 状态={json.dumps(hint, ensure_ascii=False)}"
             )
         return "\n".join(lines)
