@@ -119,6 +119,24 @@ async def demo_loop(world, brain, systems, max_actions=5):
                 "hearing_text": sensory.to_prompt_hearing(),
             }
 
+            # P/Q/KL 三层分布
+            from core.kl_divergence import compute_kl
+            p = agent.p_distribution if agent.p_distribution else {}
+            q_drives = {k: round(float(v), 1) for k, v in drives.attrs.items()}
+            # Q distribution (current, temporary)
+            q = {
+                "pos": list(agent.pos), "zone": agent.zone,
+                "drives": q_drives,
+                "coins": round(float(agent.get("interaction").private_attrs.get("coins", 0))),
+                "interactable": [r.name for r in sensory.get_interactable()],
+                "visible": [r.name for r in sensory.get_visible_only()],
+            }
+            kl_text = compute_kl(p, q) if p else ""
+
+            context["p_interactable"] = ", ".join(p.get("interactable", [])) if p.get("interactable") else ""
+            context["p_visible"] = ", ".join(p.get("visible", [])) if p.get("visible") else ""
+            context["kl_text"] = kl_text
+
             print(f"\n⏱  {world.clock.time_str()} | {agent.name} ({agent.pos[0]},{agent.pos[1]})")
             inter = agent.get("interaction")
             if inter:
@@ -132,57 +150,60 @@ async def demo_loop(world, brain, systems, max_actions=5):
 
             decision = await brain.decide(context)
 
-            # Move: independent from action
-            move_to = decision.get("move_to")
-            if move_to and isinstance(move_to, list) and len(move_to) == 2:
-                from_pos = list(agent.pos)
-                move_time = agent.move_to(move_to)
-                agent.last_action_time = world.clock.now()
-                print(f"  🚶 移动到 ({move_to[0]},{move_to[1]})，耗时 {move_time} 分钟")
-                await world.emit_event({
-                    "event": "agent_move",
-                    "agent": agent.id, "agent_name": agent.name,
-                    "from": from_pos, "to": move_to,
-                    "duration_ms": int(move_time * 1000 / world.time_scale),
-                })
+            action_text = decision.get("action")
+            
+            if action_text and isinstance(action_text, str) and action_text.strip():
+                # Engine auto-parses: find target entity from action text + nearby entities
                 systems["sensory"].update(agent, world.entities, world)
                 systems["interaction"].update_sensory(agent, world.entities)
 
-            # Action: independent from move
-            action_name = decision.get("action")
-            if action_name:
-                # Re-sense after move: prevent stale data
-                systems["sensory"].update(agent, world.entities, world)
-                systems["interaction"].update_sensory(agent, world.entities)
-
-                # Find interactible entities at current position
                 target = systems["interaction"].find_entity_at(
-                    agent.zone, agent.pos, action_name, world.entities, exclude_id=agent.id
+                    agent.zone, agent.pos, action_text, world.entities, exclude_id=agent.id
                 )
+
                 if target:
-                    # Guard: re-check interaction is still possible (v3)
+                    # Auto-move to target if not in range
                     if not systems["interaction"].can_interact(agent, target):
-                        print(f"  ⚠️  {target.name} 已经不在交互范围（re-sense 检测）")
-                        agent.get("agent").memory.record(
-                            narrative=f"想找{target.name}的{action_name}，但对方已经不在附近了"
-                        )
-                    else:
-                        # Set target busy (v3: both busy during interaction)
+                        move_time = agent.move_to(list(target.pos))
+                        print(f"  🚶 → ({target.pos[0]},{target.pos[1]})", flush=True)
+                        systems["sensory"].update(agent, world.entities, world)
+                        systems["interaction"].update_sensory(agent, world.entities)
+
+                    # Re-check after move
+                    if systems["interaction"].can_interact(agent, target):
+                        # Set target busy (v3)
                         if target.has("agent") and target.get("agent").autonomous:
                             target.status = "busy"
 
                         story = decision.get("story", "")
                         iid = uuid.uuid4().hex[:8]
-                        systems["interaction"].submit(iid, agent, target, action_name, world, story=story)
+                        systems["interaction"].submit(iid, agent, target, action_text, world, story=story)
                         agent.last_action_time = world.clock.now()
                         action_count += 1
-                        print(f"  🎯 {action_name} → {target.name}")
+                        print(f"  🎯 → {target.name}", flush=True)
+                    else:
+                        agent.get("agent").memory.record(
+                            narrative=f"想找{target.name}但对方已不在附近"
+                        )
                 else:
-                    print(f"  ⚠️  附近无可交互实体匹配")
+                    # No specific target found — just a movement or rest action
+                    print(f"  🚶 {action_text[:40]}...", flush=True)
+                    await asyncio.sleep(3)  # Short rest for "look around" actions
+            else:
+                # action is null or empty — rest
+                print(f"  😴 歇会...", flush=True)
+                await asyncio.sleep(5)
 
-            # Rest: nothing to do
-            if not move_to and not action_name:
-                print(f"  😴 歇会...")
+        # Snapshot P distribution for next cycle
+        q_sensory = agent.get("agent").sensory
+        agent.p_distribution = {
+            "pos": list(agent.pos),
+            "zone": agent.zone,
+            "drives": {k: round(float(v), 1) for k, v in agent.get("agent").drives.attrs.items()},
+            "coins": round(float(agent.get("interaction").private_attrs.get("coins", 0))),
+            "interactable": [r.name for r in q_sensory.get_interactable()],
+            "visible": [r.name for r in q_sensory.get_visible_only()],
+        }
 
         if agent.status == "busy":
             remaining = agent.busy_until - world.clock.now()

@@ -54,4 +54,8 @@ class PromptAssembler:
             return bool(context.get("ambient_text", "").strip())
         if cond == "is_busy":
             return context.get("busy", False)
+        if cond == "has_p":
+            return bool(context.get("p_interactable", "").strip())
+        if cond == "has_kl":
+            return bool(context.get("kl_text", "").strip())
         return True

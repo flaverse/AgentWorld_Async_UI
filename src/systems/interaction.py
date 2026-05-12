@@ -85,23 +85,39 @@ class InteractionSystem:
 
     def find_entity_at(self, zone: str, pos: list[int], action: str,
                        all_entities: dict, exclude_id: str = "") -> object | None:
-        """引擎自动从坐标匹配交互目标。
-        排除自身 (exclude_id)。优先匹配有 interaction layer 的实体。
+        """引擎从 action 文本 + 坐标匹配交互目标。
+        优先文本匹配(名字在 action 中出现), 其次空间距离。
         """
-        best = None
-        best_dist = 999
+        candidates = []
         for e in all_entities.values():
             if e.zone != zone or not e.has("interaction"):
                 continue
-            if e.id == exclude_id:  # 排除自身
+            if e.id == exclude_id:
                 continue
             d = abs(pos[0] - e.pos[0]) + abs(pos[1] - e.pos[1])
-            if d < best_dist:
-                best_dist = d
-                best = e
-        if best and best_dist <= best.get("interaction").interaction_radius:
-            return best
-        return best if best_dist <= 3 else None
+            candidates.append((d, e))
+
+        if not candidates:
+            return None
+
+        # Sort by distance first
+        candidates.sort(key=lambda x: x[0])
+
+        # Text matching: if entity name or key words appear in action, prefer it
+        for d, e in candidates[:5]:  # check 5 nearest
+            if e.name in action:
+                return e
+            # Check key words from describe
+            desc = getattr(e, 'describe', '') or ''
+            for word in [e.name, *desc.split('。')[0].split(' ')]:
+                if len(word) >= 2 and word in action:
+                    return e
+
+        # Fallback: nearest entity within interaction radius
+        best = candidates[0]
+        if best[0] <= best[1].get("interaction").interaction_radius + 3:
+            return best[1]
+        return None
 
     def submit(self, interaction_id: str, agent, target, action: str,
                world, story: str = "") -> None:

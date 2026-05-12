@@ -14,6 +14,7 @@ class Entity:
 
     layers: dict = field(default_factory=dict)
     describe: str = ""
+    p_distribution: dict = field(default_factory=dict)
     _world: object = None
 
     def has(self, layer_name: str) -> bool:

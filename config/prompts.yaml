@@ -31,6 +31,8 @@ templates:
       - {name: time_info, provider: runtime}
       - {name: persona, provider: runtime}
       - {name: world_rules, provider: content}
+      - {name: p_distribution, provider: runtime, condition: "has_p"}
+      - {name: kl_divergence, provider: runtime, condition: "has_kl"}
       - {name: drive_state, provider: runtime}
       - {name: spatial_context, provider: topology}
       - {name: interactable_section, provider: topology}
@@ -108,6 +110,19 @@ slots:
       {drives_table}
       (高于60=需要关注, 高于80=急需满足)
 
+  p_distribution:
+    provider: runtime
+    template: |
+      ## P 分布 (上一步)
+      上一步周围有: {p_interactable}
+      视野中: {p_visible}
+
+  kl_divergence:
+    provider: runtime
+    template: |
+      ## KL 散度 (变化)
+      {kl_text}
+
   spatial_context:
     provider: topology
     template: "## 空间\n你在{zone_name}({zone_width}x{zone_height}) | 位置: ({pos_x}, {pos_y})"
@@ -139,14 +154,12 @@ slots:
     provider: content
     template: |
       ## 指引
-      你可以自由决定下一步行动。move_to 和 action 是两个独立决策:
-      - move_to + action: 走过去，到了后做这件事
-      - move_to 单独: 只是走走逛逛，到了再说
-      - action 单独: 对当前位置附近的实体做这件事
-      - 两者都 null: 歇一会，发呆，看看周围。这是完全合法的选择。
-      
-      如果 action 涉及和其他人的互动，在 story 字段中写一段简短叙事(50-100字)描述发生了什么。
-      故事应该自然、符合人物性格。story 可以为空(简单动作不需要)。
+      action 是你下一步想做的任何事。包含去哪、做什么、说什么。
+      引擎会自动理解你的意图并执行。
+      - "去吧台找矮人老板要一杯麦酒" → 引擎走到吧台，对吧台交互
+      - "去广场中间走走看看" → 引擎走到广场坐标
+      - "跟旁边的丹德里恩聊聊维瑟米尔的信" → 引擎找到丹德里恩并交互
+      - null或空 → 歇一会，什么都不做。这是完全合法的选择。
 
   output_format:
     provider: content
@@ -154,14 +167,11 @@ slots:
       ## 输出格式 (严格JSON)
       {
         "thinking": "简短推理",
-        "move_to": [x, y] 或 null,
-        "action": "做什么 (自由文本)" 或 null,
-        "story": "简短叙事 (50-100字, 可选)" 或 null
+        "action": "做什么 (自由文本，含位置和意图)" 或 null,
+        "story": "简短叙事 (50-100字, 涉及他人时)" 或 null
       }
-      - move_to: 想去哪个坐标。null=不动
-      - action: 想做什么。null=不做
-      - story: 交互的简短叙事。简单动作可留空
-      - 两者都 null = 合法选择: 歇会/发呆/观察
+      - action: 你的完整意图(去哪+做什么)。null=歇一会。引擎自己会找目标实体
+      - story: 简短叙事。自己处理简单事务时可留空
 
   caller_section:
     provider: runtime
@@ -324,7 +334,6 @@ output_schemas:
       type: object
       properties:
         thinking: {type: string}
-        move_to: {type: array, items: {type: integer}}
         action: {type: string}
         story: {type: string}
       required: [thinking]
