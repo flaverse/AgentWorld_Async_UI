@@ -187,7 +187,7 @@ async def main():
     for a in agents:
         if a.busy_result is not None:
             pending[a.name] = a
-    for _ in range(30):
+    for _ in range(90):  # 90s drain (8*114/16 ≈ 57s needed)
         if not pending: break
         for name, a in list(pending.items()):
             if a.busy_result is not None:
