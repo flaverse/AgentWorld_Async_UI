@@ -13,6 +13,7 @@ class ActionResult:
     ambient_effects: list = field(default_factory=list)
     narrative: str = ""
     public_observation: str = ""
+    memories: dict = field(default_factory=dict)  # {entity_id: first_person_text}
     duration: int = 0
     move_to_zone: str | None = None
     move_to_pos: list | None = None
@@ -215,13 +216,16 @@ class InteractionSystem:
                 world.entities[aid].apply_deltas(amb_eff.get("deltas", {}))
 
         if agent.has("agent"):
-            agent.get("agent").memory.record(narrative=result.narrative)
+            # Use LLM #4 first-person memory if available, otherwise fallback to narrative
+            mem_text = result.memories.get(agent.id, result.narrative) if result.memories else result.narrative
+            agent.get("agent").memory.record(narrative=mem_text)
 
-        # NPC-to-NPC: target also gets the narrative in its memory
+        # NPC-to-NPC: target also gets its first-person memory
         if result.target_id and result.target_id in world.entities:
             target_entity = world.entities[result.target_id]
             if target_entity.has("agent"):
-                target_entity.get("agent").memory.record(narrative=result.narrative)
+                mem_text = result.memories.get(result.target_id, result.narrative) if result.memories else result.narrative
+                target_entity.get("agent").memory.record(narrative=mem_text)
 
         if agent.has("agent"):
             if hasattr(agent.get("agent"), "knowledge") and agent.get("agent").knowledge:

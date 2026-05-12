@@ -129,6 +129,21 @@ class InteractionResolver:
         except Exception:
             return []
 
+    async def generate_memories(self, story: str, npc_list: str) -> dict[str, str]:
+        """LLM #4: Generate first-person memories for each NPC."""
+        context = {"story_text": story, "npc_list": npc_list}
+        prompt = self.assembler.assemble("memory_layer", context)
+        system = self.assembler.get_system_prompt("memory_layer")
+        raw = await self.llm.chat(system=system, messages=[{"role":"user","content":prompt}])
+        from agent.brain import extract_json
+        try:
+            data = json.loads(extract_json(raw))
+            memories = data.get("memories", [])
+            # Convert list to dict: {entity_id: text}
+            return {m["entity_id"]: m["text"] for m in memories if "entity_id" in m and "text" in m}
+        except Exception:
+            return {}
+
     def _format_component(self, component: list[dict]) -> str:
         lines = []
         for c in component:
