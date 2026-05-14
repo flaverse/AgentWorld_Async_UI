@@ -1,297 +1,202 @@
-import yaml
-import asyncio
-import uuid
-import os
-import sys
+#!/usr/bin/env python3
+"""AgentWorld Async — single entry point.
+
+  python main.py                    # API server + demo loop
+  python main.py --test             # 8-agent concurrent test (60s)
+  python main.py --test --runtime 180 --validate  # 3min + validation
+"""
+import sys, os, yaml, asyncio, json, time, logging, argparse
+from datetime import datetime
+from collections import defaultdict
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(base_dir, "src"))
 
 from core.world import World
 from agent.brain import Brain
+from agent.drives import DriveSystem
 from prompt.loader import PromptLoader
 from prompt.assembler import PromptAssembler
 from llm.client import LLMClient
-from interaction.resolver import InteractionResolver
 from systems.sensory import SensorySystem
-from systems.interaction import InteractionSystem
+from systems.interaction import InteractionSystem, check_observing
 from systems.decay import DecaySystem
-from api.server import start_api_server
+from loop import run_agent
 
 
-async def demo_loop(world, brain, systems, max_actions=5):
-    agents = [e for e in world.entities.values()
-              if e.get("agent") and e.get("agent").autonomous]
-    if not agents:
-        print("No autonomous agents found!")
-        return
-
-    agent = agents[0]
-    agent_layer = agent.get("agent")
-
-    print(f"Found agent: {agent.name}")
-    print(f"  Personality: {agent_layer.personality}")
-    print()
-    print("=" * 60)
-    print("  异步 Multi-Agent 自主世界 — Demo")
-    print("=" * 60)
-
-    action_count = 0
-    while action_count < max_actions:
-        agent_layer = agent.get("agent")
-        drives = agent_layer.drives
-
-        elapsed = world.clock.now() - agent.last_action_time
-        if elapsed < 0:
-            elapsed = 0
-
-        # Decay
-        systems["decay"].tick(agent, elapsed)
-
-        # Sense
-        systems["sensory"].update(agent, world.entities, world)
-        systems["interaction"].update_sensory(agent, world.entities)
-        world.prune_events()
-
-        # Check busy result
-        if agent.busy_result is not None:
-            result = agent.busy_result
-            agent.busy_result = None
-            systems["interaction"].apply_result(result, agent, world)
-
-            # Frontend event
-            await world.emit_event({
-                "event": "interaction_complete",
-                "agent": agent.id, "agent_name": agent.name,
-                "observation": result.narrative[:80],
-            })
-            if result.move_to_zone:
-                await world.emit_event({
-                    "event": "zone_change", "agent": agent.id,
-                    "zone": {"name": world.zones[result.move_to_zone]["name"],
-                             "id": result.move_to_zone},
-                })
-
-            print(f"\n⏱  {world.clock.time_str()} | {agent.name} ({agent.pos[0]},{agent.pos[1]})")
-            print(f"  📖 {result.narrative}")
-            if result.caller_deltas:
-                print(f"     → 状态变化: {result.caller_deltas}")
-            if result.ambient_effects:
-                print(f"     → 周边影响: {result.ambient_effects}")
-
-        # Decide if idle
-        if agent.status == "idle":
-            zone_data = world.get_zone_data(agent.zone)
-            sensory = agent_layer.sensory
-            memory = agent_layer.memory
-            inbox_msgs = agent_layer.inbox.drain()
-
-            # Build visible-only section from sensory
-            visible_text = ""
-            visible_only = sensory.get_visible_only()
-            if visible_only:
-                parts = []
-                for r in visible_only:
-                    parts.append(f"  id={r.entity_id} | {r.name} ({r.pos[0]},{r.pos[1]}) | dist={r.distance}")
-                visible_text = "\n".join(parts)
-
-            # Build messages section from inbox
-            messages_text = ""
-            if inbox_msgs:
-                messages_text = "\n".join(
-                    f"- {m.from_agent_name}: \"{m.content[:50]}\"" for m in inbox_msgs
-                )
-
-            context = {
-                "round": action_count + 1,
-                "name": agent.name,
-                "personality": agent_layer.personality,
-                "drives_table": drives.to_prompt_table(),
-                "zone_name": zone_data.get("name", ""),
-                "zone_width": zone_data.get("width", 0),
-                "zone_height": zone_data.get("height", 0),
-                "pos_x": agent.pos[0],
-                "pos_y": agent.pos[1],
-                "interactable_text": sensory.to_prompt_vision(),
-                "visible_text": visible_text,
-                "memory_text": memory.to_prompt_text(5),
-                "messages_text": messages_text,
-                "hearing_text": sensory.to_prompt_hearing(),
-            }
-
-            # P/Q/KL 三层分布
-            from core.kl_divergence import compute_kl
-            p = agent.p_distribution if agent.p_distribution else {}
-            q_drives = {k: round(float(v), 1) for k, v in drives.attrs.items()}
-            # Q distribution (current, temporary)
-            q = {
-                "pos": list(agent.pos), "zone": agent.zone,
-                "drives": q_drives,
-                "coins": round(float(agent.get("interaction").private_attrs.get("coins", 0))),
-                "interactable": [r.name for r in sensory.get_interactable()],
-                "visible": [r.name for r in sensory.get_visible_only()],
-            }
-            kl_text = compute_kl(p, q) if p else ""
-
-            context["kl_text"] = kl_text
-
-            print(f"\n⏱  {world.clock.time_str()} | {agent.name} ({agent.pos[0]},{agent.pos[1]})")
-            inter = agent.get("interaction")
-            if inter:
-                pa = inter.private_attrs
-                print(f"  💭 想下一步... (thirst={pa.get('thirst',0):.0f} coins={pa.get('coins',0)})")
-            # Frontend time event
-            await world.emit_event({
-                "event": "world_time",
-                "time": world.clock.time_str(),
-            })
-
-            decision = await brain.decide(context)
-
-            action_text = decision.get("action")
-            
-            if action_text and isinstance(action_text, str) and action_text.strip():
-                # Engine auto-parses: find target entity from action text + nearby entities
-                systems["sensory"].update(agent, world.entities, world)
-                systems["interaction"].update_sensory(agent, world.entities)
-
-                target = systems["interaction"].find_entity_at(
-                    agent.zone, agent.pos, action_text, world.entities, exclude_id=agent.id
-                )
-
-                if target:
-                    # Auto-move to target if not in range
-                    if not systems["interaction"].can_interact(agent, target):
-                        move_time = agent.move_to(list(target.pos))
-                        print(f"  🚶 → ({target.pos[0]},{target.pos[1]})", flush=True)
-                        systems["sensory"].update(agent, world.entities, world)
-                        systems["interaction"].update_sensory(agent, world.entities)
-
-                    # Re-check after move
-                    if systems["interaction"].can_interact(agent, target):
-                        # Set target busy (v3)
-                        if target.has("agent") and target.get("agent").autonomous:
-                            target.status = "busy"
-
-                        story = decision.get("story", "")
-                        iid = uuid.uuid4().hex[:8]
-                        systems["interaction"].submit(iid, agent, target, action_text, world, story=story)
-                        agent.last_action_time = world.clock.now()
-                        action_count += 1
-                        print(f"  🎯 → {target.name}", flush=True)
-                    else:
-                        agent.get("agent").memory.record(
-                            text=f"想找{target.name}但对方已不在附近"
-                        )
-                else:
-                    # No specific target found — just a movement or rest action
-                    print(f"  🚶 {action_text[:40]}...", flush=True)
-                    await asyncio.sleep(3)  # Short rest for "look around" actions
-            else:
-                # action is null or empty — rest
-                print(f"  😴 歇会...", flush=True)
-                await asyncio.sleep(5)
-
-        # Snapshot P distribution for next cycle
-        q_sensory = agent.get("agent").sensory
-        agent.p_distribution = {
-            "pos": list(agent.pos),
-            "zone": agent.zone,
-            "drives": {k: round(float(v), 1) for k, v in agent.get("agent").drives.attrs.items()},
-            "coins": round(float(agent.get("interaction").private_attrs.get("coins", 0))),
-            "interactable": [r.name for r in q_sensory.get_interactable()],
-            "visible": [r.name for r in q_sensory.get_visible_only()],
-        }
-
-        if agent.status == "busy":
-            remaining = agent.busy_until - world.clock.now()
-            wait = max(0.5, min(remaining / world.time_scale, 3.0))
-        else:
-            wait = 1.0
-        await asyncio.sleep(wait)
-
-    # Wait for final result
-    print("\n等待最后的裁定结果...")
-    await systems["interaction"].await_pending(timeout=15)
-    if agent.busy_result is not None:
-        result = agent.busy_result
-        agent.busy_result = None
-        systems["interaction"].apply_result(result, agent, world)
-        print(f"  📖 {result.narrative}")
-
-    # Final snapshot
-    inter = agent.get("interaction")
-    print(f"\n{'=' * 60}")
-    print(f"  最终状态 | {world.clock.time_str()} | {agent.name}")
-    print("=" * 60)
-    if inter:
-        pa = inter.private_attrs
-        print(f"  thirst={pa.get('thirst',0):.0f}  hunger={pa.get('hunger',0):.0f}  coins={pa.get('coins',0)}  energy={pa.get('energy',0):.0f}  fun={pa.get('fun',0):.0f}  mood={pa.get('mood',0):.0f}")
-    print()
-    print("记忆:")
-    for entry in agent_layer.memory.entries:
-        print(f"  {entry.get('narrative', '?')}")
+EXTRA_NPCS = [
+    {"id":"vesemir","name":"维瑟米尔","zone":"bar_zone","pos":[7,2],"personality":"老猎魔人","coins":200,"thirst":50,"social":30,"mood":55},
+    {"id":"triss","name":"特莉丝","zone":"square","pos":[35,15],"personality":"女术士","coins":300,"thirst":35,"social":25,"mood":50},
+    {"id":"zoltan","name":"卓尔坦","zone":"bar_zone","pos":[7,2],"personality":"矮人商人","coins":500,"thirst":65,"social":60,"mood":70},
+    {"id":"keira","name":"凯拉","zone":"herb_hut","pos":[8,3],"personality":"年轻女术士","coins":150,"thirst":30,"social":15,"mood":60},
+    {"id":"lambert","name":"兰伯特","zone":"square","pos":[20,10],"personality":"猎魔人","coins":100,"thirst":70,"social":15,"mood":40},
+]
 
 
-async def main():
-    # Load configs
+def validate_traces(traces: list) -> list[str]:
+    """Post-run consistency checks."""
+    issues = []
+    npc_names = {'杰洛特','兰伯特','凯拉','卓尔坦','叶奈法','特莉丝','维瑟米尔','丹德里恩'}
+    acted = [t for t in traces if t.get('action_text')]
+    for t in acted:
+        for dkey in ['result_caller_deltas', 'result_target_deltas']:
+            deltas = t.get(dkey, {})
+            for attr, val in deltas.items():
+                if isinstance(val, (int, float)) and attr != 'coins' and abs(val) > 30:
+                    issues.append(f"large delta: {t['agent']} {attr}={val}")
+    for t in traces:
+        drives = t.get('drives', {})
+        for attr, val in drives.items():
+            if isinstance(val, (int, float)) and val < 0:
+                issues.append(f"negative drive: {t['agent']} {attr}={val}")
+    npc_acts = [t for t in acted if t.get('target') in npc_names and t['agent'] in npc_names and t['agent']!=t['target']]
+    issues.append(f"total_actions={len(acted)} npc_npc={len(npc_acts)}")
+    return issues
+
+
+async def test_mode(args):
+    """Run 8-agent concurrent test with optional trace."""
     with open(os.path.join(base_dir, "config/world.yaml")) as f:
-        world_cfg = yaml.safe_load(f)
+        wc = yaml.safe_load(f)
     with open(os.path.join(base_dir, "config/llm.yaml")) as f:
-        llm_cfg = yaml.safe_load(f)
+        lc = yaml.safe_load(f)
 
     loader = PromptLoader(os.path.join(base_dir, "config/prompts.yaml"))
     assembler = PromptAssembler(loader)
-    llm = LLMClient(llm_cfg)
+    llm = LLMClient(lc)
     brain = Brain(llm, assembler)
-    resolver = InteractionResolver(llm, assembler)
 
-    sound_map = {
-        "饮用": "杯子碰吧台的清脆声",
-        "交谈": "低声的说话声",
-        "倚靠": "吧台轻微的吱呀声",
-        "捡起": "硬币落地的叮当声",
-    }
     systems = {
         "sensory": SensorySystem(),
-        "interaction": InteractionSystem(resolver, sound_map),
+        "interaction": InteractionSystem(llm, assembler),
         "decay": DecaySystem(),
     }
+    world = World(wc, systems)
 
-    world = World(world_cfg, systems)
+    for npc in EXTRA_NPCS:
+        world.register_external_agent(npc["id"], npc["name"], npc["zone"],
+                                       npc["pos"], personality=npc["personality"])
+        e = world.entities[npc["id"]]
+        e.get("interaction").private_attrs.update(
+            {k: v for k, v in npc.items()
+             if k in ("coins","hunger","thirst","social","energy","fun","mood")})
+        e.get("agent").drives = DriveSystem(
+            attrs=e.get("interaction").private_attrs,
+            decay_rates={"thirst":0.022,"hunger":0.018,"social":0.015,"energy":-0.01,"fun":0.015})
 
-    # Wire EventBus: multi-modal push broadcast
-    def on_entity_event(event, entity_id, zone, pos):
-        systems["sensory"].broadcast_speech(entity_id, zone, pos, world)
-    world.event_bus.on("entity.spoke_or_gestured", on_entity_event)
+    agent_ids = ["geralt","yennefer","dandelion","vesemir","triss","zoltan","keira","lambert"]
+    agents = [world.entities[a] for a in agent_ids]
 
-    # Wire frontend broadcast
-    from api.server import broadcast_to_frontend
-    world.set_event_callback(broadcast_to_frontend)
+    t_start = time.time()
+    all_traces: dict[str, list] = defaultdict(list)
 
-    # Start API server in a daemon thread
-    start_api_server(world, host="0.0.0.0", port=8000)
-    print("🌐 API server: http://0.0.0.0:8000")
-    print("   前端: http://0.0.0.0:8000")
-    print()
+    def make_tracer():
+        def fn(trace):
+            trace["ts"] = time.time() - t_start
+            trace["wall"] = datetime.now().isoformat()
+            trace["zone"] = agents[0].zone  # placeholder, traced agent will overwrite
+            all_traces[trace["agent"]].append(trace)
+        return fn
 
-    # Run demo loop as background task (keeps world alive)
-    async def safe_demo():
-        try:
-            await demo_loop(world, brain, systems, max_actions=20)
-        except Exception as e:
-            import traceback
-            print(f"[demo] crashed: {e}")
-            traceback.print_exc()
-        print("[demo] finished")
-    asyncio.create_task(safe_demo())
+    runtime = args.runtime
+    print(f"\n{'='*60}")
+    print(f"  AgentWorld Async — Test Mode")
+    print(f"  {len(agents)} agents | {runtime}s | Start: {datetime.now().strftime('%H:%M:%S')}")
+    print(f"{'='*60}\n")
 
-    # Keep server alive
-    print("按 Ctrl+C 停止...")
-    try:
-        await asyncio.Event().wait()
-    except KeyboardInterrupt:
-        print("\nShutting down...")
+    tasks = [run_agent(a, world, brain, assembler, systems, runtime,
+                       trace_fn=make_tracer())
+             for a in agents]
+    await asyncio.gather(*tasks)
+
+    elapsed = time.time() - t_start
+    merged = [t for traces in all_traces.values() for t in traces]
+    merged.sort(key=lambda t: t.get("ts", 0))
+
+    if args.output:
+        with open(args.output, "w") as f:
+            json.dump(merged, f, ensure_ascii=False, indent=2)
+
+    actions = [t for t in merged if t.get("action_text")]
+    results = [t for t in merged if t.get("result_narrative")]
+    print(f"  Complete: {len(merged)} traces, {len(actions)} actions, "
+          f"{len(results)} results, {elapsed:.0f}s")
+    for name in sorted(set(t.get("agent","") for t in merged)):
+        agent_acts = [t for t in actions if t["agent"] == name]
+        print(f"    {name:6s}: {len(agent_acts)} acts")
+    if args.output:
+        print(f"  Data: {args.output}")
+
+    if args.validate:
+        issues = validate_traces(merged)
+        real_issues = [i for i in issues if not i.startswith("total_actions")]
+        if real_issues:
+            print(f"\n  ⚠️  {len(real_issues)} issues:")
+            for i in real_issues:
+                print(f"    - {i}")
+        else:
+            print(f"  ✅ All validation checks passed.")
+        print(f"  {[i for i in issues if i.startswith('total_actions')][0]}")
+
+
+async def demo_mode():
+    """Single-agent demo loop (original main.py behavior)."""
+    with open(os.path.join(base_dir, "config/world.yaml")) as f:
+        wc = yaml.safe_load(f)
+    with open(os.path.join(base_dir, "config/llm.yaml")) as f:
+        lc = yaml.safe_load(f)
+
+    loader = PromptLoader(os.path.join(base_dir, "config/prompts.yaml"))
+    assembler = PromptAssembler(loader)
+    llm = LLMClient(lc)
+    brain = Brain(llm, assembler)
+
+    systems = {
+        "sensory": SensorySystem(),
+        "interaction": InteractionSystem(llm, assembler),
+        "decay": DecaySystem(),
+    }
+    world = World(wc, systems)
+
+    agents = [e for e in world.entities.values()
+              if e.get("agent") and e.get("agent").autonomous]
+    if not agents:
+        print("No autonomous agents found.")
+        return
+
+    agent = agents[0]
+    print(f"Agent: {agent.name} | personality: {agent.get('agent').personality}")
+    print(f"{'='*50}")
+
+    await run_agent(agent, world, brain, assembler, systems, runtime=30,
+                    trace_fn=lambda t: print(
+                        f"  [{agent.name}] → {t.get('target','?')} | "
+                        f"{t.get('action_text','?')[:80]}"))
+
+
+async def main():
+    parser = argparse.ArgumentParser(description="AgentWorld Async")
+    parser.add_argument("--test", action="store_true",
+                        help="Run 8-agent concurrent test")
+    parser.add_argument("--runtime", type=int, default=60,
+                        help="Test runtime in seconds (default: 60)")
+    parser.add_argument("--validate", action="store_true",
+                        help="Run validation checks after test")
+    parser.add_argument("--output", type=str, default="",
+                        help="Save trace JSON to file")
+    parser.add_argument("--debug", action="store_true",
+                        help="Show stderr (LLM parse errors etc)")
+    args = parser.parse_args()
+
+    if args.debug:
+        logging.basicConfig(level=logging.WARNING)
+
+    if args.test:
+        await test_mode(args)
+    else:
+        await demo_mode()
+
+    print("\nDone.")
 
 
 if __name__ == "__main__":
