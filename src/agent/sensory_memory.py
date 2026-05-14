@@ -41,42 +41,64 @@ class SensoryMemory:
         self.vision.clear()
         self.hearing.clear()
 
-    def to_prompt_hearing(self) -> str:
+    def to_prompt_hearing(self, labels: dict = None) -> str:
+        if not labels:
+            labels = _default_labels()
         if not self.hearing:
             return ""
-        lines = ["## 听觉"]
+        lines = [labels["hearing_header"]]
         for r in self.hearing.values():
             ad = r.auditory_data
             sound = ad.get("sound", "")
             vol = ad.get("volume", "")
             if sound:
-                lines.append(f"  {r.name}说: \"{sound}\" ({vol})")
+                lines.append(labels["hearing_entry"].format(name=r.name, sound=sound, vol=vol))
             else:
-                lines.append(f"  {r.name} ({r.pos[0]},{r.pos[1]}) | {ad.get('sound','')} ({vol})")
+                lines.append(labels["hearing_entry"].format(name=r.name, sound=ad.get("sound", ""), vol=vol))
         return "\n".join(lines)
 
-    def to_prompt_vision(self) -> str:
+    def to_prompt_vision(self, labels: dict = None) -> str:
+        if not labels:
+            labels = _default_labels()
         lines = []
         interactable = self.get_interactable()
         if interactable:
-            lines.append("可交互 (直接选下方ID):")
+            lines.append(labels["interactable_header"])
             for r in interactable:
-                extra = f"\n      详情: {r.visual_data['detail']}" if "detail" in r.visual_data else ""
+                extra = f"\n      {labels['expression_label']}: {r.visual_data['detail']}" if "detail" in r.visual_data else ""
                 expr = ""
                 if "expression" in r.visual_data:
-                    expr = f" | 表情: {r.visual_data['expression']}"
+                    expr = f" | {labels['expression_label']} {r.visual_data['expression']}"
                 lines.append(
                     f"  id={r.entity_id} | {r.name} ({r.pos[0]},{r.pos[1]}) | {r.visual_data.get('look','')}{expr}"
-                    f"\n      可做: {r.actions}{extra}"
+                    f"\n      {labels['actions_label']}{r.actions}{extra}"
                 )
         visible = self.get_visible_only()
         if visible:
-            lines.append("\n看得见够不着:")
+            lines.append(f"\n{labels['visible_only_header']}")
             for r in visible:
                 expr = ""
                 if "expression" in r.visual_data:
-                    expr = f" | 表情: {r.visual_data['expression']}"
+                    expr = f" | {labels['expression_label']} {r.visual_data['expression']}"
                 lines.append(
-                    f"  id={r.entity_id} | {r.name} ({r.pos[0]},{r.pos[1]}) | 距离{r.distance} | {r.visual_data.get('look','')}{expr}"
+                    f"  id={r.entity_id} | {r.name} ({r.pos[0]},{r.pos[1]}) | {labels.get('distance_prefix','距离')}{r.distance} | {r.visual_data.get('look','')}{expr}"
                 )
-        return "\n".join(lines) if lines else "(无)"
+        return "\n".join(lines) if lines else labels["empty_sensory"]
+
+
+_DEFAULTS = None
+
+def _default_labels():
+    global _DEFAULTS
+    if _DEFAULTS is None:
+        _DEFAULTS = {
+            "hearing_header": "## 听觉",
+            "hearing_entry": '{name}说: "{sound}" ({vol})',
+            "interactable_header": "可交互 (直接选下方ID):",
+            "expression_label": "表情:",
+            "actions_label": "可做: ",
+            "visible_only_header": "看得见够不着:",
+            "empty_sensory": "(无)",
+            "distance_prefix": "距离",
+        }
+    return _DEFAULTS

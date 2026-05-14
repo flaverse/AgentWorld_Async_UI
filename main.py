@@ -37,7 +37,8 @@ def load_config():
         lc = yaml.safe_load(f)
     loader = PromptLoader(os.path.join(base_dir, "config/prompts.yaml"))
     assembler = PromptAssembler(loader)
-    return {"world": wc, "llm": lc, "assembler": assembler}
+    labels = loader.data.get("text_labels", {})
+    return {"world": wc, "llm": lc, "assembler": assembler, "labels": labels}
 
 
 # ═══════════════════════════════════════════════════
@@ -62,13 +63,25 @@ def get_agents(world: World) -> list:
             if e.get("agent") and e.get("agent").autonomous]
 
 
-def setup_agent_drives(agents: list, decay_rates: dict) -> None:
-    """Ensure every agent has a DriveSystem with the configured decay rates."""
+def setup_agent_drives(agents: list, sim: dict, currency: str) -> None:
+    """Ensure every agent has a DriveSystem with the configured decay rates and thresholds."""
+    decay_rates = sim.get("decay_rates", {})
+    drive = sim.get("drive", {})
     for e in agents:
         if not e.get("agent").drives and e.has("interaction"):
             e.get("agent").drives = DriveSystem(
                 attrs=e.get("interaction").private_attrs,
-                decay_rates=decay_rates)
+                decay_rates=decay_rates,
+                currency_key=currency,
+                drive_min=drive.get("min", 0),
+                drive_max=drive.get("max", 100),
+                urgent_threshold=drive.get("urgent_threshold", 80),
+                needed_threshold=drive.get("needed_threshold", 60))
+        inter = e.get("interaction")
+        if inter:
+            inter.currency_key = currency
+            inter.drive_min = drive.get("min", 0)
+            inter.drive_max = drive.get("max", 100)
 
 
 # ═══════════════════════════════════════════════════
@@ -76,11 +89,11 @@ def setup_agent_drives(agents: list, decay_rates: dict) -> None:
 # ═══════════════════════════════════════════════════
 
 async def run_concurrent(agents, world, brain, assembler, systems,
-                         runtime: float, kl_config: dict,
+                         runtime: float, cfg: dict,
                          *, trace_fn=None):
     """Run all agents concurrently."""
     tasks = [run_agent(a, world, brain, assembler, systems,
-                       runtime, trace_fn=trace_fn, kl_config=kl_config)
+                       runtime, trace_fn=trace_fn, cfg=cfg)
              for a in agents]
     await asyncio.gather(*tasks)
 
@@ -180,13 +193,29 @@ def report(collector: TraceCollector, agents: list, sim: dict,
 async def cmd_test(args):
     """Run concurrent test: all agents from config."""
     cfg = load_config()
+    sim = cfg["world"]["world"].get("simulation", {})
+    currency = sim.get("currency", "coins")
     world, brain, systems = make_world(cfg["world"], cfg["llm"], cfg["assembler"])
     agents = get_agents(world)
     if not agents:
         print("No autonomous agents found in world.yaml.")
         return
-    setup_agent_drives(agents, cfg["world"]["world"].get("simulation", {}).get("decay_rates", {}))
-    sim = cfg["world"]["world"].get("simulation", {})
+    setup_agent_drives(agents, sim, currency)
+
+    kl = sim.get("kl", {})
+    loop_cfg = {
+        "poll_interval": sim.get("poll_interval", 0.3),
+        "thresholds": kl.get("state_thresholds", [30, 60, 80]),
+        "coin_epsilon": kl.get("coin_epsilon", 5),
+        "stale_timeout": sim.get("stale_timeout", 30),
+        "currency": currency,
+        "text": sim.get("text", {}),
+        "labels": cfg["labels"],
+        "intent_ttl": sim.get("intent_ttl", 30),
+        "default_patience": sim.get("default_patience", 5),
+        "speech_window": sim.get("speech_window", 30),
+        "memory_prompt_count": sim.get("memory_prompt_count", 5),
+    }
 
     print(f"\n{'='*60}")
     print(f"  AgentWorld Async — {cfg['world']['world']['name']}")
@@ -196,9 +225,7 @@ async def cmd_test(args):
     tracer = TraceCollector()
     t_start = time.time()
     await run_concurrent(agents, world, brain, cfg["assembler"],
-                         systems,
-                         args.runtime,
-                         sim.get("kl", {}),
+                         systems, args.runtime, loop_cfg,
                          trace_fn=tracer.callback())
     elapsed = time.time() - t_start
     report(tracer, agents, sim, elapsed, args.validate, args.output)
@@ -220,11 +247,10 @@ async def cmd_demo(args):
 
     await run_agent(agent, world, brain, cfg["assembler"],
                     systems,
-                    runtime=30,
+                    runtime=30, cfg={"labels": cfg["labels"]},
                     trace_fn=lambda t: print(
                         f"  [{agent.name}] → {t.get('target','?')} | "
-                        f"{t.get('action_text','?')[:80]}"),
-                    kl_config=sim.get("kl", {}))
+                         f"{t.get('action_text','?')[:80]}"))
 
 
 # ═══════════════════════════════════════════════════

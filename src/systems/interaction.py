@@ -10,32 +10,35 @@ from dataclasses import dataclass, field
 logger = logging.getLogger(__name__)
 
 
-def check_observing(agent, sensory) -> str | None:
+def check_observing(agent, sensory, text: dict = None) -> str | None:
     """Observing 闭环检测。返回结束原因或 None (继续等待)。"""
+    if not text:
+        text = {"observed_replied": '{name}说："{speech}"',
+                "observed_left": "{name}走远了",
+                "observed_no_reply": "{name}没有回应我"}
     if not agent.expects_reply or not agent.observing_target:
         return None
-
     heard = sensory.hearing.get(agent.observing_target)
     if heard and heard.auditory_data.get("sound"):
         agent.get("agent").memory.record(
-            f"{heard.name}说：\"{heard.auditory_data['sound']}\"")
+            text["observed_replied"].format(
+                name=heard.name, speech=heard.auditory_data["sound"]))
         agent.expects_reply = False
         agent.observing_target = ""
         return "replied"
-
     seen = sensory.vision.get(agent.observing_target)
     if not seen or seen.distance > agent.get("agent").view_radius * 0.8:
-        agent.get("agent").memory.record(f"{agent.observing_target}走远了")
+        agent.get("agent").memory.record(
+            text["observed_left"].format(name=agent.observing_target))
         agent.expects_reply = False
         agent.observing_target = ""
         return "left"
-
     if time.time() - agent.observing_since > agent.observing_timeout:
-        agent.get("agent").memory.record(f"{agent.observing_target}没有回应我")
+        agent.get("agent").memory.record(
+            text["observed_no_reply"].format(name=agent.observing_target))
         agent.expects_reply = False
         agent.observing_target = ""
         return "timeout"
-
     return None
 
 

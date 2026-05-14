@@ -191,4 +191,25 @@ output_schemas:
       properties:
         narrative: {type: string}
         deltas: {type: object}
-      required: [narrative, deltas]
+        required: [narrative, deltas]
+
+# ═══════════════════════════════════════
+text_labels:
+  hearing_header: "## 听觉"
+  hearing_entry: '{name}说: "{sound}" ({vol})'
+  interactable_header: "可交互 (直接选下方ID):"
+  expression_label: "表情:"
+  actions_label: "可做: "
+  visible_only_header: "看得见够不着:"
+  empty_sensory: "(无)"
+  empty_memory: "无"
+  memory_entry: "[+{rel}s] {text}"
+  drive_table_header: "| 属性 | 数值 |"
+  drive_table_sep: "|------|------|"
+  drive_urgent: "⚠️急需"
+  drive_needed: "●需要"
+  drive_normal: "○正常"
+  drive_no_data: "(无数据)"
+  intent_stale: "STALE: "
+  intent_prefix: "INTENT: "
+

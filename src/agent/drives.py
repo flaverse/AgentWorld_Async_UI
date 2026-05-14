@@ -1,32 +1,44 @@
 from dataclasses import dataclass, field
 
 
+_DEFAULT_LABELS = {
+    "drive_table_header": "| 属性 | 数值 |",
+    "drive_table_sep":    "|------|------|",
+    "drive_urgent":       "⚠️急需",
+    "drive_needed":       "●需要",
+    "drive_normal":       "○正常",
+    "drive_no_data":      "(无数据)",
+}
+
+
 @dataclass
 class DriveSystem:
-    """Agent 欲望系统。直接引用 InteractionLayer.private_attrs，不持有副本。
-    
-    原则 ⑩ 属性平权: coins / thirst / hunger 无区别。
-    原则 ② 分层架构: DriveSystem 是 AgentLayer 的"计算器"，数据源在 InteractionLayer。
-    """
-    attrs: dict = field(default_factory=dict)          # → 引用 private_attrs
+    attrs: dict = field(default_factory=dict)
     decay_rates: dict[str, float] = field(default_factory=dict)
+    currency_key: str = "coins"
+    drive_min: float = 0.0
+    drive_max: float = 100.0
+    urgent_threshold: float = 80.0
+    needed_threshold: float = 60.0
 
     def decay(self, elapsed_minutes: float) -> None:
         for key, rate in self.decay_rates.items():
             if key in self.attrs:
-                self.attrs[key] = self.attrs.get(key, 0.0) + rate * elapsed_minutes
-                self.attrs[key] = max(0.0, min(100.0, self.attrs[key]))
+                val = self.attrs.get(key, 0.0) + rate * elapsed_minutes
+                self.attrs[key] = max(self.drive_min, min(self.drive_max, val))
 
-    def to_prompt_table(self) -> str:
-        lines = ["| 属性 | 数值 |", "|------|------|"]
+    def to_prompt_table(self, labels: dict = None) -> str:
+        if labels is None:
+            labels = _DEFAULT_LABELS
+        lines = [labels["drive_table_header"], labels["drive_table_sep"]]
         for key, val in self.attrs.items():
-            if key == "coins":
-                continue  # coins shown separately
-            if val >= 80:
-                urgency = "⚠️急需"
-            elif val >= 60:
-                urgency = "●需要"
+            if key == self.currency_key:
+                continue
+            if val >= self.urgent_threshold:
+                urgency = labels["drive_urgent"]
+            elif val >= self.needed_threshold:
+                urgency = labels["drive_needed"]
             else:
-                urgency = "○正常"
-            lines.append(f"| {key} | {val:.0f}/100 {urgency} |")
-        return "\n".join(lines) if len(lines) > 2 else "(无数据)"
+                urgency = labels["drive_normal"]
+            lines.append(f"| {key} | {val:.0f}/{self.drive_max:.0f} {urgency} |")
+        return "\n".join(lines) if len(lines) > 2 else labels["drive_no_data"]

@@ -6,10 +6,24 @@ world:
 
   simulation:
     currency: coins
+    poll_interval: 0.3
     stale_timeout: 30
+    memory_max_size: 10
+    memory_prompt_count: 5
+    intent_ttl: 30
+    default_patience: 5
+    speech_window: 30
+    observing_leave_ratio: 0.8
+    fuzzy_match_ratio: 0.5
+    fuzzy_range_pad: 3
     kl:
       state_thresholds: [30, 60, 80]
       coin_epsilon: 5
+    drive:
+      min: 0
+      max: 100
+      urgent_threshold: 80
+      needed_threshold: 60
     validation:
       delta_max: 30
       drive_min: 0
@@ -20,6 +34,19 @@ world:
       social: 0.015
       energy: -0.01
       fun: 0.015
+    text:
+      kl_spoke: "{name} 说话了"
+      kl_entered_vision: "{name} 进入视野"
+      kl_left_vision: "{eid} 离开视野"
+      kl_left_hearing: "{eid} 离开听力范围"
+      kl_expression_changed: "{name} 表情变了"
+      kl_stale: "太久没事做了"
+      kl_coin: "coins {sign}{delta}"
+      kl_state_cross: "{attr} {arrow}突破{t}"
+      observed_replied: '{name}说："{speech}"'
+      observed_left: "{name}走远了"
+      observed_no_reply: "{name}没有回应我"
+      intent_stale_prefix: "STALE: "
 
 zones:
 - id: bar_zone

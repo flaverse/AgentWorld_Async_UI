@@ -7,7 +7,8 @@ from agent.sensory_memory import VisionRecord, HearingRecord
 
 
 class SensorySystem:
-    def update(self, observer, all_entities: dict, world=None) -> None:
+    def update(self, observer, all_entities: dict, world=None,
+               speech_window: int = 30) -> None:
         if not observer.has("agent"):
             return
 
@@ -64,7 +65,7 @@ class SensorySystem:
                 if d <= hear_range:
                     speech = auditory_layer.properties.get("current_speech", "")
                     speech_ts = auditory_layer.properties.get("speech_ts", 0)
-                    if speech and time.time() - speech_ts < 30:
+                    if speech and time.time() - speech_ts < speech_window:
                         current_hearing_ids.add(eid)
                         is_new = eid not in sensory.hearing
                         auditory_data = auditory_layer.hear(d)

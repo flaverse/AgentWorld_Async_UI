@@ -2,6 +2,12 @@ import time
 from dataclasses import dataclass, field
 
 
+_DEFAULT_LABELS = {
+    "empty_memory": "无",
+    "memory_entry": "[+{rel}s] {text}",
+}
+
+
 @dataclass
 class AgentMemory:
     entries: list[dict] = field(default_factory=list)  # [{ts, text}]
@@ -18,15 +24,17 @@ class AgentMemory:
     def recent(self, n: int = 5) -> list[dict]:
         return self.entries[-n:]
 
-    def to_prompt_text(self, n: int = 5) -> str:
+    def to_prompt_text(self, n: int = 5, labels: dict = None) -> str:
+        if labels is None:
+            labels = _DEFAULT_LABELS
         entries = self.recent(n)
         if not entries:
-            return "无"
+            return labels["empty_memory"]
         lines = []
         for e in entries:
             ts = e["ts"]
             rel = int(ts - self.entries[0]["ts"]) if self.entries else 0
-            lines.append(f"[+{rel}s] {e['text']}")
+            lines.append(labels["memory_entry"].format(rel=rel, text=e['text']))
         return "\n".join(lines)
 
     def latest(self) -> dict | None:

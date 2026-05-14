@@ -8,6 +8,9 @@ class InteractionLayer(Layer):
     public_attrs: dict = field(default_factory=dict)
     private_attrs: dict = field(default_factory=dict)
     actions: dict[str, dict] = field(default_factory=dict)
+    currency_key: str = "coins"
+    drive_min: float = 0.0
+    drive_max: float = 100.0
 
     def interact(self, action: str | None = None) -> list[str]:
         if action is None:
@@ -29,8 +32,7 @@ class InteractionLayer(Layer):
             except (TypeError, ValueError):
                 continue
             self.private_attrs[key] = current + delta
-            # Clamp: non-coin attrs 0-100, coins >= 0
-            if key == "coins":
+            if key == self.currency_key:
                 self.private_attrs[key] = max(0, self.private_attrs[key])
             else:
-                self.private_attrs[key] = max(0, min(100, self.private_attrs[key]))
+                self.private_attrs[key] = max(self.drive_min, min(self.drive_max, self.private_attrs[key]))
