@@ -1,57 +1,34 @@
-"""P/Q/KL 分层变化检测。听觉/视觉 — 全量 dict diff。状态/时差 — 阈值逻辑。
+"""P/Q/KL 分层变化检测。全 channel 通用 dict diff。状态/时差 — 阈值逻辑。
 所有文本从 config 注入。零手工字段比较。
 """
 import time
 
 
-def _dicts_equal(a: dict, b: dict) -> bool:
-    """Shallow dict comparison — sufficient for property-level diff."""
-    return a == b
-
-
-def auditory_kl(p_auditory: dict, hearing: dict, text: dict) -> str:
-    """听觉 KL: 逐 entity 比较 auditory_data dict。任何 key 变化 = 信号。"""
+def channel_kl(channel_name: str, p_data: dict, q_data: dict,
+               records: dict, text: dict) -> str:
+    """通用 channel diff: 逐 entity 比较 data dict。任何 key 变化 = 信号。"""
     lines = []
-    p_data = p_auditory.get("data", {})
-    q_data = {eid: r.auditory_data for eid, r in hearing.items()}
-
     for eid in set(p_data) | set(q_data):
-        pv = p_data.get(eid, {})
-        qv = q_data.get(eid, {})
+        pv = p_data.get(eid, {}).get("data", {})
+        qv = q_data.get(eid, {}).get("data", {}) if isinstance(q_data.get(eid), dict) else q_data.get(eid, {})
+        # q_data values are SensorRecord objects, extract .data
+        if hasattr(q_data.get(eid), 'data'):
+            qv = q_data[eid].data
         if not pv and qv:
-            lines.append(f"{hearing[eid].name} 开始说话")
+            name = records.get(eid, eid)
+            lines.append(f"{channel_name}: {name} 进入")
         elif pv and not qv:
-            lines.append(f"{eid} 离开听力范围")
-        elif not _dicts_equal(pv, qv):
-            lines.append(f"{hearing[eid].name} 声音变了")
-
-    p_auditory["data"] = q_data
-    return " | ".join(lines) if lines else ""
-
-
-def visual_kl(p_visual: dict, vision: dict, text: dict) -> str:
-    """视觉 KL: 逐 entity 比较 visual_data dict。任何 key 变化 = 信号。"""
-    lines = []
-    p_data = p_visual.get("data", {})
-    q_data = {eid: r.visual_data for eid, r in vision.items()}
-
-    for eid in set(p_data) | set(q_data):
-        pv = p_data.get(eid, {})
-        qv = q_data.get(eid, {})
-        if not pv and qv:
-            lines.append(f"{vision[eid].name} 进入视野")
-        elif pv and not qv:
-            lines.append(f"{eid} 离开视野")
-        elif not _dicts_equal(pv, qv):
-            lines.append(f"{vision[eid].name} 外观变化了")
-
-    p_visual["data"] = q_data
+            lines.append(f"{channel_name}: {eid} 离开")
+        elif pv != qv:
+            name = records.get(eid, eid)
+            lines.append(f"{channel_name}: {name} 变化")
+    # Side-effect: update P
+    p_data[channel_name] = q_data
     return " | ".join(lines) if lines else ""
 
 
 def state_kl(p_state: dict, drives, currency_key: str, text: dict,
              thresholds: list = None, coin_epsilon: int = None) -> str:
-    """状态 KL: 阈值逻辑保留。drives cross threshold / coin delta。"""
     if thresholds is None: thresholds = [30, 60, 80]
     if coin_epsilon is None: coin_epsilon = 5
     lines = []
@@ -84,16 +61,32 @@ def stale_kl(p_stale: float, text: dict, stale_timeout: int = None) -> str:
 
 def total_kl(agent, sensory, drives, currency_key: str, text: dict,
              thresholds=None, coin_epsilon=None, stale_timeout=None) -> str:
-    ka = auditory_kl(agent.p_auditory, sensory.hearing, text)
-    kv = visual_kl(agent.p_visual, sensory.vision, text)
+    """遍历 sensory.channels 所有层，逐层 channel_kl。"""
+    parts = []
+    for ch_name, ch_data in sensory.channels.items():
+        if not ch_data:
+            continue
+        kl = channel_kl(ch_name,
+                        agent.p_channels.get(ch_name, {}),
+                        ch_data,
+                        {eid: r.name for eid, r in ch_data.items()},
+                        text)
+        if kl:
+            parts.append(kl)
     ks = state_kl(agent.p_state, drives, currency_key, text, thresholds, coin_epsilon)
+    if ks: parts.append(ks)
     kt = stale_kl(agent.p_stale, text, stale_timeout)
-    return " | ".join(filter(None, [ka, kv, ks, kt]))
+    if kt: parts.append(kt)
+    return " | ".join(parts)
 
 
 def snapshot_p(agent, sensory, drives, currency_key: str, text: dict,
                thresholds=None, coin_epsilon=None):
-    auditory_kl(agent.p_auditory, sensory.hearing, text)
-    visual_kl(agent.p_visual, sensory.vision, text)
+    for ch_name in sensory.channels:
+        channel_kl(ch_name,
+                   agent.p_channels.get(ch_name, {}),
+                   sensory.channels.get(ch_name, {}),
+                   {eid: r.name for eid, r in sensory.channels.get(ch_name, {}).items()},
+                   text)
     state_kl(agent.p_state, drives, currency_key, text, thresholds, coin_epsilon)
     agent.p_stale = time.time()

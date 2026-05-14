@@ -38,20 +38,21 @@ def load_config():
     loader = PromptLoader(os.path.join(base_dir, "config/prompts.yaml"))
     assembler = PromptAssembler(loader)
     labels = loader.data.get("text_labels", {})
-    return {"world": wc, "llm": lc, "assembler": assembler, "labels": labels}
+    modal_map = loader.data.get("modal_layer_map", {})
+    return {"world": wc, "llm": lc, "assembler": assembler, "labels": labels,
+            "modal_map": modal_map}
 
 
 # ═══════════════════════════════════════════════════
 #  World setup
 # ═══════════════════════════════════════════════════
 
-def make_world(world_cfg: dict, llm_cfg: dict, assembler):
-    """Create World + systems + brain from configs. Returns (world, brain, systems)."""
+def make_world(world_cfg: dict, llm_cfg: dict, assembler, modal_map=None):
     llm = LLMClient(llm_cfg)
     brain = Brain(llm, assembler)
     systems = {
         "sensory": SensorySystem(),
-        "interaction": InteractionSystem(llm, assembler),
+        "interaction": InteractionSystem(llm, assembler, modal_map),
         "decay": DecaySystem(),
     }
     return World(world_cfg, systems), brain, systems
@@ -195,7 +196,8 @@ async def cmd_test(args):
     cfg = load_config()
     sim = cfg["world"]["world"].get("simulation", {})
     currency = sim.get("currency", "coins")
-    world, brain, systems = make_world(cfg["world"], cfg["llm"], cfg["assembler"])
+    world, brain, systems = make_world(cfg["world"], cfg["llm"], cfg["assembler"],
+                                         cfg.get("modal_map"))
     agents = get_agents(world)
     if not agents:
         print("No autonomous agents found in world.yaml.")
@@ -224,17 +226,31 @@ async def cmd_test(args):
 
     tracer = TraceCollector()
     t_start = time.time()
+
+    db = None
+    if args.persist:
+        from core.persistence import WorldDB
+        db = WorldDB(args.persist)
+        run_id = db.start_run(cfg['world']['world']['name'])
+    else:
+        run_id = ""
+
     await run_concurrent(agents, world, brain, cfg["assembler"],
                          systems, args.runtime, loop_cfg,
                          trace_fn=tracer.callback())
     elapsed = time.time() - t_start
     report(tracer, agents, sim, elapsed, args.validate, args.output)
+    if db:
+        db.end_run(run_id)
+        db.close()
+        print(f"  Persisted to: {args.persist}")
 
 
 async def cmd_demo(args):
     """Run single-agent demo."""
     cfg = load_config()
-    world, brain, systems = make_world(cfg["world"], cfg["llm"], cfg["assembler"])
+    world, brain, systems = make_world(cfg["world"], cfg["llm"], cfg["assembler"],
+                                         cfg.get("modal_map"))
     agents = get_agents(world)
     if not agents:
         print("No autonomous agents found.")
@@ -267,6 +283,8 @@ def parse_args():
                         help="Run validation checks after test")
     parser.add_argument("--output", type=str, default="",
                         help="Save trace JSON to file")
+    parser.add_argument("--persist", type=str, default="",
+                        help="SQLite database path for persistence")
     return parser.parse_args()
 
 

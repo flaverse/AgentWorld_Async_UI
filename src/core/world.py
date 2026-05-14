@@ -3,7 +3,9 @@ from core.clock import WorldClock
 from core.spatial_grid import SpatialGrid
 from core.lifecycle import EntityLifecycle
 from entity.entity import Entity
+from layers.base import Layer
 from layers.visual import VisualLayer
+from layers.auditory import AuditoryLayer
 from layers.interaction import InteractionLayer
 from layers.agent import AgentLayer
 from agent.drives import DriveSystem
@@ -106,6 +108,15 @@ class World:
 
             if "gate" in ent_def:
                 entity.layers["gate"] = ent_def["gate"]
+
+            # Generic layers: any unknown layer type → base Layer
+            for layer_name, layer_cfg in ent_def.get("layers", {}).items():
+                if layer_name in entity.layers:
+                    continue  # already handled above
+                props = layer_cfg.get("properties", {})
+                radius = layer_cfg.get("observable_radius", 5)
+                entity.layers[layer_name] = Layer(
+                    properties=props, observable_radius=radius)
 
             self.lifecycle.spawn(entity)
 

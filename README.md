@@ -2,7 +2,7 @@
   <img src="https://img.shields.io/badge/python-3.12%2B-blue?style=flat-square" alt="Python">
   <img src="https://img.shields.io/badge/async-asyncio-purple?style=flat-square" alt="Async">
   <img src="https://img.shields.io/badge/LLM-DeepSeek%20|%20OpenAI-green?style=flat-square" alt="LLM">
-  <img src="https://img.shields.io/badge/architecture-v4-ff6b35?style=flat-square" alt="v4">
+  <img src="https://img.shields.io/badge/architecture-v5-ff6b35?style=flat-square" alt="v5">
   <img src="https://img.shields.io/badge/license-MIT-brightgreen?style=flat-square" alt="License">
 </p>
 
@@ -49,6 +49,8 @@
 | 5 | **Config-as-Behavior**<br/>配置即行为 | Every string, threshold, currency key, and drive limit injected from YAML. Swap `world.yaml` = new world. Zero Python changes.<br/>所有文本、阈值、货币键、属性上下限从 YAML 注入。换 `world.yaml` = 换世界。 |
 | 6 | **Full Decision Memory**<br/>全决策记忆 | Entire LLM #1 output (dialogue, visual, internal, self_deltas, story, expects_reply, patience) recorded as JSON. Agent remembers what it said, did, and felt.<br/>LLM #1 全部输出（对话、表情、内心、属性、故事、期待回复、耐心）以 JSON 存入记忆。 |
 | 7 | **Observing Baseline**<br/>观察基线 | Default state is observation. Decisions are triggered by change — not by a timer. "The world pushes the agent, not the other way around."<br/>默认状态是观察。变化触发决策——不是定时器。"世界推动 Agent，而非 Agent 推动世界。" |
+| 8 | **Generic Layer Observation**<br/>通用层观察 | All layers inherit `Layer.observe(d)` + `observable_radius`. Sensory polls all layers generically. New modal (action/emotion/...) = 0 code changes. Add `layers.action: {properties: {}}` in YAML.<br/>所有层继承 `observe(d)` + `observable_radius`。感官系统遍历全部层。新模态零代码——YAML 加 `layers.action: {}`。 |
+| 9 | **Property Verification** / SQLite Persistence<br/>属性校验 / 持久化 | `@register` decorator-based validator chain catches negative coins, out-of-range drives before apply. Optional `--persist world.db` snapshots all agent states + interactions to SQLite.<br/>`@register` 装饰器校验链在 apply 前拦截非法 delta。可选 `--persist` 持久化到 SQLite。
 
 ---
 
@@ -218,6 +220,8 @@ interact(A, target, action_name, decision)
 | 5 | **Agent Autonomy** · Agent 自治 | B answers via own decide(). No proxy projection. · B 用自己的 decide()回应。无替身投影。 |
 | 6 | **Config as Behavior** · 配置即行为 | All text/thresholds/currencies in YAML. Zero Python hardcode. · 全部 YAML。零 Python 硬编码。 |
 | 7 | **LLM On-Demand** · 按需调用 | 1 call for NPC→NPC. 2 for NPC→Item. Maximum. · NPC→NPC 1 次。NPC→Item 2 次。极致。 |
+| 8 | **Generic Layer Obs** · 通用层观察 | All layers inherit `observe(d)`. Sensory polls generically. New modal = YAML only. · 全层继承 `observe(d)`。感官通用轮询。新模态仅 YAML。 |
+| 9 | **Verified Deltas** · 属性校验 | `@register` validator chain catches illegal deltas before apply. Coins never negative. · `@register` 校验链在 apply 前拦截非法属性变化。 |
 
 ---
 
@@ -310,6 +314,7 @@ python main.py --runtime 180 --validate      # 3min + validation · 验证模式
 
 | Version | Date · 日期 | Milestone · 里程碑 |
 |---------|------|-----------|
+| **v5** | Jun 2026 | Generic Layer.observe() + observable_radius. Sensory polls all layers. Channel_kl full dict diff. Modal_layer_map from YAML. Property verification (@register). SQLite persistence (--persist). Pinned memory. 0-code new modal. · 通用层观察、全量 dict diff、属性校验、SQLite 持久化 |
 | **v4** | May 2026 | P/Q/KL gate + observing baseline + write-pending lock · 门控 + 观察基线 |
 | | | Unified interact(). Config decoupling. Full memory retention. · 统一入口、配置解耦 |
 | | | Delete resolver/event_bus. LLM calls: 4→1. Net code: -24000 lines. · 删 resover/event_bus |

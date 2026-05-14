@@ -51,9 +51,10 @@ class ActionResult:
 
 
 class InteractionSystem:
-    def __init__(self, llm=None, assembler=None):
+    def __init__(self, llm=None, assembler=None, modal_map=None):
         self.llm = llm
         self.assembler = assembler
+        self.modal_map = modal_map or {}
 
     # ═══════════ public API ═══════════
 
@@ -116,10 +117,7 @@ class InteractionSystem:
         return None
 
     def update_sensory(self, agent, all_entities: dict) -> None:
-        sensory = agent.get("agent").sensory
-        for eid, record in sensory.vision.items():
-            if eid in all_entities:
-                record.can_interact = self.can_interact(agent, all_entities[eid])
+        pass  # no-op: can_interact check moved to interact() time
 
     # ═══════════ core: interact() ═══════════
 
@@ -147,6 +145,15 @@ class InteractionSystem:
         if agent.has("agent"):
             agent.get("agent").memory.record(
                 json.dumps(decision, ensure_ascii=False))
+
+        # Generic modal routing: write unknown fields to their mapped layers
+        if self.modal_map:
+            for field, layer_name in self.modal_map.items():
+                if field in ("dialogue", "visual", "internal"):
+                    continue  # handled above with specific logic
+                value = decision.get(field, "")
+                if value and layer_name in agent.layers:
+                    agent.layers[layer_name].properties[field] = value
 
         # ② Apply self_deltas
         if self_deltas:
@@ -211,4 +218,12 @@ class InteractionSystem:
     def _apply_deltas(self, entity, deltas: dict) -> None:
         if not entity.has("interaction"):
             return
+        # Verify before applying
+        inter = entity.get("interaction")
+        from core.verification import verify
+        issues = verify(entity, deltas, inter.currency_key,
+                        inter.drive_min, inter.drive_max)
+        if issues:
+            logger.warning(f"Verification failed for {entity.name}: {'; '.join(issues)}")
+            return  # reject invalid deltas
         entity.get("interaction").apply_deltas(deltas)

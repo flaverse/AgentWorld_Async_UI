@@ -14,9 +14,8 @@ class Entity:
     describe: str = ""
     p_distribution: dict = field(default_factory=dict)
 
-    # Layered KL snapshots
-    p_auditory: dict = field(default_factory=dict)
-    p_visual:   dict = field(default_factory=dict)
+    # Layered KL snapshots — one dict per channel, keyed by entity_id
+    p_channels: dict = field(default_factory=dict)
     p_state:    dict = field(default_factory=dict)
     p_stale:    float = 0.0
 

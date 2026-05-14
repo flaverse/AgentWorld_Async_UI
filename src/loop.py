@@ -82,12 +82,6 @@ async def run_agent(agent, world, brain, assembler, systems,
                             continue
                     latest_mem["text"] = labels.get("intent_stale", "STALE: ") + intent_action
 
-            visible_text = ""
-            if sensory.get_visible_only():
-                visible_text = "\n".join(
-                    f"id={r.entity_id}|{r.name}|dist={r.distance}"
-                    for r in sensory.get_visible_only())
-
             ctx = {
                 "round": 0, "name": agent.name, "personality": al.personality,
                 "drives_table": al.drives.to_prompt_table(labels),
@@ -95,12 +89,12 @@ async def run_agent(agent, world, brain, assembler, systems,
                 "zone_width": world.zones.get(agent.zone, {}).get("width", 10),
                 "zone_height": world.zones.get(agent.zone, {}).get("height", 10),
                 "pos_x": agent.pos[0], "pos_y": agent.pos[1],
-                "interactable_text": sensory.to_prompt_vision(labels),
-                "visible_text": visible_text,
+                "interactable_text": sensory.to_prompt("visual", labels),
+                "visible_text": "",
                 "memory_text": al.memory.to_prompt_text(
                     cfg.get("memory_prompt_count", 5), labels),
                 "messages_text": "",
-                "hearing_text": sensory.to_prompt_hearing(labels),
+                "hearing_text": sensory.to_prompt("auditory", labels),
                 "kl_text": kl_text,
             }
 

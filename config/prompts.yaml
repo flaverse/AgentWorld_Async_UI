@@ -194,6 +194,11 @@ output_schemas:
         required: [narrative, deltas]
 
 # ═══════════════════════════════════════
+modal_layer_map:
+  dialogue: auditory
+  visual: visual
+
+# ═══════════════════════════════════════
 text_labels:
   hearing_header: "## 听觉"
   hearing_entry: '{name}说: "{sound}" ({vol})'

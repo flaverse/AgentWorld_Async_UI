@@ -18,8 +18,11 @@ class AgentMemory:
             "ts": ts if ts is not None else time.time(),
             "text": text,
         })
-        if len(self.entries) > self.max_size:
-            self.entries.pop(0)
+        non_pinned = [e for e in self.entries if not e.get("pinned")]
+        while len(non_pinned) > self.max_size:
+            idx = self.entries.index(non_pinned[0])
+            self.entries.pop(idx)
+            non_pinned.pop(0)
 
     def recent(self, n: int = 5) -> list[dict]:
         return self.entries[-n:]
@@ -39,3 +42,7 @@ class AgentMemory:
 
     def latest(self) -> dict | None:
         return self.entries[-1] if self.entries else None
+
+    def pin(self, text: str = ""):
+        """Add a pinned entry that won't be evicted by max_size limit."""
+        self.entries.append({"ts": time.time(), "text": text, "pinned": True})

@@ -1,9 +1,8 @@
-"""SensorySystem: 读 target 的 Visual/Auditory Layer + 写 observer.sensory_memory.
-原则 ② 分层架构: 每层统一接口 see()/hear()。
-原则 ⑤ Systems 总控: 跨层感知逻辑唯一在此。
+"""SensorySystem: 遍历 entity.layers → observe() → 写入 observer.sensory.channels。
+所有 layer 统一处理。零硬编码层名。
 """
 import time
-from agent.sensory_memory import VisionRecord, HearingRecord
+from agent.sensory_memory import SensorRecord
 
 
 class SensorySystem:
@@ -14,78 +13,62 @@ class SensorySystem:
 
         agent_layer = observer.get("agent")
         sensory = agent_layer.sensory
-        current_vision_ids = set()
-        current_hearing_ids = set()
 
+        max_radius = max(agent_layer.view_radius, agent_layer.hearing_radius)
         if world:
-            view_radius = max(agent_layer.view_radius,
-                              agent_layer.hearing_radius)
-            candidate_ids = world.get_nearby_ids(
-                observer.zone, observer.pos, view_radius)
+            candidate_ids = world.get_nearby_ids(observer.zone, observer.pos, max_radius)
         else:
-            candidate_ids = [
-                eid for eid, e in all_entities.items()
-                if e.zone == observer.zone and e.id != observer.id
-            ]
+            candidate_ids = [eid for eid, e in all_entities.items()
+                             if e.zone == observer.zone and e.id != observer.id]
+
+        # Track which entities are currently visible per channel
+        current = {}  # {layer_name: set(entity_id)}
 
         for eid in candidate_ids:
             entity = all_entities.get(eid)
             if not entity or entity.id == observer.id:
                 continue
-
             d = observer.distance_to(entity)
 
-            # ── 视觉 ──
-            if entity.has("visual"):
-                visual_layer = entity.get("visual")
-                see_range = min(agent_layer.view_radius,
-                                visual_layer.visible_radius)
-                if d <= see_range:
-                    current_vision_ids.add(eid)
-                    is_new = eid not in sensory.vision
-                    vision_data = visual_layer.see(d)
-                    actions = []
-                    if entity.has("interaction"):
-                        actions = list(entity.get("interaction").actions.keys())
-                    sensory.vision[eid] = VisionRecord(
-                        entity_id=eid, name=entity.name,
-                        pos=list(entity.pos), distance=d,
-                        visual_data=vision_data, actions=actions,
-                        can_interact=False,
-                        first_seen=(time.time() if is_new
-                                    else sensory.vision[eid].first_seen),
-                        last_seen=time.time(),
-                    )
+            for layer_name, layer in entity.layers.items():
+                if not hasattr(layer, "observe"):
+                    continue
+                if d > getattr(layer, "observable_radius", 5):
+                    continue
 
-            # ── 听觉 ──
-            if entity.has("auditory"):
-                auditory_layer = entity.get("auditory")
-                hear_range = min(agent_layer.hearing_radius,
-                                 auditory_layer.audible_radius)
-                if d <= hear_range:
-                    speech = auditory_layer.properties.get("current_speech", "")
-                    speech_ts = auditory_layer.properties.get("speech_ts", 0)
-                    if speech and time.time() - speech_ts < speech_window:
-                        current_hearing_ids.add(eid)
-                        is_new = eid not in sensory.hearing
-                        auditory_data = auditory_layer.hear(d)
-                        sensory.hearing[eid] = HearingRecord(
-                            entity_id=eid, name=entity.name,
-                            pos=list(entity.pos), distance=d,
-                            auditory_data=auditory_data,
-                            first_heard=(time.time() if is_new
-                                         else sensory.hearing[eid].first_heard),
-                            last_heard=time.time(),
-                        )
-                        # Save to memory so agent retains what it heard
-                        if is_new and observer.has("agent"):
-                            observer.get("agent").memory.record(
-                                f"{entity.name}说：\"{speech}\"")
+                # Auditory special handling: only poll if speech is recent
+                if layer_name == "auditory":
+                    speech = layer.properties.get("current_speech", "")
+                    speech_ts = layer.properties.get("speech_ts", 0)
+                    if not speech or time.time() - speech_ts > speech_window:
+                        continue
 
-        # 离开范围 → 删除
-        for eid in list(sensory.vision.keys()):
-            if eid not in current_vision_ids:
-                del sensory.vision[eid]
-        for eid in list(sensory.hearing.keys()):
-            if eid not in current_hearing_ids:
-                del sensory.hearing[eid]
+                if layer_name not in sensory.channels:
+                    sensory.channels[layer_name] = {}
+                if layer_name not in current:
+                    current[layer_name] = set()
+
+                current[layer_name].add(eid)
+                is_new = eid not in sensory.channels[layer_name]
+                data = layer.observe(d)
+
+                sensory.channels[layer_name][eid] = SensorRecord(
+                    entity_id=eid, name=entity.name,
+                    pos=list(entity.pos), distance=d,
+                    data=data,
+                    first_seen=(time.time() if is_new
+                                else sensory.channels[layer_name][eid].first_seen),
+                    last_seen=time.time(),
+                )
+
+                # Hearing → memory retention
+                if layer_name == "auditory" and is_new and observer.has("agent"):
+                    observer.get("agent").memory.record(
+                        f"{entity.name}说：\"{speech}\"")
+
+        # Cleanup: remove entities that left range
+        for layer_name, ch in list(sensory.channels.items()):
+            current_ids = current.get(layer_name, set())
+            for eid in list(ch.keys()):
+                if eid not in current_ids:
+                    del ch[eid]
