@@ -158,7 +158,10 @@ def report(collector: TraceCollector, agents: list, sim: dict,
                 if isinstance(val, (int, float)) and attr != currency and abs(val) > delta_max:
                     issues.append(f"large delta: {t['agent']} {attr}={val}")
     for t in merged:
-        for attr, val in t.get('drives', {}).items():
+        drives = t.get('drives', {})
+        for attr, val in drives.items():
+            if attr == currency:
+                continue  # currency has no min/max
             if isinstance(val, (int, float)) and (val < drive_min or val > drive_max):
                 issues.append(f"drive out of range: {t['agent']} {attr}={val}")
     if issues:
