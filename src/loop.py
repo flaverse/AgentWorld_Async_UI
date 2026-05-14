@@ -80,6 +80,9 @@ async def run_agent(agent, world, brain, assembler, systems,
                                     "agent": name, "target": intent_target.name,
                                     "action_text": intent_action, "note": "from_intent",
                                     "result_narrative": result.narrative if result else "",
+                                    "zone": agent.zone, "pos": list(agent.pos),
+                                    "drives": {k:round(v,1) for k,v in drives.attrs.items()},
+                                    "coins": coins, "kl_text": kl_text,
                                 })
                             snapshot_p(agent, sensory, drives, coins,
                                        thresholds, coin_epsilon)
@@ -143,6 +146,11 @@ async def run_agent(agent, world, brain, assembler, systems,
                                 "result_narrative": result.narrative if result else "",
                                 "result_caller_deltas": result.caller_deltas if result else {},
                                 "result_target_deltas": result.target_deltas if result else {},
+                                "zone": agent.zone,
+                                "pos": list(agent.pos),
+                                "drives": {k:round(v,1) for k,v in drives.attrs.items()},
+                                "coins": coins,
+                                "kl_text": kl_text,
                             })
 
                         if decision.get("expects_reply") and target.has("agent"):
