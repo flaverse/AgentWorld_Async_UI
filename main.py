@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """AgentWorld Async — single entry point.
 
-  python main.py                    # API server + demo loop
-  python main.py --test             # 8-agent concurrent test (60s)
-  python main.py --test --runtime 180 --validate  # 3min + validation
+  python main.py                         # 8-agent concurrent test (60s)
+  python main.py --runtime 180 --validate  # 3min + validation
+  python main.py --demo                  # single-agent demo
+  python main.py --output trace.json     # save trace data
 """
-import sys, os, yaml, asyncio, json, time, logging, argparse
+import sys, os, yaml, asyncio, json, time, argparse
 from datetime import datetime
 from collections import defaultdict
 
@@ -176,27 +177,20 @@ async def demo_mode():
 
 async def main():
     parser = argparse.ArgumentParser(description="AgentWorld Async")
-    parser.add_argument("--test", action="store_true",
-                        help="Run 8-agent concurrent test")
+    parser.add_argument("--demo", action="store_true",
+                        help="Run single-agent demo")
     parser.add_argument("--runtime", type=int, default=60,
                         help="Test runtime in seconds (default: 60)")
     parser.add_argument("--validate", action="store_true",
                         help="Run validation checks after test")
     parser.add_argument("--output", type=str, default="",
                         help="Save trace JSON to file")
-    parser.add_argument("--debug", action="store_true",
-                        help="Show stderr (LLM parse errors etc)")
     args = parser.parse_args()
 
-    if args.debug:
-        logging.basicConfig(level=logging.WARNING)
-
-    if args.test:
-        await test_mode(args)
-    else:
+    if args.demo:
         await demo_mode()
-
-    print("\nDone.")
+    else:
+        await test_mode(args)
 
 
 if __name__ == "__main__":
