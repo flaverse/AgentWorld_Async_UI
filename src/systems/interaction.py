@@ -149,7 +149,9 @@ class InteractionSystem:
         if self_deltas:
             self._apply_deltas(agent, self_deltas)
 
-        # ③ NPC→NPC: done (B polls → KL triggers → B's decide)
+        agent._write_pending = True
+
+        # ③ NPC→NPC: done
         if target.has("agent"):
             return ActionResult(
                 target_id=target.id,

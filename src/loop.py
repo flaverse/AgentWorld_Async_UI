@@ -112,6 +112,15 @@ async def run_agent(agent, world, brain, assembler, systems,
             }
 
             prompt1 = assembler.assemble("agent_decision", ctx)
+
+            # Write-pending lock: yield one poll cycle after interacting
+            if agent._write_pending:
+                agent._write_pending = False
+                snapshot_p(agent, sensory, drives, coins,
+                           thresholds, coin_epsilon)
+                await asyncio.sleep(0.3)
+                continue
+
             decision = await brain.decide(ctx)
             move_to = decision.get("move_to")
             action_text = decision.get("action")

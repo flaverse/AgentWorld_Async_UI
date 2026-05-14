@@ -20,6 +20,9 @@ class Entity:
     p_state:    dict = field(default_factory=dict)
     p_stale:    float = 0.0
 
+    # Write-pending lock: skip next decide after interacting
+    _write_pending: bool = False
+
     # observing state
     expects_reply:     bool = False
     observing_target:  str = ""
