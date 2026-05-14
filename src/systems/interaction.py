@@ -130,7 +130,6 @@ class InteractionSystem:
 
         dialogue = decision.get("dialogue", "")
         visual = decision.get("visual", "")
-        internal = decision.get("internal", "")
         self_deltas = decision.get("self_deltas", {})
         story = decision.get("story", "")
 
@@ -142,8 +141,9 @@ class InteractionSystem:
         if visual and agent.has("visual"):
             agent.get("visual").properties["expression"] = visual
             agent.get("visual").properties["expression_ts"] = time.time()
-        if internal:
-            agent.get("agent").memory.record(internal)
+        if agent.has("agent"):
+            agent.get("agent").memory.record(
+                json.dumps(decision, ensure_ascii=False))
 
         # ② Apply self_deltas
         if self_deltas:
