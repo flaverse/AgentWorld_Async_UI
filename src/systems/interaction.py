@@ -1,6 +1,6 @@
 """InteractionSystem — 统一交互模型
 interact() 是唯一入口。NPC→NPC: 纯同步写层。NPC→Item: +1 LLM。
-del: submit/_resolve_*/busy/_spawn_event/await_pending
+check_observing() — observing 闭环检测
 """
 import json
 import time
@@ -8,6 +8,35 @@ import logging
 from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
+
+
+def check_observing(agent, sensory) -> str | None:
+    """Observing 闭环检测。返回结束原因或 None (继续等待)。"""
+    if not agent.expects_reply or not agent.observing_target:
+        return None
+
+    heard = sensory.hearing.get(agent.observing_target)
+    if heard and heard.auditory_data.get("sound"):
+        agent.get("agent").memory.record(
+            f"{heard.name}说：\"{heard.auditory_data['sound']}\"")
+        agent.expects_reply = False
+        agent.observing_target = ""
+        return "replied"
+
+    seen = sensory.vision.get(agent.observing_target)
+    if not seen or seen.distance > agent.get("agent").view_radius * 0.8:
+        agent.get("agent").memory.record(f"{agent.observing_target}走远了")
+        agent.expects_reply = False
+        agent.observing_target = ""
+        return "left"
+
+    if time.time() - agent.observing_since > agent.observing_timeout:
+        agent.get("agent").memory.record(f"{agent.observing_target}没有回应我")
+        agent.expects_reply = False
+        agent.observing_target = ""
+        return "timeout"
+
+    return None
 
 
 @dataclass

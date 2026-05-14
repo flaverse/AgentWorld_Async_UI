@@ -1,67 +1,83 @@
-"""KL Divergence Layer — P分布 vs Q分布 一阶差计算。
-
-纯函数，零依赖。P 和 Q 是两个独立 dict。各自不感知对方存在。
-只在 compute_kl() 中被比较。返回 LLM prompt 可读的变化文本。
+"""P/Q/KL 分层变化检测。
+四层独立: 听觉/视觉/状态/时差。每层维护自己的 P 快照。
+总 KL = 并集。非空 → trigger decide。空 → continue observing。
 """
+import time
 
 
-def compute_kl(p: dict, q: dict) -> str:
-    """P分布 vs Q分布 = 各分量的一阶差。
-
-    Args:
-        p: P分布 — 上一步快照 {pos, zone, drives, coins, interactable, visible}
-        q: Q分布 — 当前快照 (同结构)
-
-    Returns:
-        变化文本，如 "thirst ↑2 | coins -5 | 丹德里恩 进入范围 | 移动: (6,4)→(7,3)"
-        无显著变化时返回空字符串
-    """
+def auditory_kl(p_auditory: dict, hearing: dict) -> str:
+    """听觉 KL: speaker_ids 变化 → 有人说了新的 / 离开听力范围"""
     lines = []
-
-    # ── 位置变化 ──
-    p_pos = p.get("pos", [0, 0]) if p.get("pos") else [0, 0]
-    q_pos = q.get("pos", [0, 0]) if q.get("pos") else [0, 0]
-    dx = q_pos[0] - p_pos[0]
-    dy = q_pos[1] - p_pos[1]
-    if dx or dy:
-        lines.append(f"移动: ({p_pos[0]},{p_pos[1]})→({q_pos[0]},{q_pos[1]})")
-
-    # ── Zone 变化 ──
-    p_zone = p.get("zone", "")
-    q_zone = q.get("zone", "")
-    if p_zone and q_zone and p_zone != q_zone:
-        lines.append(f"zone: {p_zone}→{q_zone}")
-
-    # ── 驱动力变化 (只显示绝对值 > 0.1) ──
-    p_drives = p.get("drives", {}) or {}
-    q_drives = q.get("drives", {}) or {}
-    for key in sorted(set(p_drives) & set(q_drives)):
-        d = q_drives[key] - p_drives[key]
-        if abs(d) > 0.1:
-            arrow = "↑" if d > 0 else "↓"
-            lines.append(f"{key} {arrow}{abs(d):.0f}")
-
-    # ── 金币变化 ──
-    p_coins = p.get("coins", 0) or 0
-    q_coins = q.get("coins", 0) or 0
-    d_coins = q_coins - p_coins
-    if d_coins != 0:
-        sign = "+" if d_coins > 0 else ""
-        lines.append(f"coins {sign}{d_coins:.0f}")
-
-    # ── 实体进出 ──
-    p_interact = set(p.get("interactable", []) or [])
-    q_interact = set(q.get("interactable", []) or [])
-    for name in q_interact - p_interact:
-        lines.append(f"{name} 进入范围")
-    for name in p_interact - q_interact:
-        lines.append(f"{name} 离开范围")
-
-    p_visible = set(p.get("visible", []) or [])
-    q_visible = set(q.get("visible", []) or [])
-    for name in q_visible - p_visible:
-        lines.append(f"{name} 进入视野")
-    for name in p_visible - q_visible:
-        lines.append(f"{name} 离开视野")
-
+    p_ids = set(p_auditory.get("speaker_ids", []))
+    q_ids = {eid for eid, r in hearing.items() if r.auditory_data.get("sound")}
+    for eid in q_ids - p_ids:
+        lines.append(f"{hearing[eid].name} 说话了")
+    for eid in p_ids - q_ids:
+        lines.append(f"{eid} 离开听力范围")
+    p_auditory["speaker_ids"] = list(q_ids)
     return " | ".join(lines) if lines else ""
+
+
+def visual_kl(p_visual: dict, vision: dict) -> str:
+    """视觉 KL: 实体进出 / 表情变化"""
+    lines = []
+    p_ids = set(p_visual.get("entity_ids", []))
+    q_ids = set(vision.keys())
+    for eid in q_ids - p_ids:
+        lines.append(f"{vision[eid].name} 进入视野")
+    for eid in p_ids - q_ids:
+        lines.append(f"{eid} 离开视野")
+    for eid in q_ids & p_ids:
+        old_expr = p_visual.get("expressions", {}).get(eid, "")
+        new_expr = vision[eid].visual_data.get("expression", "")
+        if new_expr and new_expr != old_expr:
+            lines.append(f"{vision[eid].name} 表情变了")
+    p_visual["entity_ids"] = list(q_ids)
+    p_visual["expressions"] = {eid: r.visual_data.get("expression", "") for eid, r in vision.items()}
+    return " | ".join(lines) if lines else ""
+
+
+def state_kl(p_state: dict, drives, coins: float) -> str:
+    """状态 KL: 仅当 cross 阈值 (30/60/80) 时返回。hysteresis 防 drift 反复触发。"""
+    lines = []
+    old_drives = p_state.get("drives", {})
+    new_drives = {k: round(float(v), 1) for k, v in drives.attrs.items()}
+    thresholds = [30, 60, 80]
+    for attr in sorted(set(old_drives) & set(new_drives)):
+        ov, nv = old_drives[attr], new_drives[attr]
+        for t in thresholds:
+            if (ov < t <= nv) or (ov > t >= nv):
+                arrow = "↑" if nv > ov else "↓"
+                lines.append(f"{attr} {arrow}突破{t}")
+                break
+    old_coins = p_state.get("coins", 0)
+    if abs(coins - old_coins) >= 5:
+        sign = "+" if coins > old_coins else ""
+        lines.append(f"coins {sign}{coins - old_coins:.0f}")
+    p_state["drives"] = new_drives
+    p_state["coins"] = coins
+    return " | ".join(lines) if lines else ""
+
+
+def stale_kl(p_stale: float) -> str:
+    """时差 KL: 超过 30s 无 decide → 触发"""
+    if time.time() - p_stale > 30:
+        return "太久没事做了"
+    return ""
+
+
+def total_kl(agent, sensory, drives, coins) -> str:
+    """四通道并集。非空 → trigger decide。空 → continue observing。"""
+    ka = auditory_kl(agent.p_auditory, sensory.hearing)
+    kv = visual_kl(agent.p_visual, sensory.vision)
+    ks = state_kl(agent.p_state, drives, coins)
+    kt = stale_kl(agent.p_stale)
+    return " | ".join(filter(None, [ka, kv, ks, kt]))
+
+
+def snapshot_p(agent, sensory, drives, coins):
+    """更新所有 KL 通道的 P 快照"""
+    auditory_kl(agent.p_auditory, sensory.hearing)
+    visual_kl(agent.p_visual, sensory.vision)
+    state_kl(agent.p_state, drives, coins)
+    agent.p_stale = time.time()
