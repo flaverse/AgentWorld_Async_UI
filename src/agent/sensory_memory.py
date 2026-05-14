@@ -44,10 +44,15 @@ class SensoryMemory:
     def to_prompt_hearing(self) -> str:
         if not self.hearing:
             return ""
-        lines = ["👂 听到:"]
+        lines = ["## 听觉"]
         for r in self.hearing.values():
             ad = r.auditory_data
-            lines.append(f"  {r.name} ({r.pos[0]},{r.pos[1]}) | {ad.get('sound','')} ({ad.get('volume','')})")
+            sound = ad.get("sound", "")
+            vol = ad.get("volume", "")
+            if sound:
+                lines.append(f"  {r.name}说: \"{sound}\" ({vol})")
+            else:
+                lines.append(f"  {r.name} ({r.pos[0]},{r.pos[1]}) | {ad.get('sound','')} ({vol})")
         return "\n".join(lines)
 
     def to_prompt_vision(self) -> str:
@@ -57,15 +62,21 @@ class SensoryMemory:
             lines.append("可交互 (直接选下方ID):")
             for r in interactable:
                 extra = f"\n      详情: {r.visual_data['detail']}" if "detail" in r.visual_data else ""
+                expr = ""
+                if "expression" in r.visual_data:
+                    expr = f" | 表情: {r.visual_data['expression']}"
                 lines.append(
-                    f"  id={r.entity_id} | {r.name} ({r.pos[0]},{r.pos[1]}) | {r.visual_data.get('look','')}"
+                    f"  id={r.entity_id} | {r.name} ({r.pos[0]},{r.pos[1]}) | {r.visual_data.get('look','')}{expr}"
                     f"\n      可做: {r.actions}{extra}"
                 )
         visible = self.get_visible_only()
         if visible:
             lines.append("\n看得见够不着:")
             for r in visible:
+                expr = ""
+                if "expression" in r.visual_data:
+                    expr = f" | 表情: {r.visual_data['expression']}"
                 lines.append(
-                    f"  id={r.entity_id} | {r.name} ({r.pos[0]},{r.pos[1]}) | 距离{r.distance} | {r.visual_data.get('look','')}"
+                    f"  id={r.entity_id} | {r.name} ({r.pos[0]},{r.pos[1]}) | 距离{r.distance} | {r.visual_data.get('look','')}{expr}"
                 )
         return "\n".join(lines) if lines else "(无)"

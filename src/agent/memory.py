@@ -1,26 +1,16 @@
+import time
 from dataclasses import dataclass, field
 
 
 @dataclass
 class AgentMemory:
-    entries: list[dict] = field(default_factory=list)
+    entries: list[dict] = field(default_factory=list)  # [{ts, text}]
     max_size: int = 10
 
-    def record(self, action: str = "", target_name: str = "",
-               narrative: str = "") -> None:
+    def record(self, text: str = "", ts: float = None) -> None:
         self.entries.append({
-            "action": action,
-            "target": target_name,
-            "narrative": narrative,
-        })
-        if len(self.entries) > self.max_size:
-            self.entries.pop(0)
-
-    def record_fail(self, action: str = "", reason: str = "") -> None:
-        self.entries.append({
-            "action": action,
-            "result": "FAILED",
-            "reason": reason,
+            "ts": ts if ts is not None else time.time(),
+            "text": text,
         })
         if len(self.entries) > self.max_size:
             self.entries.pop(0)
@@ -32,7 +22,12 @@ class AgentMemory:
         entries = self.recent(n)
         if not entries:
             return "无"
-        return "\n".join(
-            f"- {e.get('action', '?')}: {e.get('narrative', e.get('reason', '?'))}"
-            for e in entries
-        )
+        lines = []
+        for e in entries:
+            ts = e["ts"]
+            rel = int(ts - self.entries[0]["ts"]) if self.entries else 0
+            lines.append(f"[+{rel}s] {e['text']}")
+        return "\n".join(lines)
+
+    def latest(self) -> dict | None:
+        return self.entries[-1] if self.entries else None

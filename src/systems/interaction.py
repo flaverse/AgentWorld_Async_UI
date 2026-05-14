@@ -1,8 +1,13 @@
+"""InteractionSystem — 统一交互模型
+interact() 是唯一入口。NPC→NPC: 纯同步写层。NPC→Item: +1 LLM。
+del: submit/_resolve_*/busy/_spawn_event/await_pending
+"""
 import json
-import asyncio
-import uuid
+import time
+import logging
 from dataclasses import dataclass, field
-from layers.interaction import TargetType, ResolveType, ActionDef
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -10,19 +15,15 @@ class ActionResult:
     target_id: str = ""
     caller_deltas: dict = field(default_factory=dict)
     target_deltas: dict = field(default_factory=dict)
-    ambient_effects: list = field(default_factory=list)
     narrative: str = ""
-    public_observation: str = ""
-    memories: dict = field(default_factory=dict)  # {entity_id: first_person_text}
-    duration: int = 0
-    move_to_zone: str | None = None
-    move_to_pos: list | None = None
 
 
 class InteractionSystem:
-    def __init__(self, resolver, sound_map: dict | None = None):
-        self.resolver = resolver
-        self.sound_map = sound_map or {}
+    def __init__(self, llm=None, assembler=None):
+        self.llm = llm
+        self.assembler = assembler
+
+    # ═══════════ public API ═══════════
 
     def can_interact(self, agent, target) -> bool:
         if not target.has("interaction"):
@@ -32,62 +33,8 @@ class InteractionSystem:
         target_r = target.get("interaction").interaction_radius
         return agent.distance_to(target) <= min(agent_r, target_r)
 
-    def update_sensory(self, agent, all_entities: dict) -> None:
-        sensory = agent.get("agent").sensory
-        for eid, record in sensory.vision.items():
-            if eid in all_entities:
-                record.can_interact = self.can_interact(agent, all_entities[eid])
-
-    def build_component(self, center, all_entities: dict, radius: int = 3) -> list[dict]:
-        """构建交互分量: 从 center 出发，空间 BFS 收集半径内所有实体。
-        
-        返回: [{entity_id, name, describe, private_attrs}, ...]
-        用于 Story/Projection 管线的 context 构建。
-        """
-        component = []
-        seen = {center.id}
-        
-        # ① 中心实体
-        comp = self._entity_to_component_entry(center)
-        if comp:
-            component.append(comp)
-        
-        # ② 半径 R 内的所有实体
-        for e in all_entities.values():
-            if e.id in seen or e.zone != center.zone:
-                continue
-            d = center.distance_to(e)
-            if d <= radius:
-                seen.add(e.id)
-                comp = self._entity_to_component_entry(e)
-                if comp:
-                    component.append(comp)
-        
-        return component
-    
-    def _entity_to_component_entry(self, entity) -> dict | None:
-        """将 Entity 转换为 component entry dict。"""
-        desc = getattr(entity, 'describe', None) or entity.name
-        attrs = {}
-        inter = entity.get("interaction")
-        if inter:
-            attrs = inter.private_attrs.copy()
-            if inter.public_attrs:
-                desc += f" [{inter.public_attrs}]"
-        
-        return {
-            "entity_id": entity.id,
-            "name": entity.name,
-            "describe": desc,
-            "private_attrs": attrs,
-            "is_agent": entity.has("agent") and entity.get("agent").autonomous,
-        }
-
     def find_entity_at(self, zone: str, pos: list[int], action: str,
                        all_entities: dict, exclude_id: str = "") -> object | None:
-        """引擎从 action 文本 + 坐标匹配交互目标。
-        优先文本匹配(名字在 action 中出现), 其次空间距离。
-        """
         candidates = []
         for e in all_entities.values():
             if e.zone != zone or not e.has("interaction"):
@@ -96,303 +43,138 @@ class InteractionSystem:
                 continue
             d = abs(pos[0] - e.pos[0]) + abs(pos[1] - e.pos[1])
             candidates.append((d, e))
-
         if not candidates:
             return None
-
-        # Sort by distance first
         candidates.sort(key=lambda x: x[0])
-
-        # Text matching: if entity name or key words appear in action, prefer it
-        for d, e in candidates[:5]:  # check 5 nearest
+        for d, e in candidates:
             if e.name in action:
                 return e
-            # Check key words from describe
-            desc = getattr(e, 'describe', '') or ''
-            for word in [e.name, *desc.split('。')[0].split(' ')]:
+        for d, e in candidates:
+            desc = getattr(e, 'description', '') or ''
+            for word in [e.name, *desc.split('.')[0].split(' ')]:
                 if len(word) >= 2 and word in action:
                     return e
-
-        # Fallback: nearest entity within interaction radius
         best = candidates[0]
         if best[0] <= best[1].get("interaction").interaction_radius + 3:
             return best[1]
         return None
 
-    def submit(self, interaction_id: str, agent, target, action: str,
-               world, story: str = "") -> None:
+    def fuzzy_match_action(self, target, action_text: str) -> str | None:
         layer = target.get("interaction")
-        act_def = layer.get_action(action) if layer else None
-        
-        # Free-text action support
-        if not act_def:
-            if layer:
-                act_def = ActionDef(
-                    method=action,
-                    target_type=TargetType.PASSIVE,
-                    resolve=ResolveType.LLM,
-                    estimated_duration=10,
-                )
-                layer.actions[action] = act_def
-            else:
-                raise ValueError(f"No interaction layer on {target.name}")
-                
-        if not self.can_interact(agent, target):
-            raise RuntimeError(f"{agent.name} too far from {target.name}")
+        if not layer or not layer.actions:
+            return None
+        for name in layer.actions:
+            if name in action_text:
+                return name
+        for name in layer.actions:
+            if len(name) <= 1:
+                continue
+            chars = set(name)
+            overlap = sum(1 for c in chars if c in action_text)
+            if overlap / len(chars) >= 0.5:
+                return name
+        for name in layer.actions:
+            for ch in name:
+                if ch in action_text:
+                    return name
+        if target.name in action_text and layer.actions:
+            return list(layer.actions.keys())[0]
+        if len(layer.actions) == 1:
+            return list(layer.actions.keys())[0]
+        return None
 
-        agent.status = "busy"
-        est_duration = act_def.estimated_duration
-        agent.busy_until = world.clock.now() + est_duration
+    def update_sensory(self, agent, all_entities: dict) -> None:
+        sensory = agent.get("agent").sensory
+        for eid, record in sensory.vision.items():
+            if eid in all_entities:
+                record.can_interact = self.can_interact(agent, all_entities[eid])
 
-        asyncio.create_task(
-            self._resolve_async(interaction_id, agent, target, action, world, story=story)
-        ).add_done_callback(
-            lambda t: self._on_task_done(t, agent, target, action, world)
-        )
+    # ═══════════ core: interact() ═══════════
 
-    async def _resolve_async(self, iid: str, agent, target, action: str,
-                             world, story: str = "") -> None:
-        """后台裁定。resolve=rule 直接执行, resolve=llm 调裁判（含重试）。"""
-        result = await self._resolve_with_retry(agent, target, action, world,
-                                                 max_retries=2, story=story)
-        agent.busy_result = result
+    async def interact(self, agent, target, action_name: str,
+                       decision: dict, world) -> ActionResult | None:
+        """统一交互入口。同步写层，NPC→Item 加一次 LLM。"""
+        action = target.get("interaction").actions.get(action_name)
+        if not action:
+            logger.warning(f"No action '{action_name}' on {target.name}")
+            return None
 
-    async def _resolve_with_retry(self, agent, target, action: str,
-                                  world, max_retries: int = 2, story: str = "") -> ActionResult:
-        """执行裁定。LLM 失败时带反馈重试。原则 ⑥ LLM 最小化: rule 不调 LLM。"""
-        try:
-            act_def = target.get("interaction").get_action(action)
+        dialogue = decision.get("dialogue", "")
+        visual = decision.get("visual", "")
+        internal = decision.get("internal", "")
+        self_deltas = decision.get("self_deltas", {})
+        story = decision.get("story", "")
 
-            if act_def.resolve == ResolveType.RULE:
-                return self._exec_rule(act_def, agent, target)
+        # ① Write agent's layers (observers poll)
+        if dialogue and agent.has("auditory"):
+            aud = agent.get("auditory")
+            aud.properties["current_speech"] = dialogue
+            aud.properties["speech_ts"] = time.time()
+        if visual and agent.has("visual"):
+            agent.get("visual").properties["expression"] = visual
+            agent.get("visual").properties["expression_ts"] = time.time()
+        if internal:
+            agent.get("agent").memory.record(internal)
 
-            elif act_def.resolve == ResolveType.LLM:
-                # v3 path: if LLM #1 provided a story, use per-agent projection
-                if story and self.resolver:
-                    result = await self._resolve_v3(agent, target, action, story, world)
-                else:
-                    # Legacy path: single LLM #2 resolver
-                    ambient = world.get_ambient_entities(target, radius=2,
-                                                          exclude={agent.id})
-                    last_raw = ""
-                    for attempt in range(max_retries + 1):
-                        try:
-                            result = await self.resolver.resolve(
-                                caller=agent, target=target, action=action,
-                                ambient_entities=ambient, world=world,
-                            )
-                            if result.narrative:
-                                return result
-                        except Exception as e:
-                            if attempt < max_retries:
-                                import asyncio as _a
-                                await _a.sleep(1)
-                                continue
-                            raise
-                        if attempt < max_retries:
-                            import asyncio as _a
-                            await _a.sleep(1)
-                    return ActionResult(target_id=target.id,
-                                        narrative="裁定未产生有效结果")
+        # ② Apply self_deltas
+        if self_deltas:
+            self._apply_deltas(agent, self_deltas)
 
-            return ActionResult(target_id=target.id, narrative="unknown resolve type")
-
-        except Exception as e:
-            from core.error_collector import errors
-            errors.log_exception("interaction._resolve_with_retry", e,
-                                 f"{agent.name} -> {target.name}.{action}")
+        # ③ NPC→NPC: done (B polls → KL triggers → B's decide)
+        if target.has("agent"):
             return ActionResult(
                 target_id=target.id,
-                narrative=f"交互失败: {e}",
-                public_observation=f"{agent.name}尝试{action}但出了点问题",
+                caller_deltas=self_deltas,
+                narrative=story or f"{agent.name}对{target.name}说了{dialogue or action_name}",
             )
 
-    async def _resolve_v3(self, agent, target, action: str, story: str,
-                           world) -> 'ActionResult':
-        """v3 pipeline: LLM #1 story + per-agent LLM #2 projection + verify."""
-        # Build entity states for both agents
-        agent_state = self._entity_to_state_str(agent)
-        target_state = self._entity_to_state_str(target)
-
-        # Per-agent LLM #2 projection
-        agent_deltas = {}
-        target_deltas = {}
-
-        if self.resolver and agent.has("agent"):
+        # ④ NPC→Item: interact_narrative LLM
+        narrative = story or f"{agent.name}对{target.name}做了{action_name}"
+        if self.llm and self.assembler:
             try:
-                agent_deltas_raw = await self.resolver.project_deltas(
-                    story=story,
-                    entities_state=f"### 你 (视角主体)\n{agent_state}\n\n### 对方\n{target_state}"
-                )
-                if agent_deltas_raw:
-                    agent_deltas = agent_deltas_raw[0] if isinstance(agent_deltas_raw, list) else agent_deltas_raw
-            except Exception:
-                pass
+                agent_inter = agent.get("interaction").private_attrs if agent.has("interaction") else {}
+                context = {
+                    "action_name": action_name,
+                    "caller_name": agent.name,
+                    "caller_personality": agent.get("agent").personality if agent.has("agent") else "",
+                    "caller_state": json.dumps(agent_inter, ensure_ascii=False),
+                    "caller_id": agent.id,
+                    "target_name": target.name,
+                    "target_description": getattr(target, 'description', '') or target.name,
+                    "action_description": action.get("description", action_name),
+                    "target_context": "",
+                    "target_id": agent.id,
+                }
+                prompt = self.assembler.assemble("interact_narrative", context)
+                system = self.assembler.get_system_prompt("interact_narrative")
+                raw = await self.llm.chat(system=system, messages=[{"role":"user","content":prompt}])
+                from agent.brain import extract_json
+                data = json.loads(extract_json(raw))
+                narrative = data.get("narrative", narrative)
+                deltas = data.get("deltas", {})
+                extra = deltas.get(agent.id, {})
+                if extra:
+                    self._apply_deltas(agent, extra)
+            except Exception as e:
+                import sys
+                print(f"  [interact ERR] {agent.name}→{target.name}: {e}", file=sys.stderr, flush=True)
 
-        if self.resolver and target.has("agent"):
-            try:
-                target_deltas_raw = await self.resolver.project_deltas(
-                    story=story,
-                    entities_state=f"### 你 (视角主体)\n{target_state}\n\n### 对方\n{agent_state}"
-                )
-                if target_deltas_raw:
-                    target_deltas = target_deltas_raw[0] if isinstance(target_deltas_raw, list) else target_deltas_raw
-            except Exception:
-                pass
+        if narrative:
+            agent.get("agent").memory.record(narrative) if agent.has("agent") else None
 
-        # Simple bounds verification
-        ok = True
-        for eff in [{"id": agent.id, "d": agent_deltas}, {"id": target.id, "d": target_deltas}]:
-            for attr, delta in eff["d"].items():
-                e = world.entities.get(eff["id"])
-                if e and e.has("interaction"):
-                    current = e.get("interaction").private_attrs.get(attr, 0)
-                    try:
-                        current = float(current)
-                        delta = float(delta)
-                    except (TypeError, ValueError):
-                        continue
-                    new_val = current + delta
-                    if attr == "coins" and new_val < 0:
-                        ok = False
-                    elif attr != "coins" and (new_val < 0 or new_val > 100):
-                        ok = False
-
-        narrative = story or f"{agent.name}对{target.name}做了{action}"
-        memories = {}
-        if agent.has("agent"):
-            memories[agent.id] = story or narrative
-        if target.has("agent"):
-            memories[target.id] = story or narrative
+        # ⑤ Gate transfer
+        gate = action.get("gate")
+        if gate and hasattr(world, 'lifecycle'):
+            world.lifecycle.transfer_zone(agent, gate["to_zone"],
+                                           list(gate.get("to_pos", agent.pos)))
 
         return ActionResult(
             target_id=target.id,
+            caller_deltas=self_deltas,
             narrative=narrative,
-            public_observation=narrative[:100],
-            caller_deltas=agent_deltas if ok else {},
-            target_deltas=target_deltas if ok else {},
-            memories=memories,
         )
 
-    def _entity_to_state_str(self, entity) -> str:
-        """Format entity state for projection prompt."""
-        inter = entity.get("interaction")
-        desc = getattr(entity, 'describe', '') or entity.name
-        attrs = inter.private_attrs if inter else {}
-        return f"{entity.name} (id={entity.id}): {desc[:60]} | attrs: {json.dumps(attrs, ensure_ascii=False) if attrs else '{}'}"
-
-    def _on_task_done(self, task, agent, target, action, world):
-        """Callback: if the async runner task crashed, mark agent idle and log."""
-        if task.exception():
-            from core.error_collector import errors
-            errors.log_task_failure(f"interaction.resolve({agent.name},{action})",
-                                    task.exception())
-            agent.status = "idle"
-            agent.busy_result = ActionResult(
-                target_id=target.id,
-                narrative=f"内部错误: 裁定未完成",
-                public_observation=f"{agent.name}的交互出了点问题",
-            )
-
-    def apply_result(self, result: ActionResult, agent, world) -> bool:
-        """处理 busy_result。返回 True 表示有有效结果。
-        
-        原则 ⑤ Systems 总控: 统一结果处理入口。
-        """
-        if not result:
-            return False
-
-        agent.apply_deltas(result.caller_deltas)
-        if result.target_id and result.target_id in world.entities:
-            world.entities[result.target_id].apply_deltas(result.target_deltas)
-        for amb_eff in result.ambient_effects:
-            aid = amb_eff.get("entity_id", "")
-            if aid in world.entities:
-                world.entities[aid].apply_deltas(amb_eff.get("deltas", {}))
-
-        if agent.has("agent"):
-            # Use LLM #4 first-person memory if available, otherwise fallback to narrative
-            mem_text = result.memories.get(agent.id, result.narrative) if result.memories else result.narrative
-            agent.get("agent").memory.record(narrative=mem_text)
-
-        # NPC-to-NPC: target also gets its first-person memory
-        if result.target_id and result.target_id in world.entities:
-            target_entity = world.entities[result.target_id]
-            if target_entity.has("agent"):
-                mem_text = result.memories.get(result.target_id, result.narrative) if result.memories else result.narrative
-                target_entity.get("agent").memory.record(narrative=mem_text)
-
-        if agent.has("agent"):
-            if hasattr(agent.get("agent"), "knowledge") and agent.get("agent").knowledge:
-                target_name = world.entities.get(result.target_id, None)
-                target_name = target_name.name if target_name else result.target_id
-                agent.get("agent").knowledge.learn_direct(
-                    entity_id=result.target_id or "",
-                    entity_name=target_name or "",
-                    action="",
-                    narrative=result.narrative,
-                    caller_deltas=result.caller_deltas,
-                )
-
-        # Gate传送: 使用 Lifecycle.transfer_zone (P1#6)
-        if result.move_to_zone:
-            if hasattr(world, 'lifecycle'):
-                world.lifecycle.transfer_zone(agent, result.move_to_zone,
-                                              result.move_to_pos or agent.pos)
-            else:
-                agent.zone = result.move_to_zone
-                agent.pos = result.move_to_pos or agent.pos
-                if agent.has("agent"):
-                    agent.get("agent").sensory.clear()
-
-        agent.status = "idle"
-
-        self._spawn_event(world, agent,
-                          world.entities.get(result.target_id),
-                          "", result)
-        return True
-
-    def _exec_rule(self, act_def, agent, target) -> ActionResult:
-        rule = act_def.rule or {}
-        return ActionResult(
-            target_id=target.id,
-            caller_deltas={
-                **rule.get("cost", {}),
-                **rule.get("effects", {}),
-            },
-            target_deltas={},
-            ambient_effects=[],
-            narrative=rule.get("narrative", "").format(caller=agent.name),
-            public_observation=rule.get("narrative", "").format(caller=agent.name),
-            duration=rule.get("duration_minutes", 0),
-            move_to_zone=rule.get("move_to_zone"),
-            move_to_pos=rule.get("move_to_pos"),
-        )
-
-    def _spawn_event(self, world, agent, target, action, result) -> None:
-        from entity.event_entity import EventEntity
-        from layers.visual import VisualLayer
-        from layers.auditory import AuditoryLayer
-
-        sound = self.sound_map.get(action, "")
-        layers = {
-            "visual": VisualLayer(
-                visible_radius=8, sprite=None,
-                info={"look": f"{agent.name}正在{action}"}
-            ),
-        }
-        if sound:
-            layers["auditory"] = AuditoryLayer(
-                audible_radius=12, info={"sound": sound}
-            )
-
-        event = EventEntity(
-            id=f"evt_{uuid.uuid4().hex[:8]}",
-            name=f"{agent.name}的交互",
-            zone=target.zone, pos=list(target.pos),
-            spawned_at=world.clock.now(),
-            lifespan_minutes=3,
-            source_entity_id=agent.id, source_action=action,
-            layers=layers,
-        )
-        world.spawn_event(event)
+    def _apply_deltas(self, entity, deltas: dict) -> None:
+        if not entity.has("interaction"):
+            return
+        entity.get("interaction").apply_deltas(deltas)

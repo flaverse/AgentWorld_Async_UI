@@ -1,26 +1,5 @@
 from dataclasses import dataclass, field
-from enum import Enum
 from layers.base import Layer
-
-
-class TargetType(str, Enum):
-    PASSIVE = "passive"
-    AGENT = "agent"
-
-
-class ResolveType(str, Enum):
-    RULE = "rule"
-    LLM = "llm"
-
-
-@dataclass
-class ActionDef:
-    method: str = ""
-    target_type: TargetType = TargetType.PASSIVE
-    resolve: ResolveType = ResolveType.RULE
-    params: dict = field(default_factory=dict)
-    rule: dict | None = None
-    estimated_duration: int = 5
 
 
 @dataclass
@@ -28,14 +7,14 @@ class InteractionLayer(Layer):
     interaction_radius: int = 2
     public_attrs: dict = field(default_factory=dict)
     private_attrs: dict = field(default_factory=dict)
-    actions: dict[str, ActionDef] = field(default_factory=dict)
+    actions: dict[str, dict] = field(default_factory=dict)
 
     def interact(self, action: str | None = None) -> list[str]:
         if action is None:
             return list(self.actions.keys())
         raise NotImplementedError("execute via InteractionSystem")
 
-    def get_action(self, action: str) -> ActionDef | None:
+    def get_action(self, action: str) -> dict | None:
         return self.actions.get(action)
 
     def apply_deltas(self, deltas: dict) -> None:

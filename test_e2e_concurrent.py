@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""E2E CONCURRENT test — all 8 agents run simultaneously for 180s."""
-import sys,os,yaml,asyncio,uuid,json,time
+"""E2E test — observing baseline + layered KL triggers."""
+import sys, os, yaml, asyncio, uuid, json, time, logging
 from datetime import datetime
 from collections import defaultdict
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
@@ -9,17 +9,15 @@ from core.world import World; from agent.brain import Brain; from agent.drives i
 from prompt.loader import PromptLoader; from prompt.assembler import PromptAssembler
 from llm.client import LLMClient; from systems.sensory import SensorySystem
 from systems.interaction import InteractionSystem; from systems.decay import DecaySystem
-from interaction.resolver import InteractionResolver
-from layers.interaction import ActionDef, TargetType, ResolveType
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(BASE, "e2e_concurrent_trace.json")
 LOG = os.path.join(BASE, "e2e_concurrent_log.jsonl")
 
 EXTRA_NPCS = [
-    {"id":"vesemir","name":"维瑟米尔","zone":"bar_zone","pos":[20,8],"personality":"老猎魔人","coins":200,"thirst":50,"social":30,"mood":55},
+    {"id":"vesemir","name":"维瑟米尔","zone":"bar_zone","pos":[7,2],"personality":"老猎魔人","coins":200,"thirst":50,"social":30,"mood":55},
     {"id":"triss","name":"特莉丝","zone":"square","pos":[35,15],"personality":"女术士","coins":300,"thirst":35,"social":25,"mood":50},
-    {"id":"zoltan","name":"卓尔坦","zone":"bar_zone","pos":[15,10],"personality":"矮人商人","coins":500,"thirst":65,"social":60,"mood":70},
+    {"id":"zoltan","name":"卓尔坦","zone":"bar_zone","pos":[7,2],"personality":"矮人商人","coins":500,"thirst":65,"social":60,"mood":70},
     {"id":"keira","name":"凯拉","zone":"herb_hut","pos":[8,3],"personality":"年轻女术士","coins":150,"thirst":30,"social":15,"mood":60},
     {"id":"lambert","name":"兰伯特","zone":"square","pos":[20,10],"personality":"猎魔人","coins":100,"thirst":70,"social":15,"mood":40},
 ]
@@ -32,7 +30,88 @@ def log(etype, **kw):
     with open(LOG, "a") as f: f.write(json.dumps(e, ensure_ascii=False)+"\n")
 
 
-async def run_agent(agent, world, brain, assembler, systems, resolver, runtime):
+# ═══════════ Layered KL ═══════════
+
+def auditory_kl(p_auditory: dict, hearing: dict) -> str:
+    """听觉 KL: speech_ts 变化 → 有人说了新的 / 有人离开听力范围"""
+    lines = []
+    p_ids = set(p_auditory.get("speaker_ids", []))
+    q_ids = {eid for eid, r in hearing.items() if r.auditory_data.get("sound")}
+    for eid in q_ids - p_ids:
+        lines.append(f"{hearing[eid].name} 说话了")
+    for eid in p_ids - q_ids:
+        lines.append(f"{eid} 离开听力范围")
+    p_auditory["speaker_ids"] = list(q_ids)
+    return " | ".join(lines) if lines else ""
+
+
+def visual_kl(p_visual: dict, vision: dict) -> str:
+    """视觉 KL: 实体进出 / zone变化 / 表情变化"""
+    lines = []
+    p_ids = set(p_visual.get("entity_ids", []))
+    q_ids = set(vision.keys())
+    for eid in q_ids - p_ids:
+        lines.append(f"{vision[eid].name} 进入视野")
+    for eid in p_ids - q_ids:
+        lines.append(f"{eid} 离开视野")
+    # expression change
+    for eid in q_ids & p_ids:
+        old_expr = p_visual.get("expressions", {}).get(eid, "")
+        new_expr = vision[eid].visual_data.get("expression", "")
+        if new_expr and new_expr != old_expr:
+            lines.append(f"{vision[eid].name} 表情变了")
+    p_visual["entity_ids"] = list(q_ids)
+    p_visual["expressions"] = {eid: r.visual_data.get("expression","") for eid, r in vision.items()}
+    return " | ".join(lines) if lines else ""
+
+
+def state_kl(p_state: dict, drives, coins: float) -> str:
+    """状态 KL: 仅当 cross 阈值 30/60/80 时返回"""
+    lines = []
+    old_drives = p_state.get("drives", {})
+    new_drives = {k: round(float(v), 1) for k, v in drives.attrs.items()}
+    thresholds = [30, 60, 80]
+    for attr in sorted(set(old_drives) & set(new_drives)):
+        ov, nv = old_drives[attr], new_drives[attr]
+        for t in thresholds:
+            if (ov < t <= nv) or (ov > t >= nv):
+                arrow = "↑" if nv > ov else "↓"
+                lines.append(f"{attr} {arrow}突破{t}")
+                break
+    old_coins = p_state.get("coins", 0)
+    if abs(coins - old_coins) >= 5:
+        lines.append(f"coins {'+' if coins > old_coins else ''}{coins - old_coins:.0f}")
+    p_state["drives"] = new_drives
+    p_state["coins"] = coins
+    return " | ".join(lines) if lines else ""
+
+
+def stale_kl(p_stale: float) -> str:
+    """时差 KL: 超过 30s 无 decide → 触发"""
+    if time.time() - p_stale > 30:
+        return "太久没事做了"
+    return ""
+
+
+def total_kl(agent, sensory, drives, coins) -> str:
+    ka = auditory_kl(agent.p_auditory, sensory.hearing)
+    kv = visual_kl(agent.p_visual, sensory.vision)
+    ks = state_kl(agent.p_state, drives, coins)
+    kt = stale_kl(agent.p_stale)
+    return " | ".join(filter(None, [ka, kv, ks, kt]))
+
+
+def snapshot_p(agent, sensory, drives, coins):
+    """更新所有 KL P 快照"""
+    auditory_kl(agent.p_auditory, sensory.hearing)
+    visual_kl(agent.p_visual, sensory.vision)
+    state_kl(agent.p_state, drives, coins)
+    agent.p_stale = time.time()
+
+
+# ═══════════ Agent Loop ═══════════
+
+async def run_agent(agent, world, brain, assembler, systems, runtime):
     name = agent.name; al = agent.get("agent")
     end = time.time() + runtime
     actions = 0
@@ -44,136 +123,163 @@ async def run_agent(agent, world, brain, assembler, systems, resolver, runtime):
             systems["sensory"].update(agent, world.entities, world)
             systems["interaction"].update_sensory(agent, world.entities)
             world.prune_events()
-
-            # Busy result
-            if agent.busy_result is not None:
-                r = agent.busy_result; agent.busy_result = None
-                systems["interaction"].apply_result(r, agent, world)
-                log("result", agent=name, narrative=r.narrative[:150], deltas=r.caller_deltas)
-
             al.inbox.drain()
 
-            if agent.status == "idle":
-                sensory = al.sensory
-                visible_text = ""
-                if sensory.get_visible_only():
-                    visible_text = "\n".join(f"id={r.entity_id}|{r.name}|dist={r.distance}" for r in sensory.get_visible_only())
+            sensory = al.sensory
 
-                ctx = {
-                    "round": actions+1, "name": agent.name, "personality": al.personality,
-                    "drives_table": al.drives.to_prompt_table(),
-                    "zone_name": world.zones.get(agent.zone,{}).get("name",""),
-                    "zone_width": world.zones.get(agent.zone,{}).get("width",10),
-                    "zone_height": world.zones.get(agent.zone,{}).get("height",10),
-                    "pos_x": agent.pos[0], "pos_y": agent.pos[1],
-                    "interactable_text": sensory.to_prompt_vision(),
-                    "visible_text": visible_text,
-                    "memory_text": al.memory.to_prompt_text(3),
-                    "messages_text": "", "hearing_text": sensory.to_prompt_hearing(),
-                }
+            # ═══ observing 闭环检测 ═══
+            if agent.expects_reply and agent.observing_target:
+                # Hearing response
+                heard = sensory.hearing.get(agent.observing_target)
+                if heard and heard.auditory_data.get("sound"):
+                    agent.get("agent").memory.record(
+                        f"{heard.name}说：\"{heard.auditory_data['sound']}\"")
+                    agent.expects_reply = False
+                    agent.observing_target = ""
+                    continue
 
-                # P/Q/KL layer
-                from core.kl_divergence import compute_kl
-                p = agent.p_distribution if agent.p_distribution else {}
-                q_drives = {k: round(float(v), 1) for k, v in al.drives.attrs.items()}
-                q = {"pos": list(agent.pos), "zone": agent.zone,
-                     "drives": q_drives,
-                     "coins": round(float(agent.get("interaction").private_attrs.get("coins", 0))),
-                     "interactable": [r.name for r in sensory.get_interactable()],
-                     "visible": [r.name for r in sensory.get_visible_only()]}
-                kl_text = compute_kl(p, q) if p else ""
-                ctx["p_interactable"] = ", ".join(p.get("interactable", [])) if p.get("interactable") else ""
-                ctx["p_visible"] = ", ".join(p.get("visible", [])) if p.get("visible") else ""
-                ctx["kl_text"] = kl_text
+                # Vision: target left
+                seen = sensory.vision.get(agent.observing_target)
+                if not seen or seen.distance > al.view_radius * 0.8:
+                    agent.get("agent").memory.record(f"{agent.observing_target}走远了")
+                    agent.expects_reply = False
+                    agent.observing_target = ""
+                    continue
 
-                prompt1 = assembler.assemble("agent_decision", ctx)
-                t1 = time.time(); decision = await brain.decide(ctx); dt1 = time.time()-t1
+                # Timeout
+                if time.time() - agent.observing_since > agent.observing_timeout:
+                    agent.get("agent").memory.record(f"{agent.observing_target}没有回应我")
+                    agent.expects_reply = False
+                    agent.observing_target = ""
+                    continue
 
-                move_to = decision.get("move_to")
-                action = decision.get("action")
+            # ═══ Layered KL ═══
+            drives = al.drives
+            coins = round(float(agent.get("interaction").private_attrs.get("coins", 0)))
+            kl_text = total_kl(agent, sensory, drives, coins)
 
-                trace = {
-                    "agent": name, "ts": time.time()-test_start,
-                    "wall": datetime.now().isoformat(),
-                    "zone": agent.zone, "pos": list(agent.pos),
-                    "drives": {k:round(v,1) for k,v in al.drives.attrs.items() if k in ("thirst","hunger","social","energy","fun","mood")},
-                    "coins": round(agent.get("interaction").private_attrs.get("coins",0)),
-                    "p_distribution": agent.p_distribution.copy() if agent.p_distribution else {},
-                    "kl_text": kl_text,
-                    "llm1_prompt": prompt1, "llm1_time": round(dt1,1),
-                    "llm1_output": decision,
-                }
+            if not kl_text:
+                await asyncio.sleep(0.3)
+                continue
 
-                if move_to and isinstance(move_to, list) and len(move_to)==2:
-                    agent.move_to(move_to); agent.last_action_time=world.clock.now()
-                    systems["sensory"].update(agent, world.entities, world)
-                    systems["interaction"].update_sensory(agent, world.entities)
-                    trace["moved_to"] = move_to
-
-                if action:
-                    target = systems["interaction"].find_entity_at(agent.zone, agent.pos, action, world.entities, exclude_id=agent.id)
-                    if target and systems["interaction"].can_interact(agent, target):
-                        il = target.get("interaction")
-                        ambient = world.get_ambient_entities(target, radius=2, exclude={agent.id})
-                        label_table = resolver._build_label_mapping(world.entities)
-                        caller_memory = al.memory.to_prompt_text(3)
-
-                        rctx = {
-                            "caller_name": agent.name,
-                            "caller_recent_memory": caller_memory or "无",
-                            "caller_public": json.dumps(il.public_attrs, ensure_ascii=False) if il else "{}",
-                            "caller_private": json.dumps(agent.get("interaction").private_attrs, ensure_ascii=False) if agent.has("interaction") else "{}",
-                            "target_name": target.name,
-                            "target_public": json.dumps(il.public_attrs, ensure_ascii=False) if il else "{}",
-                            "target_private": json.dumps(il.private_attrs, ensure_ascii=False) if il else "{}",
-                            "action": action,
-                            "ambient_text": resolver._format_ambient(ambient),
-                            "label_table": label_table,
-                        }
-                        prompt2 = assembler.assemble("interaction_resolve", rctx)
-
-                        t2 = time.time()
-                        systems["interaction"].submit(uuid.uuid4().hex[:8], agent, target, action, world,
-                                                      story=decision.get("story", ""))
-                        agent.last_action_time = world.clock.now(); actions += 1
-                        dt2 = time.time()-t2
-
-                        trace.update({
-                            "llm2_prompt": prompt2, "llm2_time": round(dt2,1),
-                            "target": target.name, "target_id": target.id,
-                            "action_text": action, "action_count": actions,
-                        })
-                        agent_traces[name].append(trace)
-                        log("action", agent=name, action=action, target=target.name, ts=trace["ts"])
-                    else:
-                        if not move_to and not action: pass
-                        elif not target:
-                            trace["note"] = f"no target at pos ({agent.pos})"
+            # ═══ INTENT check ═══
+            latest_mem = al.memory.latest()
+            if latest_mem and latest_mem.get("text", "").startswith("INTENT:"):
+                mem_age = time.time() - latest_mem["ts"]
+                if mem_age < 30:
+                    intent_action = latest_mem["text"][len("INTENT:"):].strip()
+                    intent_target = systems["interaction"].find_entity_at(
+                        agent.zone, agent.pos, intent_action, world.entities, exclude_id=agent.id)
+                    if intent_target and systems["interaction"].can_interact(agent, intent_target):
+                        action_name = systems["interaction"].fuzzy_match_action(intent_target, intent_action)
+                        if action_name:
+                            result = await systems["interaction"].interact(
+                                agent, intent_target, action_name, {}, world)
+                            agent.last_action_time = world.clock.now()
+                            latest_mem["text"] += " ✓"
+                            trace = {"agent": name, "ts": time.time()-test_start,
+                                     "wall": datetime.now().isoformat(), "zone": agent.zone, "pos": list(agent.pos),
+                                     "target": intent_target.name, "target_id": intent_target.id,
+                                     "action_text": intent_action, "action_count": actions+1,
+                                     "note": "from_intent", "result_narrative": result.narrative if result else ""}
                             agent_traces[name].append(trace)
-                else:
-                    if not move_to:
-                        trace["note"] = "rest"
-                    agent_traces[name].append(trace)
+                            log("action", agent=name, action=intent_action, target=intent_target.name, ts=trace["ts"])
+                            actions += 1
+                            snapshot_p(agent, sensory, drives, coins)
+                            await asyncio.sleep(0.3)
+                            continue
+                    latest_mem["text"] = f"STALE: {intent_action}"
 
-            # Attach result to latest trace when it arrives
-            if agent_traces[name] and agent_traces[name][-1].get("agent") == name and agent.busy_result is not None:
-                r = agent.busy_result; agent.busy_result = None
-                systems["interaction"].apply_result(r, agent, world)
-                agent_traces[name][-1]["result_narrative"] = r.narrative
-                agent_traces[name][-1]["result_caller_deltas"] = r.caller_deltas
-                agent_traces[name][-1]["result_target_deltas"] = r.target_deltas
+            # ═══ Decide ═══
+            visible_text = ""
+            if sensory.get_visible_only():
+                visible_text = "\n".join(f"id={r.entity_id}|{r.name}|dist={r.distance}" for r in sensory.get_visible_only())
 
-            # Snapshot P distribution
-            q_sensory = al.sensory
-            agent.p_distribution = {
-                "pos": list(agent.pos), "zone": agent.zone,
-                "drives": {k: round(float(v), 1) for k, v in al.drives.attrs.items()},
-                "coins": round(float(agent.get("interaction").private_attrs.get("coins", 0))),
-                "interactable": [r.name for r in q_sensory.get_interactable()],
-                "visible": [r.name for r in q_sensory.get_visible_only()],
+            ctx = {
+                "round": actions+1, "name": agent.name, "personality": al.personality,
+                "drives_table": al.drives.to_prompt_table(),
+                "zone_name": world.zones.get(agent.zone,{}).get("name",""),
+                "zone_width": world.zones.get(agent.zone,{}).get("width",10),
+                "zone_height": world.zones.get(agent.zone,{}).get("height",10),
+                "pos_x": agent.pos[0], "pos_y": agent.pos[1],
+                "interactable_text": sensory.to_prompt_vision(),
+                "visible_text": visible_text,
+                "memory_text": al.memory.to_prompt_text(5),
+                "messages_text": "", "hearing_text": sensory.to_prompt_hearing(),
+                "kl_text": kl_text,
             }
 
-            await asyncio.sleep(2 if agent.status=="busy" else 1.0)
+            prompt1 = assembler.assemble("agent_decision", ctx)
+            t1 = time.time()
+            decision = await brain.decide(ctx)
+            dt1 = time.time()-t1
+
+            move_to = decision.get("move_to")
+            action_text = decision.get("action")
+
+            trace = {
+                "agent": name, "ts": time.time()-test_start,
+                "wall": datetime.now().isoformat(), "zone": agent.zone, "pos": list(agent.pos),
+                "drives": {k:round(v,1) for k,v in drives.attrs.items() if k in ("thirst","hunger","social","energy","fun","mood")},
+                "coins": coins, "kl_text": kl_text, "llm1_prompt": prompt1,
+                "llm1_time": round(dt1,1), "llm1_output": decision,
+            }
+
+            if move_to and isinstance(move_to, list) and len(move_to)==2:
+                agent.move_to(move_to); agent.last_action_time=world.clock.now()
+                systems["sensory"].update(agent, world.entities, world)
+                systems["interaction"].update_sensory(agent, world.entities)
+                trace["moved_to"] = move_to
+
+            if action_text:
+                target = systems["interaction"].find_entity_at(agent.zone, agent.pos, action_text, world.entities, exclude_id=agent.id)
+                if target and systems["interaction"].can_interact(agent, target):
+                    action_name = systems["interaction"].fuzzy_match_action(target, action_text)
+                    if action_name:
+                        result = await systems["interaction"].interact(
+                            agent, target, action_name, decision, world)
+                        agent.last_action_time = world.clock.now(); actions += 1
+                        trace.update({
+                            "target": target.name, "target_id": target.id,
+                            "action_text": action_text, "action_name": action_name,
+                            "action_count": actions,
+                        })
+                        if result:
+                            trace["result_narrative"] = result.narrative
+                            trace["result_caller_deltas"] = result.caller_deltas
+                            trace["result_target_deltas"] = result.target_deltas
+                        agent_traces[name].append(trace)
+                        log("action", agent=name, action=action_text, target=target.name, ts=trace["ts"])
+
+                        # Enter observing if expects_reply
+                        if decision.get("expects_reply") and target.has("agent"):
+                            agent.expects_reply = True
+                            agent.observing_target = target.id
+                            agent.observing_since = time.time()
+                            agent.observing_timeout = decision.get("patience", 5)
+                    else:
+                        trace["note"] = f"no matching action on {target.name}"
+                        agent_traces[name].append(trace)
+                elif target and not systems["interaction"].can_interact(agent, target):
+                    agent.move_to(list(target.pos))
+                    agent.last_action_time = world.clock.now()
+                    systems["sensory"].update(agent, world.entities, world)
+                    systems["interaction"].update_sensory(agent, world.entities)
+                    trace["moved_to"] = list(target.pos)
+                    trace["note"] = f"moving to {target.name}"
+                    agent_traces[name].append(trace)
+                    al.memory.record(f"INTENT: {action_text}", ts=time.time())
+                else:
+                    if not target:
+                        trace["note"] = f"no target at pos ({agent.pos})"
+                        agent_traces[name].append(trace)
+            else:
+                if not move_to:
+                    trace["note"] = "rest"
+                agent_traces[name].append(trace)
+
+            snapshot_p(agent, sensory, drives, coins)
+            await asyncio.sleep(0)
 
         except Exception as e:
             import traceback; traceback.print_exc()
@@ -181,12 +287,32 @@ async def run_agent(agent, world, brain, assembler, systems, resolver, runtime):
             await asyncio.sleep(3)
 
 
+# ═══════════ Validation ═══════════
+def validate_traces(traces: list) -> dict:
+    issues = []
+    npc_names = {'杰洛特','兰伯特','凯拉','卓尔坦','叶奈法','特莉丝','维瑟米尔','丹德里恩'}
+    acted = [t for t in traces if t.get('action_text')]
+    for t in acted:
+        for dkey in ['result_caller_deltas', 'result_target_deltas']:
+            deltas = t.get(dkey, {})
+            for attr, val in deltas.items():
+                if isinstance(val, (int, float)) and attr != 'coins' and abs(val) > 30:
+                    issues.append(f"[{t['ts']:.0f}s] {t['agent']}→{t.get('target','')} {attr}={val} (large)")
+    for t in traces:
+        drives = t.get('drives', {})
+        for attr, val in drives.items():
+            if isinstance(val, (int, float)) and val < 0:
+                issues.append(f"[{t['ts']:.0f}s] {t['agent']} {attr}={val} (negative!)")
+    npc_acts = [t for t in acted if t.get('target') in npc_names and t['agent'] in npc_names and t['agent']!=t['target']]
+    return {"issues": issues, "total_actions": len(acted), "npc_actions": len(npc_acts)}
+
+
 async def main():
     with open(os.path.join(BASE,"config/world.yaml")) as f: wc=yaml.safe_load(f)
     with open(os.path.join(BASE,"config/llm.yaml")) as f: lc=yaml.safe_load(f)
     loader=PromptLoader(os.path.join(BASE,"config/prompts.yaml")); assembler=PromptAssembler(loader)
-    llm=LLMClient(lc); brain=Brain(llm,assembler); resolver=InteractionResolver(llm,assembler)
-    systems={"sensory":SensorySystem(),"interaction":InteractionSystem(resolver),"decay":DecaySystem()}
+    llm=LLMClient(lc); brain=Brain(llm,assembler)
+    systems={"sensory":SensorySystem(),"interaction":InteractionSystem(llm, assembler),"decay":DecaySystem()}
     world=World(wc,systems)
 
     for npc in EXTRA_NPCS:
@@ -200,47 +326,19 @@ async def main():
     agents=[world.entities[a] for a in agent_ids]
     log("test_start", agents=agent_ids, n_entities=len(world.entities))
     print("="*70, flush=True)
-    print(f"  E2E CONCURRENT — {len(agents)} agents running simultaneously for 180s", flush=True)
+    print(f"  E2E — observing + layered KL | {len(agents)} agents | 60s", flush=True)
     print(f"  Start: {datetime.now().strftime('%H:%M:%S')}", flush=True)
     print("="*70, flush=True)
 
-    runtime = 600  # 10 min concurrent
-    tasks = [run_agent(a, world, brain, assembler, systems, resolver, runtime) for a in agents]
+    runtime = 60
+    tasks = [run_agent(a, world, brain, assembler, systems, runtime) for a in agents]
     await asyncio.gather(*tasks)
-
-    # Wait for pending resolver results
-    print("\n  Waiting for pending resolvers...", flush=True)
-    pending = {}
-    for a in agents:
-        if a.busy_result is not None:
-            pending[a.name] = a
-    for _ in range(120):  # 120s drain for 10min run
-        if not pending: break
-        for name, a in list(pending.items()):
-            if a.busy_result is not None:
-                r = a.busy_result; a.busy_result = None
-                systems["interaction"].apply_result(r, a, world)
-                log("result", agent=name, narrative=r.narrative[:150], deltas=r.caller_deltas)
-                # Attach to last trace for this agent
-                for t in reversed(agent_traces.get(name, [])):
-                    if t.get("agent") == name and not t.get("result_narrative"):
-                        t["result_narrative"] = r.narrative
-                        t["result_caller_deltas"] = r.caller_deltas
-                        t["result_target_deltas"] = r.target_deltas
-                        break
-                del pending[name]
-            elif a.status == "idle":
-                del pending[name]
-        await asyncio.sleep(1)
-    if pending:
-        print(f"  ⚠️ {len(pending)} agents still pending: {list(pending.keys())}", flush=True)
 
     elapsed = time.time()-test_start
     merged = [t for traces in agent_traces.values() for t in traces]
     merged.sort(key=lambda t: t["ts"])
     with open(OUT,"w") as f: json.dump(merged, f, ensure_ascii=False, indent=2)
 
-    # Stats
     agents_seen = set(agent_traces.keys())
     actions = [t for traces in agent_traces.values() for t in traces if t.get("action_text")]
     results = [t for traces in agent_traces.values() for t in traces if t.get("result_narrative")]
@@ -250,9 +348,18 @@ async def main():
     for name in sorted(agents_seen):
         agent_acts = [t for t in actions if t["agent"]==name]
         agent_res = [t for t in results if t["agent"]==name]
-        agent_social = [t for traces in agent_traces.values() for t in traces if t["agent"]==name and t.get("target") and t["agent"]!=t["target"]]
-        print(f"  {name:6s}: {len(agent_acts)} acts, {len(agent_res)} results, {len(agent_social)} social", flush=True)
+        print(f"  {name:6s}: {len(agent_acts)} acts, {len(agent_res)} results", flush=True)
     print(f"  Data: {OUT}", flush=True)
+
+    report = validate_traces(merged)
+    if report["issues"]:
+        print(f"\n  ⚠️  {len(report['issues'])} issues:", flush=True)
+        for iss in report["issues"][:10]:
+            print(f"    - {iss}", flush=True)
+    else:
+        print(f"  ✅ All checks passed.", flush=True)
+    print(f"  Total actions: {report['total_actions']} | NPC→NPC: {report['npc_actions']}", flush=True)
+
 
 if __name__=="__main__":
     asyncio.run(main())

@@ -1,11 +1,10 @@
 import asyncio
 from core.clock import WorldClock
 from core.spatial_grid import SpatialGrid
-from core.event_bus import EventBus
 from core.lifecycle import EntityLifecycle
 from entity.entity import Entity
 from layers.visual import VisualLayer
-from layers.interaction import InteractionLayer, ActionDef, TargetType, ResolveType
+from layers.interaction import InteractionLayer
 from layers.agent import AgentLayer
 from agent.drives import DriveSystem
 from agent.sensory_memory import SensoryMemory
@@ -32,7 +31,6 @@ class World:
         self.grids: dict[str, SpatialGrid] = {}
 
         self._systems = systems
-        self.event_bus = EventBus()
         self.lifecycle = EntityLifecycle(self)
 
         for zone_def in world_config.get("zones", []):
@@ -50,7 +48,7 @@ class World:
                 name=ent_def["name"],
                 zone=ent_def["zone"],
                 pos=list(ent_def.get("pos", [0, 0])),
-                describe=ent_def.get("describe", ""),
+                describe=ent_def.get("description", ent_def.get("describe", "")),
             )
 
             if "visual" in ent_def:
@@ -59,21 +57,17 @@ class World:
                     visible_radius=v.get("visible_radius", 5),
                     sprite=v.get("sprite"),
                     sprite_sheet=v.get("sprite_sheet"),
-                    info=v.get("info", {}),
+                    properties=v.get("properties", v.get("info", {})),
                 )
 
             if "interaction" in ent_def:
                 inter = ent_def["interaction"]
                 actions = {}
                 for name, a in inter.get("actions", {}).items():
-                    actions[name] = ActionDef(
-                        method=name,
-                        target_type=TargetType(a.get("target_type", "passive")),
-                        resolve=ResolveType(a.get("resolve", "rule")),
-                        params=a.get("params", {}),
-                        rule=a.get("rule"),
-                        estimated_duration=a.get("estimated_duration", 5),
-                    )
+                    # New format: action has description + optional gate
+                    # Keep backward compat: old format has resolve/rule/effects
+                    adef = dict(a)  # shallow copy to avoid mutating YAML
+                    actions[name] = adef
                 entity.layers["interaction"] = InteractionLayer(
                     interaction_radius=inter.get("interaction_radius", 2),
                     public_attrs=inter.get("public_attrs", {}),
@@ -103,6 +97,11 @@ class World:
                 agent_layer.sensory = SensoryMemory()
                 agent_layer.memory = AgentMemory()
                 agent_layer.inbox = Inbox()
+                # Auditory layer for speech output (observers poll this)
+                from layers.auditory import AuditoryLayer
+                entity.layers["auditory"] = AuditoryLayer(
+                    audible_radius=ag.get("hearing_radius", 15),
+                    properties={"sound": ""})
                 entity.layers["agent"] = agent_layer
 
             if "gate" in ent_def:
@@ -172,18 +171,14 @@ class World:
         entity.layers["visual"] = VisualLayer(
             visible_radius=20,
             sprite=sprite,
-            info={"look": f"{name} (外部访客)"},
+            properties={"look": f"{name} (外部访客)"},
         )
         entity.layers["interaction"] = InteractionLayer(
             interaction_radius=3,
             public_attrs={"expression": "好奇地四处张望"},
             private_attrs={"coins": 20, "mood": 60},
             actions={
-                "交谈": ActionDef(
-                    method="交谈",
-                    target_type=TargetType.PASSIVE,
-                    resolve=ResolveType.LLM,
-                ),
+                "交谈": {"description": f"和{name}交谈。他/她看起来很好奇。"},
             },
         )
         entity.layers["agent"] = AgentLayer(
@@ -197,6 +192,10 @@ class World:
         entity.get("agent").sensory = SensoryMemory()
         entity.get("agent").memory = AgentMemory()
         entity.get("agent").inbox = Inbox()
+        from layers.auditory import AuditoryLayer
+        entity.layers["auditory"] = AuditoryLayer(
+            audible_radius=15,
+            properties={"sound": ""})
         self.lifecycle.spawn(entity)
         return entity
 

@@ -1,5 +1,4 @@
 """SensorySystem: 读 target 的 Visual/Auditory Layer + 写 observer.sensory_memory.
-
 原则 ② 分层架构: 每层统一接口 see()/hear()。
 原则 ⑤ Systems 总控: 跨层感知逻辑唯一在此。
 """
@@ -17,13 +16,11 @@ class SensorySystem:
         current_vision_ids = set()
         current_hearing_ids = set()
 
-        # Get candidate entities: spatial grid if available, else full scan
         if world:
             view_radius = max(agent_layer.view_radius,
                               agent_layer.hearing_radius)
             candidate_ids = world.get_nearby_ids(
-                observer.zone, observer.pos, view_radius
-            )
+                observer.zone, observer.pos, view_radius)
         else:
             candidate_ids = [
                 eid for eid, e in all_entities.items()
@@ -48,7 +45,7 @@ class SensorySystem:
                     vision_data = visual_layer.see(d)
                     actions = []
                     if entity.has("interaction"):
-                        actions = entity.get("interaction").interact()
+                        actions = list(entity.get("interaction").actions.keys())
                     sensory.vision[eid] = VisionRecord(
                         entity_id=eid, name=entity.name,
                         pos=list(entity.pos), distance=d,
@@ -65,17 +62,24 @@ class SensorySystem:
                 hear_range = min(agent_layer.hearing_radius,
                                  auditory_layer.audible_radius)
                 if d <= hear_range:
-                    current_hearing_ids.add(eid)
-                    is_new = eid not in sensory.hearing
-                    auditory_data = auditory_layer.hear(d)
-                    sensory.hearing[eid] = HearingRecord(
-                        entity_id=eid, name=entity.name,
-                        pos=list(entity.pos), distance=d,
-                        auditory_data=auditory_data,
-                        first_heard=(time.time() if is_new
-                                     else sensory.hearing[eid].first_heard),
-                        last_heard=time.time(),
-                    )
+                    speech = auditory_layer.properties.get("current_speech", "")
+                    speech_ts = auditory_layer.properties.get("speech_ts", 0)
+                    if speech and time.time() - speech_ts < 30:
+                        current_hearing_ids.add(eid)
+                        is_new = eid not in sensory.hearing
+                        auditory_data = auditory_layer.hear(d)
+                        sensory.hearing[eid] = HearingRecord(
+                            entity_id=eid, name=entity.name,
+                            pos=list(entity.pos), distance=d,
+                            auditory_data=auditory_data,
+                            first_heard=(time.time() if is_new
+                                         else sensory.hearing[eid].first_heard),
+                            last_heard=time.time(),
+                        )
+                        # Save to memory so agent retains what it heard
+                        if is_new and observer.has("agent"):
+                            observer.get("agent").memory.record(
+                                f"{entity.name}说：\"{speech}\"")
 
         # 离开范围 → 删除
         for eid in list(sensory.vision.keys()):

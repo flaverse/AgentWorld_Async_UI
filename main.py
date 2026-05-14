@@ -133,8 +133,6 @@ async def demo_loop(world, brain, systems, max_actions=5):
             }
             kl_text = compute_kl(p, q) if p else ""
 
-            context["p_interactable"] = ", ".join(p.get("interactable", [])) if p.get("interactable") else ""
-            context["p_visible"] = ", ".join(p.get("visible", [])) if p.get("visible") else ""
             context["kl_text"] = kl_text
 
             print(f"\n⏱  {world.clock.time_str()} | {agent.name} ({agent.pos[0]},{agent.pos[1]})")
@@ -183,7 +181,7 @@ async def demo_loop(world, brain, systems, max_actions=5):
                         print(f"  🎯 → {target.name}", flush=True)
                     else:
                         agent.get("agent").memory.record(
-                            narrative=f"想找{target.name}但对方已不在附近"
+                            text=f"想找{target.name}但对方已不在附近"
                         )
                 else:
                     # No specific target found — just a movement or rest action
@@ -214,16 +212,12 @@ async def demo_loop(world, brain, systems, max_actions=5):
 
     # Wait for final result
     print("\n等待最后的裁定结果...")
-    for _ in range(15):
-        if agent.busy_result is not None:
-            result = agent.busy_result
-            agent.busy_result = None
-            systems["interaction"].apply_result(result, agent, world)
-            print(f"  📖 {result.narrative}")
-            break
-        if agent.status == "idle":
-            break
-        await asyncio.sleep(1.0)
+    await systems["interaction"].await_pending(timeout=15)
+    if agent.busy_result is not None:
+        result = agent.busy_result
+        agent.busy_result = None
+        systems["interaction"].apply_result(result, agent, world)
+        print(f"  📖 {result.narrative}")
 
     # Final snapshot
     inter = agent.get("interaction")
@@ -265,6 +259,11 @@ async def main():
     }
 
     world = World(world_cfg, systems)
+
+    # Wire EventBus: multi-modal push broadcast
+    def on_entity_event(event, entity_id, zone, pos):
+        systems["sensory"].broadcast_speech(entity_id, zone, pos, world)
+    world.event_bus.on("entity.spoke_or_gestured", on_entity_event)
 
     # Wire frontend broadcast
     from api.server import broadcast_to_frontend

@@ -3,25 +3,12 @@ system_prompts:
     你是一个虚拟世界中的自主居民。根据你的欲望状态和周围环境，做出一个合理的行动决定。
     你可以移动到某个坐标，或与某个实体交互。行动应自然、合理、有趣。
     你可以对任何实体做任何合理的事，不需要从固定列表选择。
+    输出JSON。不要输出数字属性变化——那是引擎的事。
 
-  interaction_resolve: |
-    你是世界交互裁判。根据双方公开和私有状态，客观裁定交互结果。
-    结果应合理、有生活感、偶有惊喜。属性变化控制在-30到+30之间。
-    周边实体(state字段)的存在可能会影响交互结果(如酒在吧台上=老板可能在)。
-    你可修改周边实体的属性(ambient_effects)。
-    不禁止"违规"行为(如偷喝)，但会产生连锁后果(老板生气等)。
-
-  story_generator: |
-    你是世界叙事者。根据场景中所有实体的描述和状态，生成一个自然的、有趣的简短故事。
-    不输出数字或属性变化。不裁判合理性。只写故事。
-
-  projection_engine: |
-    你是世界投影引擎。你收到一个已经发生的故事。你需要计算故事对每个实体的属性影响。
-    严格输出JSON。遵守世界法则。
-
-  memory_writer: |
-    你是记忆书写者。为每个NPC从自己的第一人称视角写一段简短的记忆。
-    只给有agent层的NPC生成记忆。物品不需要。每段<30字。
+  interact_narrative: |
+    你是世界叙事者。根据动作描述和执行者/对象的状态，写一段50-150字的叙事并计算影响。
+    叙事应自然、有生活感、偶有惊喜。
+    只输出JSON。不要额外评论。deltas绝对值控制在20以内。
 
 # ═══════════════════════════════════════
 templates:
@@ -31,7 +18,6 @@ templates:
       - {name: time_info, provider: runtime}
       - {name: persona, provider: runtime}
       - {name: world_rules, provider: content}
-      - {name: p_distribution, provider: runtime, condition: "has_p"}
       - {name: kl_divergence, provider: runtime, condition: "has_kl"}
       - {name: drive_state, provider: runtime}
       - {name: spatial_context, provider: topology}
@@ -43,45 +29,13 @@ templates:
       - {name: output_format, provider: content}
     output_schema: decision_output
 
-  interaction_resolve:
-    temperature: 0.3
+  interact_narrative:
+    temperature: 0.5
     slots:
-      - {name: caller_section, provider: runtime}
-      - {name: target_section, provider: runtime}
-      - {name: action_section, provider: runtime}
-      - {name: ambient_section, provider: runtime, condition: "has_ambient"}
-      - {name: label_mapping, provider: runtime}
-      - {name: world_rules_resolve, provider: content}
-      - {name: resolve_guide, provider: content}
-      - {name: output_format_resolve, provider: content}
-    output_schema: resolve_output
-
-  story_layer:
-    temperature: 0.8
-    slots:
-      - {name: story_caller, provider: runtime}
-      - {name: story_component, provider: runtime}
-      - {name: story_guidance, provider: content}
-      - {name: story_output, provider: content}
-    output_schema: story_output
-
-  projection_layer:
-    temperature: 0.3
-    slots:
-      - {name: projection_story, provider: runtime}
-      - {name: projection_entities, provider: runtime}
-      - {name: projection_rules, provider: content}
-      - {name: projection_output, provider: content}
-    output_schema: projection_output
-
-  memory_layer:
-    temperature: 0.7
-    slots:
-      - {name: memory_story, provider: runtime}
-      - {name: memory_npcs, provider: runtime}
-      - {name: memory_guidance, provider: content}
-      - {name: memory_output, provider: content}
-    output_schema: memory_output
+      - {name: interact_context, provider: runtime}
+      - {name: interact_rules, provider: content}
+      - {name: interact_output_format, provider: content}
+    output_schema: interact_output
 
 # ═══════════════════════════════════════
 slots:
@@ -109,13 +63,6 @@ slots:
       ## 你的状态
       {drives_table}
       (高于60=需要关注, 高于80=急需满足)
-
-  p_distribution:
-    provider: runtime
-    template: |
-      ## P 分布 (上一步)
-      上一步周围有: {p_interactable}
-      视野中: {p_visible}
 
   kl_divergence:
     provider: runtime
@@ -168,163 +115,57 @@ slots:
       {
         "thinking": "简短推理",
         "action": "做什么 (自由文本，含位置和意图)" 或 null,
-        "story": "简短叙事 (50-100字, 涉及他人时)" 或 null
+        "story": "简短叙事 (50-100字, 涉及他人时)" 或 null,
+        "dialogue": "你说了什么" 或 null,
+        "visual": "你的表情/动作描述" 或 null,
+        "internal": "你的心里话" 或 null,
+        "self_deltas": {"属性": 值},
+        "expects_reply": true/false,
+        "patience": 5
       }
       - action: 你的完整意图(去哪+做什么)。null=歇一会。引擎自己会找目标实体
       - story: 简短叙事。自己处理简单事务时可留空
+      - dialogue: 你直接说了什么(原话)。null=沉默
+      - visual: 你的神态、表情、肢体动作。给观察者看的
+      - internal: 你的内心活动(秘密)
+      - self_deltas: 这个动作对你自身属性的影响。属性: thirst hunger social energy fun mood coins。范围±30。无影响写{}
+      - expects_reply: 这句话是否需要对方回应(true/false)
+      - patience: 如果等回应，最多等几秒。不等回应写0
 
-  caller_section:
+  # ── Interact Narrative ──
+  interact_context:
     provider: runtime
     template: |
-      ## 发起方: {caller_name}
-      最近记忆: {caller_recent_memory}
-      公开: {caller_public}
-      私有: {caller_private}
+      ## 交互
+      {caller_name}(id={caller_id}) 对 {target_name}(id={target_id}) 执行了 {action_name}。
+      
+      执行者: {caller_name} ({caller_personality})
+      执行者当前: {caller_state}
 
-  target_section:
+      对象: {target_description}
+      动作: {action_description}
+
+      {target_context}
+
+  interact_rules:
     provider: runtime
     template: |
-      ## 被调用方: {target_name}
-      公开: {target_public}
-      私有: {target_private}
+      ## 规则
+      写一段50-150字的叙事。计算对{caller_name}({caller_id})和{target_name}({target_id})的属性影响。
+      属性有: thirst hunger social energy fun mood coins。控制在[-20,+20]。
+      只输出JSON。
 
-  action_section:
-    provider: runtime
-    template: "## 动作\n{action}"
-
-  ambient_section:
+  interact_output_format:
     provider: runtime
     template: |
-      ## 周边实体 (同位置或邻格)
-      {ambient_text}
-      (entity_id 必须使用括号内的 id)
-
-  label_mapping:
-    provider: runtime
-    template: |
-      ## 实体 ID 映射表 (entity_id 请使用左侧 id，不要用显示名)
-      {label_table}
-
-  world_rules_resolve:
-    provider: content
-    template: |
-      ## 裁判公理 (所有裁定默认遵守)
-      1. **不可透支**: deltas 不能使任何属性变负。资源不足直接拒绝。
-      2. **边际递减**: 同一动作连续>2次后效果减半。
-      3. **上下文感知**: 实体状态影响结果。
-      4. **适度随机**: +-20%变化让世界更真实。
-
-  resolve_guide:
-    provider: content
-    template: |
-      ## 裁定原则
-      - 综合考虑发起方、被调用方、周边实体
-      - 周边实体可能影响交互
-      - 不禁止违规行为，但产生连锁后果
-      - coins不能为负
-      - 如果动作为"交谈": 生成对话回复。影响 social 和 mood。
-
-  output_format_resolve:
-    provider: content
-    template: |
-      ## 输出格式 (严格JSON)
-      {
-        "caller_deltas": {"属性名": 变化值},
-        "target_deltas": {"属性名": 变化值},
-        "ambient_effects": [{"entity_id": "id", "deltas": {}}],
-        "narrative": "叙事",
-        "public_observation": "公开观察"
-      }
-
-  # ── Story Layer ──
-  story_caller:
-    provider: runtime
-    template: |
-      ## 触发者
-      {caller_name}: {caller_desc}
-      提议动作: {proposed_action}
-
-  story_component:
-    provider: runtime
-    template: |
-      ## 场景内实体
-      {component_entities}
-
-  story_guidance:
-    provider: content
-    template: |
-      ## 你是世界叙事者
-      根据场景生成简短自然的叙事。50-100字。不输出数字或属性变化。不裁判合理性。
-      故事应该有趣、符合角色性格、有生活感。
-
-  story_output:
-    provider: content
-    template: |
-      ## 输出
-      {"story": "一段叙事"}
-
-  # ── Projection Layer ──
-  projection_story:
-    provider: runtime
-    template: |
-      ## 已发生的故事
-      {story_text}
-
-  projection_entities:
-    provider: runtime
-    template: |
-      ## 各实体当前状态
-      {entity_states}
-
-  projection_rules:
-    provider: content
-    template: |
-      ## 世界法则 (必须遵守)
-      1. 不可透支: 任何属性不能变负
-      2. 边际递减: 连续同动作>2次效果减半
-      3. 上下文感知: 实体状态影响结果
-      4. +-20%随机变化
-      只输出JSON, 不要叙事。
-
-  projection_output:
-    provider: content
-    template: |
-      ## 输出
-      {"effects": [{"entity_id":"id","deltas":{"key":value}}]}
-
-  # ── Memory Layer ──
-  memory_story:
-    provider: runtime
-    template: |
-      ## 已发生的故事
-      {story_text}
-
-  memory_npcs:
-    provider: runtime
-    template: |
-      ## 需要生成记忆的NPC
-      {npc_list}
-
-  memory_guidance:
-    provider: content
-    template: |
-      ## 你是记忆书写者
-      为每个NPC从自己的第一人称视角写一段简短记忆(<30字)。
-      只给有agent层的NPC生成。物品不需要。
-
-  memory_output:
-    provider: content
-    template: |
-      ## 输出
-      {"memories": [{"entity_id":"id","text":"第一人称记忆"}]}
-
-# ═══════════════════════════════════════
-verification:
-  projection_mask:
-    - attribute_bounds
-    - entity_existence
-    - conservation
-  max_retries: 2
+      输出格式:
+      {{
+        "narrative": "50-150字的叙事，从执行者视角描述",
+        "deltas": {{
+          "{caller_id}": {{"thirst": -10, "mood": 3}}
+        }}
+      }}
+      只输出JSON。不要标记。
 
 # ═══════════════════════════════════════
 output_schemas:
@@ -336,36 +177,18 @@ output_schemas:
         thinking: {type: string}
         action: {type: string}
         story: {type: string}
-      required: [thinking]
-  resolve_output:
+        dialogue: {type: string}
+        visual: {type: string}
+        internal: {type: string}
+        self_deltas: {type: object}
+        expects_reply: {type: boolean}
+        patience: {type: number}
+
+  interact_output:
     type: json_object
     schema:
       type: object
       properties:
-        caller_deltas: {type: object}
-        target_deltas: {type: object}
-        ambient_effects: {type: array}
         narrative: {type: string}
-        public_observation: {type: string}
-      required: [narrative, public_observation]
-  story_output:
-    type: json_object
-    schema:
-      type: object
-      properties:
-        story: {type: string}
-      required: [story]
-  projection_output:
-    type: json_object
-    schema:
-      type: object
-      properties:
-        effects: {type: array}
-      required: [effects]
-  memory_output:
-    type: json_object
-    schema:
-      type: object
-      properties:
-        memories: {type: array}
-      required: [memories]
+        deltas: {type: object}
+      required: [narrative, deltas]

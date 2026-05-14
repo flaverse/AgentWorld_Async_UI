@@ -1,7 +1,7 @@
 world:
   name: 猎魔人世界 - 白果园
   time_scale: 60
-  start_time: 08:00
+  start_time: "08:00"
   tick_interval_seconds: 1.0
 zones:
 - id: bar_zone
@@ -38,557 +38,374 @@ zones:
     to_zone: square
     target_gate: square_herb_gate
 entities:
+# ═══ GATES ═══
 - id: bar_door
   name: 酒馆门口
   zone: bar_zone
-  pos:
-  - 0
-  - 4
+  pos: [0, 4]
   visual:
     visible_radius: 20
     sprite: door
-    info:
+    properties:
       look: 酒馆的木质大门，通向白果园广场
   interaction:
     interaction_radius: 1
     actions:
       离开:
-        target_type: passive
-        resolve: rule
-        rule:
-          narrative: '{caller}推开酒馆门走了出去'
-          move_to_zone: square
-          move_to_pos:
-          - 13
-          - 5
-  describe: '酒馆门口。可做: [''离开'']'
+        description: 推开酒馆门走出去。门外是白果园广场，阳光和新鲜空气扑面而来。
+        gate: {to_zone: square, to_pos: [13, 5]}
+  description: 酒馆的木质大门，通向白果园广场。
+
 - id: square_bar_gate
   name: 酒馆入口
   zone: square
-  pos:
-  - 13
-  - 5
+  pos: [13, 5]
   visual:
     visible_radius: 20
     sprite: door
-    info:
+    properties:
       look: 狐狸与鹅酒馆的招牌在风中摇晃，里面传来麦酒香
   interaction:
     interaction_radius: 1
     actions:
       进入酒馆:
-        target_type: passive
-        resolve: rule
-        rule:
-          narrative: '{caller}推开酒馆门走了进去'
-          move_to_zone: bar_zone
-          move_to_pos:
-          - 1
-          - 4
-  describe: '酒馆入口。可做: [''进入酒馆'']'
+        description: 推开橡木门走进狐狸与鹅酒馆。一股麦酒和烤肉的暖香扑面而来，里面人声嘈杂。
+        gate: {to_zone: bar_zone, to_pos: [1, 4]}
+  description: 狐狸与鹅酒馆的橡木大门。门缝里透出麦酒香和暖黄的灯光。
+
 - id: square_herb_gate
   name: 草药小屋入口
   zone: square
-  pos:
-  - 0
-  - 6
+  pos: [0, 6]
   visual:
     visible_radius: 20
     sprite: door
-    info:
+    properties:
       look: 一间歪斜的小木屋，门口挂满了干草药
   interaction:
     interaction_radius: 1
     actions:
       进入小屋:
-        target_type: passive
-        resolve: rule
-        rule:
-          narrative: '{caller}推开草药小屋的门，一股草药味扑面而来'
-          move_to_zone: herb_hut
-          move_to_pos:
-          - 7
-          - 5
-  describe: '草药小屋入口。可做: [''进入小屋'']'
+        description: 推开挂着干草药的小木门。一股浓郁的草药味扑面而来，混合着鼠尾草和某种发酵根茎的气息。
+        gate: {to_zone: herb_hut, to_pos: [7, 5]}
+  description: 一间歪斜的小木屋，门口挂满了干草药。门缝里透出药草的混合气味。
+
 - id: herb_door
   name: 小屋门口
   zone: herb_hut
-  pos:
-  - 7
-  - 5
+  pos: [7, 5]
   visual:
     visible_radius: 20
     sprite: door
-    info:
+    properties:
       look: 透过门缝能看到白果园广场
   interaction:
     interaction_radius: 1
     actions:
       离开小屋:
-        target_type: passive
-        resolve: rule
-        rule:
-          narrative: '{caller}走出草药小屋'
-          move_to_zone: square
-          move_to_pos:
-          - 1
-          - 6
-  describe: '小屋门口。可做: [''离开小屋'']'
+        description: 推开小木门走出草药小屋。门外是白果园广场，阳光照在石板路上。
+        gate: {to_zone: square, to_pos: [1, 6]}
+  description: 草药小屋的木门。透过门缝能看到白果园广场。
+
+# ═══ BAR ZONE ═══
 - id: bar_counter
   name: 吧台
   zone: bar_zone
-  pos:
-  - 7
-  - 2
+  pos: [7, 2]
   visual:
     visible_radius: 20
     sprite: counter_bar
-    info:
+    properties:
       look: 木制吧台，后面站着矮人老板
       detail: 酒架上有几瓶酒，吧台有些年头了
   interaction:
     interaction_radius: 3
-    public_attrs:
-      type: 吧台
-    private_attrs:
-      personality: 话不多的矮人老板，看心情定价
-      mood: 60
     actions:
       搭话:
-        target_type: passive
-        resolve: llm
+        description: 靠在吧台上，跟矮人老板聊两句。老板话不多，但看心情会透点消息。心情好的时候还多送你半杯。
       倚靠:
-        target_type: passive
-        resolve: rule
-        rule:
-          cost:
-            energy: -2
-          effects:
-            fun: 5
-          duration_minutes: 5
-          narrative: '{caller}靠在吧台上，手指轻敲着台面'
-  describe: '吧台。可做: [''搭话'', ''倚靠'']。属性: {''personality'': ''话不多的矮人老板，看心情定价'', ''mood'':
-    60}'
+        description: 靠在吧台上休息一下，手指轻敲着台面。吧台的木纹被无数个酒杯磨得光滑。
+  description: 被无数酒杯磨得光滑发亮的橡木吧台。矮人老板站在吧台后，用一块脏布擦着杯子。墙上挂着一面公告板。
+
 - id: drink_ale
   name: 麦酒
   zone: bar_zone
-  pos:
-  - 7
-  - 2
+  pos: [7, 2]
   visual:
     visible_radius: 3
     sprite: null
-    info:
+    properties:
       look: 一杯琥珀色麦酒，泡沫细密
       detail: 闻起来有麦芽香气
   interaction:
     interaction_radius: 2
-    private_attrs:
-      price: 5
-      quality: 普通
     actions:
       饮用:
-        target_type: passive
-        resolve: llm
-        estimated_duration: 10
+        description: 端起杯子喝上一口。麦酒冰凉微苦，泡沫细腻，是矮人老板从玛哈坎进的货。解渴又暖和。大概花5个克朗。
       嗅闻:
-        target_type: passive
-        resolve: rule
-        rule:
-          narrative: '{caller}低头闻了闻麦酒，麦芽香气很浓'
-  describe: '麦酒。可做: [''饮用'', ''嗅闻'']。属性: {''price'': 5, ''quality'': ''普通''}'
+        description: 低头闻一闻。麦芽香气很浓，带着一点啤酒花的苦味。
+  description: 一杯琥珀色的麦酒，泡沫细密地贴着杯沿。矮人老板刚从酒桶里打出来的，还冒着凉气。
+
 - id: drink_wine
   name: 葡萄酒
   zone: bar_zone
-  pos:
-  - 7
-  - 2
+  pos: [7, 2]
   visual:
     visible_radius: 3
     sprite: null
-    info:
+    properties:
       look: 一杯深红色葡萄酒，果香浓郁
   interaction:
     interaction_radius: 2
-    private_attrs:
-      price: 12
-      quality: 上等
     actions:
       饮用:
-        target_type: passive
-        resolve: llm
-        estimated_duration: 10
+        description: 端起酒杯抿一口。深红色的酒液带着黑莓和橡木的香气，是陶森特的上等货。大概12个克朗。
       嗅闻:
-        target_type: passive
-        resolve: rule
-        rule:
-          narrative: '{caller}闻了闻葡萄酒，果香芬芳'
-  describe: '葡萄酒。可做: [''饮用'', ''嗅闻'']。属性: {''price'': 12, ''quality'': ''上等''}'
+        description: 闻一闻。果香芬芳，带着一丝陈年橡木桶的气息。
+  description: 一杯深红色的葡萄酒，果香浓郁。陶森特的上等货，价格不菲。
+
 - id: table_01
   name: 散桌
   zone: bar_zone
-  pos:
-  - 3
-  - 5
+  pos: [3, 5]
   visual:
     visible_radius: 15
     sprite: table
-    info:
+    properties:
       look: 靠窗的散桌，阳光正好洒在桌面
   interaction:
     interaction_radius: 2
     actions:
       坐下:
-        target_type: passive
-        resolve: rule
-        rule:
-          cost:
-            energy: -3
-          effects:
-            fun: 10
-            energy: -5
-          duration_minutes: 15
-          narrative: '{caller}在散桌前坐下，阳光暖暖地洒在身上'
-  describe: '散桌。可做: [''坐下'']'
+        description: 拉开椅子在窗边坐下。阳光洒在桌面上，暖洋洋的。是个安静歇脚的好位置。
+  description: 靠窗的一张散桌。阳光透过窗格洒在木桌上，桌面上还留着上一杯酒的杯印。
+
 - id: notice_board
   name: 公告板
   zone: bar_zone
-  pos:
-  - 5
-  - 7
+  pos: [5, 7]
   visual:
     visible_radius: 10
     sprite: null
-    info:
+    properties:
       look: 一面钉满委托书的木制公告板
       detail: 上面贴满了猎魔委托：狮鹫兽、水鬼、日间妖灵...
   interaction:
     interaction_radius: 2
     actions:
       查看委托:
-        target_type: passive
-        resolve: rule
-        rule:
-          effects:
-            fun: 5
-          narrative: '{caller}翻了翻公告板。最上面一张写着：''白果园郊外出现狮鹫兽，悬赏500金币。有意者请找维瑟米尔。'''
-  describe: '公告板。可做: [''查看委托'']'
+        description: 翻看公告板上的委托书。最上面一张写着：'白果园郊外出现狮鹫兽，悬赏500金币。有意者请找维瑟米尔。'
+  description: 一面钉满委托书的木制公告板。上面有狮鹫兽、水鬼、日间妖灵的悬赏。
+
+# ═══ SQUARE ═══
 - id: square_well
   name: 水井
   zone: square
-  pos:
-  - 7
-  - 6
+  pos: [7, 6]
   visual:
     visible_radius: 20
     sprite: null
-    info:
+    properties:
       look: 一口石砌水井，井水清澈见底
   interaction:
     interaction_radius: 2
     actions:
       打水:
-        target_type: passive
-        resolve: rule
-        rule:
-          effects:
-            thirst: -30
-          duration_minutes: 5
-          narrative: '{caller}从井里打了一桶水，清凉甘甜'
-  describe: '水井。可做: [''打水'']'
+        description: 放下木桶，摇动辘轳打上一桶水。井水来自地下暗河，常年清凉甘甜。喝下去喉咙一阵冰凉。
+      看:
+        description: 低头往井里看。深不见底，隐约能听到水滴声，自己的倒影在水面上微微晃动。
+  description: 广场中央的石砌水井。井沿被无数只手磨得光滑，井绳和木桶挂在辘轳上。井水来自地下暗河，常年清凉甘甜。
+
 - id: square_bench
   name: 长椅
   zone: square
-  pos:
-  - 5
-  - 7
+  pos: [5, 7]
   visual:
     visible_radius: 15
     sprite: null
-    info:
+    properties:
       look: 树荫下的木制长椅，有老人在打盹
   interaction:
     interaction_radius: 2
     actions:
       坐下:
-        target_type: passive
-        resolve: rule
-        rule:
-          cost:
-            energy: -2
-          effects:
-            fun: 8
-            energy: -3
-          duration_minutes: 10
-          narrative: '{caller}在长椅上坐下，树荫遮住了阳光'
-  describe: '长椅。可做: [''坐下'']'
+        description: 在树荫下的长椅上坐下。旁边的老人在打盹，风吹过树叶沙沙响。是个发呆的好地方。
+  description: 广场大树下的木制长椅，被树荫遮住了太阳。椅子上有老人正在打盹。
+
 - id: square_merchant
   name: 商人摊位
   zone: square
-  pos:
-  - 10
-  - 3
+  pos: [10, 3]
   visual:
     visible_radius: 15
     sprite: null
-    info:
+    properties:
       look: 一个摆满货物的临时摊位，商人正在吆喝
   interaction:
     interaction_radius: 3
-    public_attrs:
-      type: 杂货摊
-    private_attrs:
-      personality: 精明的矮人商贩，喜欢讨价还价
-      mood: 50
     actions:
       浏览货物:
-        target_type: passive
-        resolve: rule
-        rule:
-          effects:
-            fun: 5
-          narrative: '{caller}在摊位前驻足。摊子上摆着面包、草药、磨刀石和一些不知名的瓶罐。'
+        description: 在摊位前驻足浏览。摊子上摆着面包、草药、磨刀石、还有一些不知名的瓶罐。矮人商人正热情地招呼你来看看。
       讨价还价:
-        target_type: passive
-        resolve: llm
-  describe: '商人摊位。可做: [''浏览货物'', ''讨价还价'']。属性: {''personality'': ''精明的矮人商贩，喜欢讨价还价'',
-    ''mood'': 50}'
+        description: 跟矮人商人讨价还价。他喜欢这调调——只要不砍太狠。最后成交时他还会咧嘴笑。
+  description: 一个摆满面包、草药和杂货的临时摊位。矮人商贩正在大声吆喝，见人就招呼。
+
 - id: coin_ground
   name: 硬币
   zone: square
-  pos:
-  - 4
-  - 10
+  pos: [4, 10]
   visual:
     visible_radius: 1
     sprite: null
-    info:
+    properties:
       look: 地上有一枚亮闪闪的硬币
   interaction:
     interaction_radius: 1
     actions:
       捡起:
-        target_type: passive
-        resolve: rule
-        rule:
-          effects:
-            coins: 3
-          narrative: '{caller}弯腰捡起三枚金币，上面有泰莫利亚的纹章'
-  describe: '硬币。可做: [''捡起'']'
+        description: 弯腰捡起地上的硬币。上面有泰莫利亚的纹章，不知道是谁掉的。
+  description: 地上躺着一枚亮闪闪的硬币。看起来是泰莫利亚金币。
+
+# ═══ HERB HUT ═══
 - id: herb_shelf
   name: 草药架
   zone: herb_hut
-  pos:
-  - 3
-  - 2
+  pos: [3, 2]
   visual:
     visible_radius: 10
     sprite: null
-    info:
+    properties:
       look: 一个摆满瓶瓶罐罐的草药架，散发着各种草药混合的气味
       detail: 曼德拉草根、狼毒乌头、白屈花...每样都标注了功效
   interaction:
     interaction_radius: 2
     actions:
       查看草药:
-        target_type: passive
-        resolve: rule
-        rule:
-          effects:
-            fun: 5
-          narrative: '{caller}仔细查看草药架。曼德拉草根——治疗重伤。狼毒乌头——剧毒，需稀释。白屈花——猎魔人魔药基底。'
+        description: 仔细查看草药架上的瓶瓶罐罐。曼德拉草根——治疗重伤。狼毒乌头——剧毒，需稀释。白屈花——猎魔人魔药基底。
       取曼德拉草:
-        target_type: passive
-        resolve: rule
-        rule:
-          effects:
-            fun: 8
-            energy: -2
-          narrative: '{caller}小心翼翼地取下一株曼德拉草根，根须还在微微颤动。这东西能做出最强的治疗药水。'
+        description: 小心翼翼地取下一株曼德拉草根。根须还在微微颤动。这东西能做出最强的治疗药水。
       取白屈花:
-        target_type: passive
-        resolve: rule
-        rule:
-          effects:
-            fun: 5
-            energy: -1
-          narrative: '{caller}摘了几朵白屈花，花瓣散发着淡淡的荧光。猎魔人魔药的基本材料。'
-  describe: '草药架。可做: [''查看草药'', ''取曼德拉草'', ''取白屈花'']'
+        description: 摘几朵白屈花。花瓣散发着淡淡的荧光，是猎魔人魔药的基本材料。
+  description: 一个摆满了瓶瓶罐罐的草药架。曼德拉草根、狼毒乌头、白屈花——每样都贴着褪色的标签。
+
 - id: herb_mortar
   name: 研钵
   zone: herb_hut
-  pos:
-  - 3
-  - 3
+  pos: [3, 3]
   visual:
     visible_radius: 8
     sprite: null
-    info:
+    properties:
       look: 一个石制研钵，里面还残留着一些绿色粉末
   interaction:
     interaction_radius: 2
-    private_attrs:
-      contains: 白屈花粉
     actions:
       研磨:
-        target_type: passive
-        resolve: rule
-        rule:
-          effects:
-            energy: -3
-            fun: 8
-          narrative: '{caller}拿起研杵，将白屈花细细研磨成粉。粉末在指尖闪着微弱的荧光。'
-  describe: '研钵。可做: [''研磨'']。属性: {''contains'': ''白屈花粉''}'
+        description: 拿起研杵，将草药细细研磨成粉。石钵冰凉，粉末在指尖闪着微弱的荧光。是个需要耐心和手腕力气的活。
+  description: 一个石制研钵，里面残留着某种绿色粉末。旁边的研杵还沾着上一批草药的痕迹。
+
 - id: herb_recipe_book
   name: 配方书
   zone: herb_hut
-  pos:
-  - 4
-  - 2
+  pos: [4, 2]
   visual:
     visible_radius: 6
     sprite: null
-    info:
+    properties:
       look: 一本厚重的皮制笔记本，书页边缘已经泛黄
   interaction:
     interaction_radius: 1
     actions:
       翻阅:
-        target_type: passive
-        resolve: rule
-        rule:
-          effects:
-            fun: 10
-          narrative: '{caller}翻开配方书。里面记载着各种魔药配方：燕子——加速愈合。猫——夜视。暴雪——强化反应。每一页都有配比和注意事项。'
+        description: 翻开泛黄的皮制笔记本。里面记载着各种魔药配方和注意事项——燕子：加速愈合，猫：夜视，暴雪：强化反应。每页都有托蜜拉亲手写的批注。
       研究配方:
-        target_type: passive
-        resolve: llm
-  describe: '配方书。可做: [''翻阅'', ''研究配方'']'
+        description: 坐下来仔细研究某条配方的细节。托蜜拉的笔记很工整——她标注了草药的年份、用量调整、以及每次实验的结果。
+  description: 一本厚重的皮制笔记本。书页泛黄，里面密密麻麻写满了魔药配方的记录和批注。
+
 - id: herb_cauldron
   name: 炼金坩埚
   zone: herb_hut
-  pos:
-  - 5
-  - 3
+  pos: [5, 3]
   visual:
     visible_radius: 10
     sprite: null
-    info:
+    properties:
       look: 一口冒着热气的小坩埚，里面煮着某种墨绿色的液体
   interaction:
     interaction_radius: 2
-    private_attrs:
-      brew: 未完成的魔药
-      personality: 坩埚的温度刚好，再投入一些材料就能完成炼制
     actions:
       查看坩埚:
-        target_type: passive
-        resolve: rule
-        rule:
-          narrative: '{caller}凑近坩埚——里面煮着半成品魔药，闻起来像猫眼药水。'
+        description: 凑近坩埚看看。里面煮着半成品魔药，墨绿色的液体咕嘟咕嘟冒着泡。闻起来像猫眼药水——还差最后一步。
       投入材料:
-        target_type: passive
-        resolve: llm
-        estimated_duration: 10
-  describe: '炼金坩埚。可做: [''查看坩埚'', ''投入材料'']。属性: {''brew'': ''未完成的魔药'', ''personality'':
-    ''坩埚的温度刚好，再投入一些材料就能完成炼制''}'
+        description: 往坩埚里投入材料。液体的颜色开始变化——可能成功了，也可能炸锅。炼金术士的日常冒险。
+  description: 一口黑色小坩埚，正在煮着墨绿色的液体。热气蒸腾，空气中弥漫着草药苦味。底下压着一张揉皱的字条。
+
 - id: herb_basket
   name: 原料篮
   zone: herb_hut
-  pos:
-  - 6
-  - 2
+  pos: [6, 2]
   visual:
     visible_radius: 6
     sprite: null
-    info:
+    properties:
       look: 一个柳条编的大篮子，里面堆满了刚采回来的草药
   interaction:
     interaction_radius: 2
     actions:
       翻看:
-        target_type: passive
-        resolve: rule
-        rule:
-          effects:
-            fun: 5
-          narrative: '{caller}翻看篮子。里面有刚采的蒲公英、鼠尾草、还有几根白色的骨粉——不知道是什么生物的。'
-  describe: '原料篮。可做: [''翻看'']'
+        description: 在篮子里翻找。里面有刚采的蒲公英、鼠尾草、几根白色的骨粉——不知道是什么生物的。还有一束散发荧光的沼泽苔藓。
+  description: 一个柳条编的大篮子，堆满了刚采回来的新鲜草药。散发着泥土和植物的混合气味。
+
 - id: herb_potion_finished
   name: 成品魔药
   zone: herb_hut
-  pos:
-  - 5
-  - 2
+  pos: [5, 2]
   visual:
     visible_radius: 4
     sprite: null
-    info:
+    properties:
       look: 一排已经完成的魔药瓶，标签上写着燕子、猫、暴雪
   interaction:
     interaction_radius: 2
-    private_attrs:
-      personality: 药效强劲但副作用未知
-      stock: 3
     actions:
       查看药瓶:
-        target_type: passive
-        resolve: rule
-        rule:
-          effects:
-            fun: 5
-          narrative: '{caller}拿起一瓶燕子魔药对着光看。液体是暗红色的，摇晃时会冒出细小的气泡。品质似乎不错。'
-  describe: '成品魔药。可做: [''查看药瓶'']。属性: {''personality'': ''药效强劲但副作用未知'', ''stock'':
-    3}'
+        description: 拿起一瓶燕子魔药对着光看。暗红色的液体摇晃时会冒出细小的气泡——品质不错。但副作用永远是个未知数。
+  description: 一排已经完成的魔药瓶。标签上写着燕子、猫、暴雪。每瓶都是托蜜拉亲手调制的。
+
 - id: herb_note
   name: 字条
   zone: herb_hut
-  pos:
-  - 5
-  - 1
+  pos: [5, 1]
   visual:
     visible_radius: 3
     sprite: null
-    info:
+    properties:
       look: 一张压在坩埚下的字条，字迹潦草
   interaction:
     interaction_radius: 1
     actions:
       阅读:
-        target_type: passive
-        resolve: rule
-        rule:
-          effects:
-            fun: 3
-          narrative: '{caller}拿起字条。上面写着：''叶奈法大人——您要的星辉石粉末我放在后屋了。另外，白果园郊外最近出现了狮鹫兽，杰洛特大人可能会感兴趣。——托蜜拉'''
-  describe: '字条。可做: [''阅读'']'
+        description: 拿起字条。上面写着：'叶奈法大人——您要的星辉石粉末我放在后屋了。另外，白果园郊外最近出现了狮鹫兽，杰洛特大人可能会感兴趣。——托蜜拉'
+  description: 一张压在坩埚下的小字条，字迹潦草但有力。看起来是匆忙写下的留言。
+
+# ═══ AGENTS ═══
 - id: geralt
   name: 杰洛特
   zone: square
-  pos:
-  - 7
-  - 5
+  pos: [7, 5]
   visual:
     visible_radius: 20
     sprite: char_witcher
-    info:
+    properties:
       look: 白发猎魔人，背后背着两把剑——银剑斩妖，钢剑杀人
   interaction:
     interaction_radius: 3
-    public_attrs:
-      expression: 冷静，警惕地扫视四周
-    private_attrs:
-      coins: 150
-      hunger: 50
-      thirst: 60
-      social: 20
-      energy: 85
-      fun: 15
-      mood: 50
+    private_attrs: {coins: 150, hunger: 50, thirst: 60, social: 20, energy: 85, fun: 15, mood: 50}
     actions:
       交谈:
-        target_type: passive
-        resolve: llm
+        description: 压低声音聊两句。杰洛特说话不多但每句都精准。谈到怪物和报酬时话会多些。
+      拍肩膀:
+        description: 拍拍他的肩膀打个招呼。他会抬头看你一眼，然后继续喝他的酒。
   agent:
     autonomous: true
     speed: 1.2
@@ -596,46 +413,25 @@ entities:
     hearing_radius: 20
     interaction_radius: 3
     personality: 利维亚的杰洛特，狼学派猎魔人。寡言少语，行事果断。刚刚完成一个水鬼委托，回到白果园休整。习惯在酒馆喝一杯，顺便看看公告板有没有新委托。
-    drives:
-      hunger:
-        decay: 0.018
-      thirst:
-        decay: 0.022
-      social:
-        decay: 0.01
-      energy:
-        decay: -0.012
-      fun:
-        decay: 0.015
-  describe: '杰洛特。可做: [''交谈'']。属性: {''coins'': 150, ''hunger'': 50, ''thirst'': 60,
-    ''social'': 20, ''energy'': 85, ''fun'': 15, ''mood'': 50}'
+  description: 白发猎魔人，猫眼，脸上有疤。背着银剑和钢剑，皮甲有些旧。坐在吧台边或站在广场上，面前放着一杯麦酒。
+
 - id: yennefer
   name: 叶奈法
   zone: herb_hut
-  pos:
-  - 4
-  - 2
+  pos: [4, 2]
   visual:
     visible_radius: 20
     sprite: char_sorceress
-    info:
+    properties:
       look: 黑发紫眼的女术士，周身环绕着淡淡的魔法气息
   interaction:
     interaction_radius: 3
-    public_attrs:
-      expression: 专注地看着草药架，若有所思
-    private_attrs:
-      coins: 500
-      hunger: 30
-      thirst: 40
-      social: 10
-      energy: 70
-      fun: 40
-      mood: 55
+    private_attrs: {coins: 500, hunger: 30, thirst: 40, social: 10, energy: 70, fun: 40, mood: 55}
     actions:
       交谈:
-        target_type: passive
-        resolve: llm
+        description: 和叶奈法交谈。她说话带着术士的优雅和距离感，但如果提到魔法材料或杰洛特，她的眼神会亮起来。
+      请教:
+        description: 向她请教魔法或炼金术的问题。她挑剔苛刻但对真才实学很慷慨——如果你值得教的话。
   agent:
     autonomous: true
     speed: 1.0
@@ -643,46 +439,25 @@ entities:
     hearing_radius: 18
     interaction_radius: 3
     personality: 温格堡的叶奈法，强大的女术士。正在寻找稀有的魔法材料，被草药小屋的收藏吸引而来。高傲但关心杰洛特。
-    drives:
-      hunger:
-        decay: 0.015
-      thirst:
-        decay: 0.02
-      social:
-        decay: 0.008
-      energy:
-        decay: -0.01
-      fun:
-        decay: 0.012
-  describe: '叶奈法。可做: [''交谈'']。属性: {''coins'': 500, ''hunger'': 30, ''thirst'': 40,
-    ''social'': 10, ''energy'': 70, ''fun'': 40, ''mood'': 55}'
+  description: 黑发紫眼的女术士，长袍上散发着紫丁香与醋栗的香气。站在草药架前专心地查看瓶瓶罐罐。
+
 - id: dandelion
   name: 丹德里恩
   zone: bar_zone
-  pos:
-  - 2
-  - 6
+  pos: [2, 6]
   visual:
     visible_radius: 20
     sprite: char_bard
-    info:
+    properties:
       look: 衣着花哨的吟游诗人，手里抱着鲁特琴，一脸轻松
   interaction:
     interaction_radius: 3
-    public_attrs:
-      expression: 面带微笑，好像刚喝完一杯
-    private_attrs:
-      coins: 80
-      hunger: 45
-      thirst: 75
-      social: 90
-      energy: 60
-      fun: 85
-      mood: 80
+    private_attrs: {coins: 80, hunger: 45, thirst: 75, social: 90, energy: 60, fun: 85, mood: 80}
     actions:
       交谈:
-        target_type: passive
-        resolve: llm
+        description: 和丹德里恩聊两句。他一开口就停不下来——从白果园女巫偷蜂蜜酒到尼弗迦德宫廷秘闻。每段都能编进新歌里。
+      听他弹唱:
+        description: 坐在旁边听他弹鲁特琴。他会即兴来一段，内容多半是今天的见闻加工成的。好听但不要全信。
   agent:
     autonomous: true
     speed: 0.9
@@ -690,16 +465,4 @@ entities:
     hearing_radius: 15
     interaction_radius: 3
     personality: 丹德里恩，北境最有名的吟游诗人。喜欢喝酒聊天，顺便收集新歌素材。杰洛特的老朋友。今天想在酒馆即兴表演一首。
-    drives:
-      hunger:
-        decay: 0.02
-      thirst:
-        decay: 0.025
-      social:
-        decay: 0.02
-      energy:
-        decay: -0.008
-      fun:
-        decay: 0.02
-  describe: '丹德里恩。可做: [''交谈'']。属性: {''coins'': 80, ''hunger'': 45, ''thirst'': 75,
-    ''social'': 90, ''energy'': 60, ''fun'': 85, ''mood'': 80}'
+  description: 衣着花哨的吟游诗人，手里抱着鲁特琴。一脸轻松，嘴唇微动似乎正在酝酿下一首歌的歌词。

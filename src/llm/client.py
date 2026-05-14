@@ -5,7 +5,7 @@ import asyncio
 import concurrent.futures
 import requests
 
-_executor = concurrent.futures.ThreadPoolExecutor(max_workers=16)
+_executor = concurrent.futures.ThreadPoolExecutor(max_workers=32)
 
 
 class LLMClient:
@@ -175,6 +175,7 @@ class LLMClient:
                     messages=full,
                     temperature=temperature,
                     max_tokens=4000,
+                    timeout=120,
                 )
                 return resp.choices[0].message.content or ""
             except Exception as e:
