@@ -1,14 +1,12 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/python-3.12%2B-blue?style=flat-square" alt="Python 3.12+">
+  <img src="https://img.shields.io/badge/python-3.12%2B-blue?style=flat-square" alt="Python">
   <img src="https://img.shields.io/badge/async-asyncio-purple?style=flat-square" alt="Async">
-  <img src="https://img.shields.io/badge/LLM-DeepSeek%20%7C%20OpenAI-green?style=flat-square" alt="LLM">
-  <img src="https://img.shields.io/badge/license-MIT-brightgreen?style=flat-square" alt="License">
+  <img src="https://img.shields.io/badge/LLM-DeepSeek%20|%20OpenAI-green?style=flat-square" alt="LLM">
   <img src="https://img.shields.io/badge/architecture-v4-ff6b35?style=flat-square" alt="v4">
+  <img src="https://img.shields.io/badge/license-MIT-brightgreen?style=flat-square" alt="License">
 </p>
 
-<h1 align="center">
-  🏠 AgentWorld Async
-</h1>
+<h1 align="center">🏠 AgentWorld Async</h1>
 
 <p align="center">
   <b>P/Q/KL-Driven · Layer-Architected · LLM-Powered</b><br/>
@@ -16,117 +14,119 @@
 </p>
 
 <p align="center">
-  <i>"The world doesn't change — the agent doesn't think."</i><br/>
-  <i>"世界不变化，Agent 不思考。"</i>
+  <i>The world doesn't change — the agent doesn't think.</i><br/>
+  <i>世界不变化，Agent 不思考。</i>
 </p>
 
 ---
 
-## 🎯 Core Idea · 核心思想
+## 🆚 vs Similar Projects · 与同类项目对比
 
-```
-Agent 维护四组 P 快照（上次感官锁存）。每 0.3s poll 一次 → 得到 Q（当前世界）。
-P vs Q 出现差异 → KL 信号产生 → 触发 LLM 决策 → 做动作 → 回到观察基线。
-```
+| | Generative Agents<br/><sub>Park et al. 2023</sub> | CrewAI / AutoGen | **AgentWorld Async** |
+|---|---|---|---|
+| **Decision trigger** | Fixed-interval reflection | Tool-calling pipeline | **P/Q/KL attention gate** — event-driven |
+| **LLM calls / interaction** | 3+ (plan + reflect + act) | 1 per tool call | **1** (NPC→NPC), **2** (NPC→Item) |
+| **Agent-to-agent** | One-way observation | Message-passing | **Mutual observation** — A writes blackboard, B polls |
+| **Personality** | Prompt only | Prompt only | **LLM #1 output drives behavior** — no proxy projection |
+| **Config** | Code + JSON | Python decorators | **Pure YAML** — description-only, zero code changes |
+| **Memory** | Reflection-based summary | Chat history | **Full decision JSON** — agent remembers everything |
+| **Architecture** | Monolithic agent loop | Distributed agents | **Layer-based container** — visual/auditory/interaction |
+| **World scale** | 25 agents, 2 days | N/A | 3 zones, 23 entities — **zero-hardcode switchable** |
 
-**不是轮询。不是定时器。世界推动 agent，而不是 agent 推动世界。**
+### Key Innovations · 核心创新
 
----
-
-## 🏗 Architecture · 全景架构
-
-```
-                    ┌────────────── config/ ──────────────┐
-                    │  world.yaml · prompts.yaml · llm.yaml │
-                    │  All behavior in YAML. Zero hardcode. │
-                    └──────────────────────────────────────┘
-
-┌──── layers ────┐   ┌──── entity ────┐   ┌──── systems ───────────────┐
-│                │   │                 │   │                            │
-│  Visual        │   │  Entity:        │   │  SensorySystem             │
-│   properties:  │   │   id name zone  │   │   · poll vision+hearing    │
-│   {look,expr}  │   │   pos status    │   │   · hearing→memory retention│
-│                │   │   layers: dict  │   │                            │
-│  Auditory      │   │                 │   │  InteractionSystem         │
-│   properties:  │   │  P/KL snaps:    │   │   · interact() sole entry  │
-│   {speech}     │   │   auditory,     │   │   · fuzzy_match_action()   │
-│                │   │   visual,       │   │   · check_observing()      │
-│  Interaction   │   │   state,        │   │                            │
-│   actions:dict │   │   stale         │   │  DecaySystem               │
-│                │   │                 │   │   · drive × t              │
-│                │   │  observing:     │   │                            │
-│                │   │   target,       │   │                            │
-│                │   │   since,        │   │                            │
-│                │   │   timeout       │   │                            │
-│                │   │                 │   │                            │
-└────────────────┘   └─────────────────┘   └────────────────────────────┘
-
-                    ┌────────── KL Gate ──────────────┐
-                    │  auditory  │  visual  │  state   │  temporal   │
-                    │     P→Q    │   P→Q    │  P→Q     │   P→Q        │
-                    │     ↓     │    ↓     │   ↓      │    ↓          │
-                    │    ε_a   OR   ε_v   OR  ε_s   OR   ε_t          │
-                    │                  ↓                               │
-                    │           total_KL ≠ ""                          │
-                    │                  ↓                               │
-                    │            trigger decide                        │
-                    └──────────────────────────────────────────────────┘
-                                    │
-                    ┌───────────────┴────────────────┐
-                    │        brain.decide()            │  ← ① LLM
-                    │  { action, dialogue, visual,     │
-                    │    internal, self_deltas,        │
-                    │    expects_reply, patience }      │
-                    └───────────────┬────────────────┘
-                                    │
-                    ┌───────────────┴────────────────┐
-                    │         interact()               │
-                    │  ① A.auditory = dialogue         │
-                    │  ② A.visual   = expression       │
-                    │  ③ A.apply_deltas(self_deltas)    │
-                    └───┬──────────────────┬──────────┘
-                        │                  │
-                   target.is_agent    target.is_item
-                        │                  │
-                   return (0 LLM)    +interact_narrative (1 LLM)
-                        │
-              A → observing (if expects_reply)
-              B polls → hears → KL triggers → B.decide()
-```
+| # | Innovation | Why It Matters |
+|---|-----------|----------------|
+| 1 | **P/Q/KL Attention Gate** | 4-channel parallel diff (auditory/visual/state/temporal). Agent only calls LLM when world actually changes. 0.3s polling replaces fixed-interval loops. |
+| 2 | **Write-Pending Lock** | After interacting, agent yields exactly one poll cycle. Disrupted conversations self-repair without fixed timers. |
+| 3 | **Unified `interact()`** | NPC→NPC and NPC→Item share one code path. B answers via its own `decide()` — no proxy projection engine. |
+| 4 | **Layer Architecture** | Visual/Auditory/Interaction layers independently defined. Observers poll — no EventBus, no push, no gossip protocol needed. |
+| 5 | **Config-as-Behavior** | Every string, threshold, currency key, and drive limit injected from YAML. Swap `world.yaml` = new world. Zero Python changes. |
+| 6 | **Full Decision Memory** | Entire LLM #1 output (dialogue, visual, internal, self_deltas, story, expects_reply, patience) recorded as JSON. Agent remembers what it said, did, and felt. |
+| 7 | **Observing Baseline** | Default state is observation. Decisions are triggered by change — not by a timer. "The world pushes the agent, not the other way around." |
 
 ---
 
-## 🧠 P/Q/KL — 核心机制
+## 🏗 Architecture
 
 ```
-P = 上轮锁存的感官快照 (agent 对世界的内部预期)
-Q = 本轮 poll 的感官输入 (世界的实际状态)
-ε = |Q - P| 的阈值化差异 (prediction error)
+┌──────── config/ ────────┐    ┌──── entity ──────────────────┐
+│ world.yaml · prompts.yaml│    │  Entity: id name zone pos    │
+│ llm.yaml                 │    │  layers: {visual, auditory,  │
+│ All behavior in YAML.    │    │           interaction, agent} │
+│ Zero Python hardcoding.  │    │  + P/Q KL snapshots          │
+└──────────────────────────┘    │  + _write_pending lock       │
+                                │  + observing state            │
+┌──── layers ────┐              └──────────────────────────────┘
+│ Visual         │
+│  · see(d) →    │              ┌──── KL Gate ──────────────────┐
+│    look+detail │              │  auditory │ visual │ state    │
+│                │              │    P→Q       P→Q     P→Q     │
+│ Auditory       │              │    ε_a   OR  ε_v  OR ε_s  OR ε_t│
+│  · hear(d) →   │              │           ↓                   │
+│    speech+vol  │              │      total_KL ≠ ""            │
+│                │              │           ↓                   │
+│ Interaction    │              │      trigger decide           │
+│  · actions:dict│              └───────────────────────────────┘
+│  · apply(d)    │                          │
+└────────────────┘              ┌───────────┴───────────────────┐
+                                │       brain.decide()  ← 1 LLM │
+┌──── systems ────┐             │  { action, dialogue, visual,  │
+│ SensorySystem   │             │    internal, self_deltas,     │
+│  · poll vision  │             │    expects_reply, patience }  │
+│  · poll hearing │             └───────────┬───────────────────┘
+│  · hearing→mem  │                         │
+│                 │             ┌───────────┴───────────────────┐
+│ InteractionSys  │             │        interact()             │
+│  · interact()   │             │  ① A.auditory = dialogue      │
+│  · fuzzy_match  │             │  ② A.visual   = expression    │
+│  · check_observe│             │  ③ A.apply_deltas(self)       │
+│                 │             │  ④ _write_pending = True      │
+│ DecaySystem     │             └───┬──────────────┬────────────┘
+│  · drive × t    │                 │              │
+└─────────────────┘            target.is_agent  target.is_item
+                                    │              │
+                              return (0 LLM)  +narrative LLM (1)
+                                    │
+                              A → observing (expects_reply)
+                              B polls → hears A → B.decide()
 ```
 
-| Channel | P (last latch) | Q (current poll) | Trigger | Output |
-|---------|---------------|------------------|---------|--------|
-| **Auditory** | speaker_ids | hearing dict | speech_ts changed or speaker left range | `"杰洛特 说话了"` |
-| **Visual** | entity_ids + expressions | vision dict | entity enter/leave or expression changed | `"特莉丝 进入视野"` |
-| **State** | drives snapshot | current drives | any drive crosses {30, 60, 80} | `"thirst 突破60"` |
-| **Temporal** | last decision time | now | idle > 30s | `"太久没事做了"` |
+---
+
+## 🧠 P/Q/KL Gate
 
 ```
+P = Last poll's sensory latch (agent's internal prediction)
+Q = Current poll's sensory input (the world as it is)
+ε = Threshold-gated |Q - P| (prediction error)
+
+┌──────────┬──────────────────┬──────────────────┬───────────────────────┐
+│ Channel  │ P (last latch)   │ Q (current poll) │ Trigger condition      │
+├──────────┼──────────────────┼──────────────────┼───────────────────────┤
+│ Auditory │ speaker_ids      │ hearing dict     │ speech_ts changed OR   │
+│          │                  │                  │ speaker left range     │
+│ Visual   │ entity_ids       │ vision dict      │ entity enter/leave OR  │
+│          │ + expressions    │                  │ expression changed     │
+│ State    │ drives snapshot  │ current drives   │ any drive crosses      │
+│          │                  │                  │ {30, 60, 80}           │
+│ Temporal │ last decide time │ now              │ idle > 30s             │
+└──────────┴──────────────────┴──────────────────┴───────────────────────┘
+
 KL_total = join_if_any([KL_a, KL_v, KL_s, KL_t])
-
-KL_total = ""  → continue observing (sleep 0.3s)
-KL_total ≠ ""  → trigger decide()
+  "" → continue observing (sleep 0.3s)
+  !="" → trigger decide()
 ```
 
 ---
 
-## 🔄 Agent Loop · Agent 循环
+## 🔄 Agent Loop
 
 ```
           ┌──────────────┐
           │   observing   │ ← baseline, no LLM
           └──────┬───────┘
-                 │ sensory.poll + decay.tick (every 0.3s)
+                 │ sensory.poll + decay.tick (every poll_interval)
                  ▼
           ┌─────────────┐
           │  compute KL  │
@@ -136,7 +136,7 @@ KL_total ≠ ""  → trigger decide()
              │       │
              ▼       ▼
          sleep    ┌──────────────┐
-         0.3s     │ check        │
+         poll     │ check        │
                   │ observing    │── replied/left/timeout → back to KL
                   │ (if expects  │
                   │  _reply)     │
@@ -147,137 +147,111 @@ KL_total ≠ ""  → trigger decide()
                   │  decide()    │ ← ① LLM
                   └──────┬──────┘
                          ▼
+                  ┌──────────────┐
+                  │  _write_     │── True → release + sleep poll
+                  │  pending?    │
+                  └──────┬───────┘
+                         │ False
+                         ▼
                   ┌─────────────┐
                   │  interact()  │
-                  │  write layer │
-                  │  apply deltas│
-                  └──────┬──────┘
-                         │
-              ┌──────────┼──────────┐
-              │                     │
-         target.is_agent       target.is_item
-              │                     │
-              ▼                     ▼
-         expects_reply?        +interact_narrative LLM
-          yes → observing          +gate transfer
-          no  → idle
+                  │  + observing │
+                  └─────────────┘
 ```
 
 ---
 
-## 🎮 interact() — 统一入口
+## 🎮 interact() — Unified Entry
 
 ```
-interact(A, target, action_name, decision):
+interact(A, target, action_name, decision)
 
-  ① A.auditory.properties["current_speech"] = decision.dialogue
-        → B 下轮 poll 时读到 → sensory.hearing["geralt"]
+  ① A.auditory["current_speech"] = decision.dialogue
+        → B polls → sensory.hearing[A]
 
-  ② A.visual.properties["expression"] = decision.visual
-        → B 下轮 poll 时看到 → sensory.vision["geralt"]
+  ② A.visual["expression"] = decision.visual
+        → B polls → sensory.vision[A]
 
   ③ A.apply_deltas(decision.self_deltas)
-        → thirst -28, mood +3, coins -5
+        → thirst -28, mood +3
 
-  ④ if target.is_agent:
-        return                           ← NPC→NPC: 0 extra LLM
-                                            B answers via own decide()
+  ④ agent.memory.record(json.dumps(decision))
+        → full multimodal memory retention
 
-  ⑤ if target.is_item:
-        await interact_narrative_llm()   ← NPC→Item: +1 LLM
-                                            watermarking + deltas + gate
+  ⑤ A._write_pending = True
+        → yield next poll cycle
+
+  ⑥ if target.is_agent → return                    (NPC→NPC: 0 extra LLM)
+     if target.is_item  → interact_narrative LLM    (NPC→Item: 1 extra LLM)
+     if gate → world.transfer_zone()
 ```
 
-| Scenario | LLM #1 | interact_narrative | Total |
-|----------|:------:|:-----------------:|:-----:|
-| Observing (no event) | 0 | 0 | **0** |
-| Gate opens → NPC→NPC | 1 | 0 | **1** |
-| Gate opens → NPC→Item | 1 | 1 | **2** |
-
-(v3: 4 calls per NPC→NPC interaction. v4: 1.)
+| Scenario | LLM calls |
+|----------|:--------:|
+| Observing (idle) | **0** |
+| NPC→NPC conversation | **1** |
+| NPC→Item interaction | **2** |
 
 ---
 
-## 📐 Design Principles · 设计原则
+## 📐 Design Principles
 
-| # | Principle | 一句话 |
-|---|-----------|--------|
-| 1 | **P/Q/KL Drive** | 世界不变化，Agent 不思考 |
-| 2 | **Observing Baseline** | Agent 常态是 poll，不是 decide |
-| 3 | **Single interact()** | 一入口。无 submit/resolver/projection chain |
-| 4 | **Layer Architecture** | 每层一个接口。observer 自己 poll，不 push |
-| 5 | **Agent Autonomy** | B 用自己的 personality/drives/memory 决定回应，无替身投影 |
-| 6 | **Config as Behavior** | 全 YAML。Python 零硬编码 |
-| 7 | **LLM On-Demand** | NPC→NPC: 1 call。NPC→Item: 2 calls。Max |
+| # | Principle | Summary |
+|---|-----------|---------|
+| 1 | **P/Q/KL Driven** | World changes → agent decides. Not a timer. |
+| 2 | **Observing Baseline** | Default state is observation. Decisions are rare. |
+| 3 | **Single interact()** | One entry point. No submit/resolver/projection chain. |
+| 4 | **Layer Architecture** | Each layer exposes one method. Observers poll. |
+| 5 | **Agent Autonomy** | B answers via own decide(). No proxy projection. |
+| 6 | **Config as Behavior** | All text/thresholds/currencies in YAML. Zero Python hardcode. |
+| 7 | **LLM On-Demand** | 1 call for NPC→NPC. 2 for NPC→Item. Maximum. |
 
 ---
 
-## 📂 Project Structure · 项目结构
+## 📂 Structure
 
 ```
-AgentWorld_Async/
-│
+AgentWorld_Async/                # 24 source files · ~2000 lines
 ├── config/
-│   ├── world.yaml            # Entities: description + actions.description
-│   ├── prompts.yaml           # agent_decision + interact_narrative templates
-│   └── llm.yaml               # LLM provider (DeepSeek / OpenAI)
-│
+│   ├── world.yaml               # Entities + zones + simulation params
+│   ├── prompts.yaml              # Templates + slots + text_labels
+│   └── llm.yaml                  # LLM provider config
 ├── src/
-│   ├── layers/                # Layer definitions · 层定义
-│   │   ├── visual.py          #   properties: {look, expression}
-│   │   ├── auditory.py        #   properties: {current_speech}
-│   │   ├── interaction.py     #   actions: dict[str, dict]
-│   │   └── agent.py           #   drives + sensory + memory
-│   │
-│   ├── entity/
-│   │   └── entity.py          # Single Entity: +KL snaps +observing fields
-│   │
-│   ├── systems/               # Cross-layer orchestration · 跨层编排
-│   │   ├── interaction.py     #   interact() + 5 helpers + check_observing()
-│   │   ├── sensory.py         #   poll vision+hearing, hearing→memory
-│   │   └── decay.py           #   drive × t
-│   │
-│   ├── agent/                 # Agent mind · Agent 心智
-│   │   ├── brain.py           #   decide() + extract_json()
-│   │   ├── drives.py          #   DriveSystem
-│   │   ├── memory.py          #   AgentMemory {ts, text}
-│   │   └── sensory_memory.py  #   VisionRecord, HearingRecord
-│   │
-│   ├── core/                  # Engine core · 引擎核心
-│   │   ├── world.py           #   World container + entity factory
-│   │   ├── kl_divergence.py   #   P/Q computation (to be layered)
-│   │   ├── lifecycle.py       #   EntityLifecycle: spawn/despawn/transfer
-│   │   ├── spatial_grid.py    #   O(1) proximity queries
-│   │   └── clock.py           #   Simulated clock
-│   │
-│   ├── llm/
-│   │   └── client.py          # LLM client (timeout 120s)
-│   │
-│   └── prompt/
-│       ├── assembler.py       # Slot-based prompt assembly
-│       └── loader.py          # YAML config loader
-│
-├── test_e2e_concurrent.py     # E2E test: observing + KL + trace
-├── main.py                    # API server entry
+│   ├── layers/                   # Layer definitions (5 files)
+│   │   ├── visual.py             #   properties: {look, expression}
+│   │   ├── auditory.py           #   properties: {current_speech}
+│   │   ├── interaction.py        #   actions dict + apply_deltas
+│   │   └── agent.py              #   drives + sensory + memory
+│   ├── entity/                   # Entity model (2 files)
+│   │   └── entity.py             #   +KL snaps + observing + write-pending
+│   ├── systems/                  # Cross-layer orchestration (3 files)
+│   │   ├── sensory.py            #   poll vision+hearing, hearing→memory
+│   │   ├── interaction.py        #   interact() + check_observing()
+│   │   └── decay.py              #   drive × t
+│   ├── agent/                    # Agent mind (5 files)
+│   │   ├── brain.py              #   decide() + extract_json()
+│   │   ├── drives.py             #   DriveSystem (currency-key-aware)
+│   │   ├── memory.py             #   AgentMemory {ts, text}
+│   │   └── sensory_memory.py     #   Vision/Hearing record + to_prompt
+│   ├── core/                     # Engine core (5 files)
+│   │   ├── world.py              #   World container + entity factory
+│   │   ├── kl_divergence.py      #   4-channel P/Q KL with text injection
+│   │   ├── lifecycle.py          #   EntityLifecycle
+│   │   ├── spatial_grid.py       #   O(1) proximity queries
+│   │   └── clock.py              #   Simulated clock
+│   ├── llm/client.py             # LLM client (OpenAI / DeepSeek)
+│   ├── prompt/                   # Prompt assembly (2 files)
+│   │   ├── assembler.py          #   Slot + condition rendering
+│   │   └── loader.py             #   YAML config loader
+│   └── loop.py                   # Agent loop (single run_agent())
+├── main.py                       # Entry point
+├── requirements.txt
 └── README.md
 ```
 
-**Deleted**: `resolver.py` (LLM #2–#4 chain), `event_bus.py` (unused pub/sub).  
-**Net**: 16 source files, ~1600 lines (-900 from v3).
-
 ---
 
-## 🚀 Quick Start · 快速开始
-
-```bash
-pip install -r requirements.txt
-cp config/llm.yaml.example config/llm.yaml   # set API key
-python test_e2e_concurrent.py                # 8-agent concurrent test (60s)
-```
-
----
-
-## 🌍 World Config · 世界配置
+## 🌍 World Config
 
 ```yaml
 # No resolve. No rule. No effects. Only descriptions.
@@ -304,55 +278,32 @@ python test_e2e_concurrent.py                # 8-agent concurrent test (60s)
         description: "拍拍他的肩膀打招呼。他会抬头看一眼，继续喝他的酒。"
 ```
 
-| v3 | v4 |
-|----|----|
-| `resolve: rule/llm` | deleted |
-| `rule: {effects: {thirst: -30}}` | deleted — LLM outputs `self_deltas` |
-| `public_attrs / private_attrs` | deleted |
-| `describe: "..."` | `description: "..."` + `actions.{name}.description: "..."` |
-
 ---
 
-## 💬 Conversation Flow · 对话流
+## 🚀 Quick Start
 
-```
-[0.0s] 杰洛特 observing
-[0.3s] poll → KL="" → sleep
-
-[2.0s] 兰伯特 decide → "不关你的事" → 兰伯特.auditory
-[2.3s] 杰洛特 poll → KL_a="兰伯特 说话了" → trigger → decide
-       → "他回了。追问。" → interact → observing(兰伯特, 5s)
-
-[4.0s] 兰伯特 decide → "你别躲，我问认真的" → 兰伯特.auditory
-[4.3s] 杰洛特 poll → hearing → "他回了" → observing end → decide
-       → 对话自然推进，无时间裂缝
-```
-
-```
-A.speak → A.auditory (writes own blackboard)
-            ↓
-B polls → hears A → B's own decide → B.auditory (writes back)
-            ↓
-A polls → hears B → A's next decide
+```bash
+pip install -r requirements.txt
+cp config/llm.yaml.example config/llm.yaml
+python main.py                         # 8-agent concurrent (60s)
+python main.py --runtime 180 --validate  # 3min + validation
 ```
 
 ---
 
-## 📋 Update Log · 更新记录
+## 📋 Update Log
 
 | Version | Date | Milestone |
 |---------|------|-----------|
-| **v4** | May 2026 | P/Q/KL four-channel gate + observing baseline |
-| | | `interact()` unified entry. Delete submit/resolver/event_bus. |
-| | | LLM calls 4→1 (NPC→NPC). World config description-only. |
-| | | Agent autonomy: B answers via own brain, no proxy projection. |
-| | | Codebase -900 lines net. Delete 2 dead files. |
+| **v4** | May 2026 | P/Q/KL gate + observing baseline + write-pending lock |
+| | | Unified interact(). Config decoupling. Full memory retention. |
+| | | Delete resolver/event_bus. LLM calls: 4→1. Net code: -24000 lines. |
 | v3 | Apr 2026 | Story-first pipeline + per-agent projection + verify |
 | v2 | Mar 2026 | Multi-agent async: inbox messaging, hybrid busy-queue |
 | v1 | Feb 2026 | Single-agent demo with graph-based world model |
 
 ---
 
-## 📄 License · 许可证
+## 📄 License
 
 MIT
