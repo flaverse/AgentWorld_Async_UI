@@ -176,7 +176,7 @@ class World:
         entity.layers["interaction"] = InteractionLayer(
             interaction_radius=3,
             public_attrs={"expression": "好奇地四处张望"},
-            private_attrs={"coins": 20, "mood": 60},
+            private_attrs={},
             actions={
                 "交谈": {"description": f"和{name}交谈。他/她看起来很好奇。"},
             },

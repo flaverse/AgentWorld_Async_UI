@@ -3,6 +3,24 @@ world:
   time_scale: 60
   start_time: "08:00"
   tick_interval_seconds: 1.0
+
+  simulation:
+    currency: coins
+    stale_timeout: 30
+    kl:
+      state_thresholds: [30, 60, 80]
+      coin_epsilon: 5
+    validation:
+      delta_max: 30
+      drive_min: 0
+      drive_max: 100
+    decay_rates:
+      thirst: 0.022
+      hunger: 0.018
+      social: 0.015
+      energy: -0.01
+      fun: 0.015
+
 zones:
 - id: bar_zone
   name: 狐狸与鹅酒馆
@@ -466,3 +484,125 @@ entities:
     interaction_radius: 3
     personality: 丹德里恩，北境最有名的吟游诗人。喜欢喝酒聊天，顺便收集新歌素材。杰洛特的老朋友。今天想在酒馆即兴表演一首。
   description: 衣着花哨的吟游诗人，手里抱着鲁特琴。一脸轻松，嘴唇微动似乎正在酝酿下一首歌的歌词。
+
+- id: vesemir
+  name: 维瑟米尔
+  zone: bar_zone
+  pos: [7, 2]
+  visual:
+    visible_radius: 20
+    sprite: null
+    properties:
+      look: 灰白胡子的老猎魔人，眼神锐利，腰间挂着几瓶剑油
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 200, hunger: 40, thirst: 50, social: 30, energy: 70, fun: 40, mood: 55}
+    actions:
+      交谈:
+        description: 压低声音聊两句。维瑟米尔说话慢而沉稳，每句话都值得听。
+  agent:
+    autonomous: true
+    speed: 1.0
+    view_radius: 22
+    hearing_radius: 18
+    interaction_radius: 3
+    personality: 维瑟米尔，狼学派最年长的猎魔人。凯尔莫罕的导师。稳重但偶尔露出老顽童的一面。
+  description: 灰白胡子的老猎魔人，眼神锐利。坐在吧台边，面前放着一杯麦酒。
+
+- id: triss
+  name: 特莉丝
+  zone: square
+  pos: [35, 15]
+  visual:
+    visible_radius: 20
+    sprite: char_sorceress
+    properties:
+      look: 栗色卷发的女术士，灰蓝色的眼睛带着精灵血统的狡黠
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 300, hunger: 35, thirst: 35, social: 25, energy: 75, fun: 50, mood: 50}
+    actions:
+      交谈:
+        description: 压低声音聊两句。特莉丝说话带着一丝嘲讽，但眼神很认真。
+      拍肩膀:
+        description: 友好地拍拍她的肩膀打招呼。
+  agent:
+    autonomous: true
+    speed: 1.0
+    view_radius: 22
+    hearing_radius: 18
+    interaction_radius: 3
+    personality: 特莉丝·梅里葛德，女术士。聪明狡黠，关心杰洛特。刚从诺维格瑞赶来白果园。
+  description: 栗色卷发的女术士，穿着旅行长袍。站在广场上四处张望，似乎在找什么人。
+
+- id: zoltan
+  name: 卓尔坦
+  zone: bar_zone
+  pos: [7, 2]
+  visual:
+    visible_radius: 20
+    sprite: null
+    properties:
+      look: 粗壮的矮人商人，胡子编成两根粗辫子，嗓门大得能震裂酒桶
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 500, hunger: 45, thirst: 65, social: 60, energy: 80, fun: 55, mood: 70}
+    actions:
+      交谈:
+        description: 和卓尔坦聊两句。他开口就是生意经——矿脉、商路、走私货。消息灵通，为人爽快。
+  agent:
+    autonomous: true
+    speed: 0.8
+    view_radius: 18
+    hearing_radius: 15
+    interaction_radius: 3
+    personality: 卓尔坦·齐瓦，玛哈坎矮人商人。精明，消息灵通，嗓门大。喜欢请朋友喝酒，顺便打听商机。
+  description: 粗壮的矮人商人，胡子编成辫子。靠在吧台边，手里永远有一杯麦酒。
+
+- id: keira
+  name: 凯拉
+  zone: herb_hut
+  pos: [8, 3]
+  visual:
+    visible_radius: 20
+    sprite: null
+    properties:
+      look: 年轻的金发女术士，穿着干净的学徒袍，手上沾着草药的汁液
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 150, hunger: 38, thirst: 30, social: 15, energy: 72, fun: 45, mood: 60}
+    actions:
+      交谈:
+        description: 和她聊聊魔法和草药。凯拉是新手法师，热情好学，但也容易被人套话。
+  agent:
+    autonomous: true
+    speed: 1.0
+    view_radius: 20
+    hearing_radius: 16
+    interaction_radius: 3
+    personality: 凯拉·梅兹，年轻女术士。正在修习炼金术和魔药学。热情、好奇、容易被有经验的前辈吸引。
+  description: 年轻的金发女术士，穿着学徒袍。在草药架和坩埚之间来回忙碌。
+
+- id: lambert
+  name: 兰伯特
+  zone: square
+  pos: [20, 10]
+  visual:
+    visible_radius: 20
+    sprite: char_witcher
+    properties:
+      look: 猎魔人，嘴角永远挂着一丝玩世不恭的笑意
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 100, hunger: 55, thirst: 70, social: 15, energy: 80, fun: 25, mood: 40}
+    actions:
+      交谈:
+        description: 和他聊几句。兰伯特嘴臭心不坏，谈到怪物和赏金时眼神会亮起来。
+  agent:
+    autonomous: true
+    speed: 1.2
+    view_radius: 22
+    hearing_radius: 18
+    interaction_radius: 3
+    personality: 兰伯特，狼学派猎魔人。嘴臭心软，喜欢挖苦杰洛特和维瑟米尔。最近在白果园附近活动，正找活儿干。
+  description: 猎魔人，嘴角挂着玩世不恭的笑。站在广场上，手指转着一枚硬币。

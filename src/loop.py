@@ -10,7 +10,7 @@ from systems.interaction import check_observing
 
 
 async def run_agent(agent, world, brain, assembler, systems,
-                    runtime: float, *, trace_fn=None):
+                    runtime: float, *, trace_fn=None, kl_config=None):
     """Run one agent's observing + KL + decide + interact loop.
 
     Args:
@@ -21,7 +21,11 @@ async def run_agent(agent, world, brain, assembler, systems,
         systems:     {"sensory": ..., "interaction": ..., "decay": ...}
         runtime:     Max real-time seconds to run
         trace_fn:    Optional callback(trace_dict) for recording
+        kl_config:   dict with keys: thresholds, coin_epsilon, stale_timeout
     """
+    thresholds = kl_config.get("thresholds", [30, 60, 80]) if kl_config else [30, 60, 80]
+    coin_epsilon = kl_config.get("coin_epsilon", 5) if kl_config else 5
+    stale_timeout = kl_config.get("stale_timeout", 30) if kl_config else 30
     name = agent.name
     al = agent.get("agent")
     end = time.time() + runtime
@@ -46,7 +50,8 @@ async def run_agent(agent, world, brain, assembler, systems,
             # ── KL gate ──
             drives = al.drives
             coins = round(float(agent.get("interaction").private_attrs.get("coins", 0)))
-            kl_text = total_kl(agent, sensory, drives, coins)
+            kl_text = total_kl(agent, sensory, drives, coins,
+                                thresholds, coin_epsilon, stale_timeout)
 
             if not kl_text:
                 await asyncio.sleep(0.3)
@@ -76,7 +81,8 @@ async def run_agent(agent, world, brain, assembler, systems,
                                     "action_text": intent_action, "note": "from_intent",
                                     "result_narrative": result.narrative if result else "",
                                 })
-                            snapshot_p(agent, sensory, drives, coins)
+                            snapshot_p(agent, sensory, drives, coins,
+                                       thresholds, coin_epsilon)
                             await asyncio.sleep(0.3)
                             continue
                     latest_mem["text"] = f"STALE: {intent_action}"
@@ -102,6 +108,7 @@ async def run_agent(agent, world, brain, assembler, systems,
                 "kl_text": kl_text,
             }
 
+            prompt1 = assembler.assemble("agent_decision", ctx)
             decision = await brain.decide(ctx)
             move_to = decision.get("move_to")
             action_text = decision.get("action")
@@ -131,6 +138,8 @@ async def run_agent(agent, world, brain, assembler, systems,
                                 "target_id": target.id,
                                 "action_text": action_text,
                                 "action_name": action_name,
+                                "llm1_output": decision,
+                                "llm1_prompt": prompt1,
                                 "result_narrative": result.narrative if result else "",
                                 "result_caller_deltas": result.caller_deltas if result else {},
                                 "result_target_deltas": result.target_deltas if result else {},
