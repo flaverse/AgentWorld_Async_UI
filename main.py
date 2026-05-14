@@ -40,25 +40,6 @@ def load_config():
     return {"world": wc, "llm": lc, "assembler": assembler}
 
 
-def get_sim_config(world_cfg: dict) -> dict:
-    """Extract simulation parameters from world config."""
-    sim = world_cfg.get("world", {}).get("simulation", {})
-    return {
-        "decay_rates": sim.get("decay_rates", {}),
-        "kl": {
-            "thresholds": sim.get("kl", {}).get("state_thresholds", [30, 60, 80]),
-            "coin_epsilon": sim.get("kl", {}).get("coin_epsilon", 5),
-            "stale_timeout": sim.get("stale_timeout", 30),
-        },
-        "validation": {
-            "delta_max": sim.get("validation", {}).get("delta_max", 30),
-            "drive_min": sim.get("validation", {}).get("drive_min", 0),
-            "drive_max": sim.get("validation", {}).get("drive_max", 100),
-        },
-        "currency": sim.get("currency", "coins"),
-    }
-
-
 # ═══════════════════════════════════════════════════
 #  World setup
 # ═══════════════════════════════════════════════════
@@ -165,16 +146,20 @@ def report(collector: TraceCollector, agents: list, sim: dict,
                    and t.get("agent","") in npc_names
                    and t["agent"] != t["target"])
 
-    v = sim["validation"]
+    v = sim.get("validation", {})
+    delta_max = v.get("delta_max", 30)
+    drive_min = v.get("drive_min", 0)
+    drive_max = v.get("drive_max", 100)
+    currency = sim.get("currency", "coins")
     issues = []
     for t in actions:
         for dkey in ['result_caller_deltas', 'result_target_deltas']:
             for attr, val in t.get(dkey, {}).items():
-                if isinstance(val, (int, float)) and attr != sim["currency"] and abs(val) > v["delta_max"]:
+                if isinstance(val, (int, float)) and attr != currency and abs(val) > delta_max:
                     issues.append(f"large delta: {t['agent']} {attr}={val}")
     for t in merged:
         for attr, val in t.get('drives', {}).items():
-            if isinstance(val, (int, float)) and (val < v["drive_min"] or val > v["drive_max"]):
+            if isinstance(val, (int, float)) and (val < drive_min or val > drive_max):
                 issues.append(f"drive out of range: {t['agent']} {attr}={val}")
     if issues:
         print(f"\n  ⚠️  {len(issues)} issues:")
@@ -192,14 +177,13 @@ def report(collector: TraceCollector, agents: list, sim: dict,
 async def cmd_test(args):
     """Run concurrent test: all agents from config."""
     cfg = load_config()
-    sim = get_sim_config(cfg["world"])
     world, brain, systems = make_world(cfg["world"], cfg["llm"], cfg["assembler"])
-
     agents = get_agents(world)
     if not agents:
         print("No autonomous agents found in world.yaml.")
         return
-    setup_agent_drives(agents, sim["decay_rates"])
+    setup_agent_drives(agents, cfg["world"]["world"].get("simulation", {}).get("decay_rates", {}))
+    sim = cfg["world"]["world"].get("simulation", {})
 
     print(f"\n{'='*60}")
     print(f"  AgentWorld Async — {cfg['world']['world']['name']}")
@@ -210,7 +194,8 @@ async def cmd_test(args):
     t_start = time.time()
     await run_concurrent(agents, world, brain, cfg["assembler"],
                          systems,
-                         args.runtime, sim["kl"],
+                         args.runtime,
+                         sim.get("kl", {}),
                          trace_fn=tracer.callback())
     elapsed = time.time() - t_start
     report(tracer, agents, sim, elapsed, args.validate, args.output)
@@ -219,14 +204,13 @@ async def cmd_test(args):
 async def cmd_demo(args):
     """Run single-agent demo."""
     cfg = load_config()
-    sim = get_sim_config(cfg["world"])
     world, brain, systems = make_world(cfg["world"], cfg["llm"], cfg["assembler"])
-
     agents = get_agents(world)
     if not agents:
         print("No autonomous agents found.")
         return
     agent = agents[0]
+    sim = cfg["world"]["world"].get("simulation", {})
 
     print(f"Agent: {agent.name} | personality: {agent.get('agent').personality}")
     print(f"{'='*50}")
@@ -237,7 +221,7 @@ async def cmd_demo(args):
                     trace_fn=lambda t: print(
                         f"  [{agent.name}] → {t.get('target','?')} | "
                         f"{t.get('action_text','?')[:80]}"),
-                    kl_config=sim["kl"])
+                    kl_config=sim.get("kl", {}))
 
 
 # ═══════════════════════════════════════════════════
