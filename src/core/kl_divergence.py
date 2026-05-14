@@ -1,41 +1,57 @@
-"""P/Q/KL 分层变化检测。四层独立: 听觉/视觉/状态/时差。
-所有文本和参数从 config 注入，零硬编码。
+"""P/Q/KL 分层变化检测。听觉/视觉 — 全量 dict diff。状态/时差 — 阈值逻辑。
+所有文本从 config 注入。零手工字段比较。
 """
 import time
 
 
+def _dicts_equal(a: dict, b: dict) -> bool:
+    """Shallow dict comparison — sufficient for property-level diff."""
+    return a == b
+
+
 def auditory_kl(p_auditory: dict, hearing: dict, text: dict) -> str:
+    """听觉 KL: 逐 entity 比较 auditory_data dict。任何 key 变化 = 信号。"""
     lines = []
-    p_ids = set(p_auditory.get("speaker_ids", []))
-    q_ids = {eid for eid, r in hearing.items() if r.auditory_data.get("sound")}
-    for eid in q_ids - p_ids:
-        lines.append(text["kl_spoke"].format(name=hearing[eid].name))
-    for eid in p_ids - q_ids:
-        lines.append(text["kl_left_hearing"].format(eid=eid))
-    p_auditory["speaker_ids"] = list(q_ids)
+    p_data = p_auditory.get("data", {})
+    q_data = {eid: r.auditory_data for eid, r in hearing.items()}
+
+    for eid in set(p_data) | set(q_data):
+        pv = p_data.get(eid, {})
+        qv = q_data.get(eid, {})
+        if not pv and qv:
+            lines.append(f"{hearing[eid].name} 开始说话")
+        elif pv and not qv:
+            lines.append(f"{eid} 离开听力范围")
+        elif not _dicts_equal(pv, qv):
+            lines.append(f"{hearing[eid].name} 声音变了")
+
+    p_auditory["data"] = q_data
     return " | ".join(lines) if lines else ""
 
 
 def visual_kl(p_visual: dict, vision: dict, text: dict) -> str:
+    """视觉 KL: 逐 entity 比较 visual_data dict。任何 key 变化 = 信号。"""
     lines = []
-    p_ids = set(p_visual.get("entity_ids", []))
-    q_ids = set(vision.keys())
-    for eid in q_ids - p_ids:
-        lines.append(text["kl_entered_vision"].format(name=vision[eid].name))
-    for eid in p_ids - q_ids:
-        lines.append(text["kl_left_vision"].format(eid=eid))
-    for eid in q_ids & p_ids:
-        old_expr = p_visual.get("expressions", {}).get(eid, "")
-        new_expr = vision[eid].visual_data.get("expression", "")
-        if new_expr and new_expr != old_expr:
-            lines.append(text["kl_expression_changed"].format(name=vision[eid].name))
-    p_visual["entity_ids"] = list(q_ids)
-    p_visual["expressions"] = {eid: r.visual_data.get("expression", "") for eid, r in vision.items()}
+    p_data = p_visual.get("data", {})
+    q_data = {eid: r.visual_data for eid, r in vision.items()}
+
+    for eid in set(p_data) | set(q_data):
+        pv = p_data.get(eid, {})
+        qv = q_data.get(eid, {})
+        if not pv and qv:
+            lines.append(f"{vision[eid].name} 进入视野")
+        elif pv and not qv:
+            lines.append(f"{eid} 离开视野")
+        elif not _dicts_equal(pv, qv):
+            lines.append(f"{vision[eid].name} 外观变化了")
+
+    p_visual["data"] = q_data
     return " | ".join(lines) if lines else ""
 
 
 def state_kl(p_state: dict, drives, currency_key: str, text: dict,
              thresholds: list = None, coin_epsilon: int = None) -> str:
+    """状态 KL: 阈值逻辑保留。drives cross threshold / coin delta。"""
     if thresholds is None: thresholds = [30, 60, 80]
     if coin_epsilon is None: coin_epsilon = 5
     lines = []

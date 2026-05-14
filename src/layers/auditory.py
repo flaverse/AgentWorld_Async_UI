@@ -9,8 +9,6 @@ class AuditoryLayer(Layer):
 
     def hear(self, distance: int) -> dict:
         vol = "响亮" if distance <= 3 else "中等" if distance <= 8 else "隐约"
-        speech = self.properties.get("current_speech", "")
-        return {
-            "sound": speech or self.properties.get("sound", ""),
-            "volume": vol,
-        }
+        data = {"_distance": distance, "_volume": vol}
+        data.update(self.properties.copy())
+        return data

@@ -35,11 +35,12 @@ world:
       energy: -0.01
       fun: 0.015
     text:
-      kl_spoke: "{name} 说话了"
+      kl_entered_hearing: "{name} 进入听力范围"
+      kl_left_hearing: "{eid} 离开听力范围"
+      kl_sound_changed: "{name} 声音变了"
       kl_entered_vision: "{name} 进入视野"
       kl_left_vision: "{eid} 离开视野"
-      kl_left_hearing: "{eid} 离开听力范围"
-      kl_expression_changed: "{name} 表情变了"
+      kl_look_changed: "{name} 外观变化了"
       kl_stale: "太久没事做了"
       kl_coin: "coins {sign}{delta}"
       kl_state_cross: "{attr} {arrow}突破{t}"

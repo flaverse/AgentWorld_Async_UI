@@ -10,7 +10,4 @@ class VisualLayer(Layer):
     properties: dict = field(default_factory=dict)
 
     def see(self, distance: int) -> dict:
-        result = {"look": self.properties.get("look", "")}
-        if distance <= 2 and "detail" in self.properties:
-            result["detail"] = self.properties["detail"]
-        return result
+        return {"_distance": distance, **self.properties.copy()}

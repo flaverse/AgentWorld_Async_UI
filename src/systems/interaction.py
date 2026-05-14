@@ -19,10 +19,10 @@ def check_observing(agent, sensory, text: dict = None) -> str | None:
     if not agent.expects_reply or not agent.observing_target:
         return None
     heard = sensory.hearing.get(agent.observing_target)
-    if heard and heard.auditory_data.get("sound"):
+    if heard and (heard.auditory_data.get("current_speech", "") or heard.auditory_data.get("sound", "")):
+        speech = heard.auditory_data.get("current_speech", "") or heard.auditory_data.get("sound", "")
         agent.get("agent").memory.record(
-            text["observed_replied"].format(
-                name=heard.name, speech=heard.auditory_data["sound"]))
+            text["observed_replied"].format(name=heard.name, speech=speech))
         agent.expects_reply = False
         agent.observing_target = ""
         return "replied"

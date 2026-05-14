@@ -49,13 +49,11 @@ class SensoryMemory:
         lines = [labels["hearing_header"]]
         for r in self.hearing.values():
             ad = r.auditory_data
-            sound = ad.get("sound", "")
-            vol = ad.get("volume", "")
-            if sound:
-                lines.append(labels["hearing_entry"].format(name=r.name, sound=sound, vol=vol))
-            else:
-                lines.append(labels["hearing_entry"].format(name=r.name, sound=ad.get("sound", ""), vol=vol))
-        return "\n".join(lines)
+            speech = ad.get("current_speech", "") or ad.get("sound", "")
+            vol = ad.get("_volume", ad.get("volume", ""))
+            if speech:
+                lines.append(labels["hearing_entry"].format(name=r.name, sound=speech, vol=vol))
+        return "\n".join(lines) if len(lines) > 1 else ""
 
     def to_prompt_vision(self, labels: dict = None) -> str:
         if not labels:
