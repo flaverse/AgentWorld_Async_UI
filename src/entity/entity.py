@@ -22,6 +22,11 @@ class Entity:
     # Write-pending lock: skip next decide after interacting
     _write_pending: bool = False
 
+    # Duplication check: last output for each channel
+    _last_dialogue: str = ""
+    _last_visual:   str = ""
+    _last_internal: str = ""
+
     # observing state
     expects_reply:     bool = False
     observing_target:  str = ""

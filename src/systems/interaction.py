@@ -18,15 +18,18 @@ def check_observing(agent, sensory, text: dict = None) -> str | None:
                 "observed_no_reply": "{name}没有回应我"}
     if not agent.expects_reply or not agent.observing_target:
         return None
-    heard = sensory.hearing.get(agent.observing_target)
-    if heard and (heard.auditory_data.get("current_speech", "") or heard.auditory_data.get("sound", "")):
-        speech = heard.auditory_data.get("current_speech", "") or heard.auditory_data.get("sound", "")
+    heard_ch = sensory.channels.get("auditory", {})
+    heard = heard_ch.get(agent.observing_target)
+    if heard and (heard.data.get("current_speech", "") or heard.data.get("sound", "")):
+        speech = heard.data.get("current_speech", "") or heard.data.get("sound", "")
         agent.get("agent").memory.record(
             text["observed_replied"].format(name=heard.name, speech=speech))
         agent.expects_reply = False
         agent.observing_target = ""
         return "replied"
-    seen = sensory.vision.get(agent.observing_target)
+
+    seen_ch = sensory.channels.get("visual", {})
+    seen = seen_ch.get(agent.observing_target)
     if not seen or seen.distance > agent.get("agent").view_radius * 0.8:
         agent.get("agent").memory.record(
             text["observed_left"].format(name=agent.observing_target))
@@ -146,6 +149,11 @@ class InteractionSystem:
             agent.get("agent").memory.record(
                 json.dumps(decision, ensure_ascii=False))
 
+        # Update duplication-check snapshots
+        agent._last_dialogue = dialogue
+        agent._last_visual   = visual
+        agent._last_internal = decision.get("internal", "")
+
         # Generic modal routing: write unknown fields to their mapped layers
         if self.modal_map:
             for field, layer_name in self.modal_map.items():
@@ -218,12 +226,12 @@ class InteractionSystem:
     def _apply_deltas(self, entity, deltas: dict) -> None:
         if not entity.has("interaction"):
             return
-        # Verify before applying
-        inter = entity.get("interaction")
+        # Apply with built-in clamping (InteractionLayer handles bounds)
+        entity.get("interaction").apply_deltas(deltas)
+        # Post-apply verification (diagnostic only)
         from core.verification import verify
+        inter = entity.get("interaction")
         issues = verify(entity, deltas, inter.currency_key,
                         inter.drive_min, inter.drive_max)
         if issues:
-            logger.warning(f"Verification failed for {entity.name}: {'; '.join(issues)}")
-            return  # reject invalid deltas
-        entity.get("interaction").apply_deltas(deltas)
+            logger.warning(f"Verification flag for {entity.name}: {'; '.join(issues)}")

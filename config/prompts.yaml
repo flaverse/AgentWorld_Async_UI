@@ -194,6 +194,14 @@ output_schemas:
         required: [narrative, deltas]
 
 # ═══════════════════════════════════════
+duplication:
+  prefix_length: 40
+  mask:
+    - dialogue
+    - visual
+    - internal
+
+# ═══════════════════════════════════════
 modal_layer_map:
   dialogue: auditory
   visual: visual

@@ -22,6 +22,8 @@ async def run_agent(agent, world, brain, assembler, systems,
     intent_ttl = cfg.get("intent_ttl", 30)
     patience_default = cfg.get("default_patience", 5)
     speech_window = cfg.get("speech_window", 30)
+    dup_mask = cfg.get("dup_mask", [])
+    dup_prefix_len = cfg.get("dup_prefix_len", 40)
 
     while time.time() < end:
         try:
@@ -108,6 +110,20 @@ async def run_agent(agent, world, brain, assembler, systems,
                 continue
 
             decision = await brain.decide(ctx)
+
+            # Duplication check: mute repeated channels
+            if dup_mask:
+                from core.duplication import check as dup_check
+                allowed = dup_check(agent, decision, dup_mask, dup_prefix_len)
+                if not any(allowed.values()):
+                    snapshot_p(agent, sensory, drives, currency, sim_text,
+                               thresholds, coin_eps)
+                    await asyncio.sleep(poll)
+                    continue
+                for ch in dup_mask:
+                    if not allowed.get(ch, True):
+                        decision[ch] = ""
+
             move_to = decision.get("move_to")
             action_text = decision.get("action")
 
