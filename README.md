@@ -90,7 +90,7 @@ sequenceDiagram
     participant S as SensorySystem
     participant D as DecaySystem
     participant K as KL Gate
-    participant B as Brain (LLM #1)
+    participant B as Brain (LLM-1)
     participant I as InteractionSystem
 
     loop every poll_interval (0.3s)
@@ -170,8 +170,8 @@ flowchart LR
     k_sta --> join
     k_tim --> join
 
-    join -->|""| sleep["sleep 0.3s<br/>continue observing"]
-    join -->|"≠"""| trigger["trigger decide()"]
+    join -->|KL empty| sleep["sleep 0.3s<br/>continue observing"]
+    join -->|KL triggered| trigger["trigger decide()"]
 ```
 
 ---
