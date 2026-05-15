@@ -111,11 +111,11 @@ async def run_agent(agent, world, brain, assembler, systems,
 
             decision = await brain.decide(ctx)
 
-            # Duplication check: mute repeated channels
+            # Duplication check: mute channels that repeat previous output
             if dup_mask:
                 from core.duplication import check as dup_check
                 allowed = dup_check(agent, decision, dup_mask, dup_prefix_len)
-                if not any(allowed.values()):
+                if not all(allowed.values()):
                     snapshot_p(agent, sensory, drives, currency, sim_text,
                                thresholds, coin_eps)
                     await asyncio.sleep(poll)

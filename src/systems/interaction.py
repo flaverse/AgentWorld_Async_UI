@@ -149,11 +149,6 @@ class InteractionSystem:
             agent.get("agent").memory.record(
                 json.dumps(decision, ensure_ascii=False))
 
-        # Update duplication-check snapshots
-        agent._last_dialogue = dialogue
-        agent._last_visual   = visual
-        agent._last_internal = decision.get("internal", "")
-
         # Generic modal routing: write unknown fields to their mapped layers
         if self.modal_map:
             for field, layer_name in self.modal_map.items():

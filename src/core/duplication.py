@@ -1,5 +1,5 @@
 """Output-level duplication check. @register chain, YAML-configurable mask.
-v1-style: each channel independently validates, mask controls activation.
+Only blocks consecutive repeats. Reference updates on each non-muted output.
 """
 _registry = {}
 
@@ -12,11 +12,17 @@ def register(name: str):
 
 
 def check(agent, decision, mask: list[str], prefix_len: int) -> dict[str, bool]:
-    """按 mask 跑注册链。返回 {channel_name: True=allowed, False=mute}。"""
+    """按 mask 跑注册链。返回 {channel_name: True=allowed, False=mute}。
+    通过时更新 _last_* 参考值；被 mute 时保留旧参考值。
+    """
     result = {}
     for channel in mask:
         if channel in _registry:
             ok = _registry[channel](agent, decision, prefix_len)
+            if ok:
+                # Update reference on success
+                ref_attr = f'_last_{channel}'
+                setattr(agent, ref_attr, decision.get(channel, ""))
             result[channel] = ok
     return result
 
@@ -24,16 +30,19 @@ def check(agent, decision, mask: list[str], prefix_len: int) -> dict[str, bool]:
 @register("dialogue")
 def _dialogue_dup(agent, decision, n):
     d = decision.get("dialogue", "")
-    return not (d and d[:n] == getattr(agent, '_last_dialogue', '')[:n])
+    last = getattr(agent, '_last_dialogue', '')
+    return not (d and last and d[:n] == last[:n])
 
 
 @register("visual")
 def _visual_dup(agent, decision, n):
     v = decision.get("visual", "")
-    return not (v and v[:n] == getattr(agent, '_last_visual', '')[:n])
+    last = getattr(agent, '_last_visual', '')
+    return not (v and last and v[:n] == last[:n])
 
 
 @register("internal")
 def _internal_dup(agent, decision, n):
     i = decision.get("internal", "")
-    return not (i and i[:n] == getattr(agent, '_last_internal', '')[:n])
+    last = getattr(agent, '_last_internal', '')
+    return not (i and last and i[:n] == last[:n])
