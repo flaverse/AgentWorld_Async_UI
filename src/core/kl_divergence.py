@@ -59,7 +59,7 @@ def stale_kl(p_stale: float, text: dict, stale_timeout: int = None) -> str:
     return ""
 
 
-def total_kl(agent, sensory, drives, currency_key: str, text: dict,
+def total_kl(agent_layer, sensory, drives, currency_key: str, text: dict,
              thresholds=None, coin_epsilon=None, stale_timeout=None) -> str:
     """遍历 sensory.channels 所有层，逐层 channel_kl。"""
     parts = []
@@ -67,26 +67,26 @@ def total_kl(agent, sensory, drives, currency_key: str, text: dict,
         if not ch_data:
             continue
         kl = channel_kl(ch_name,
-                        agent.p_channels.get(ch_name, {}),
+                        agent_layer.p_channels.get(ch_name, {}),
                         ch_data,
                         {eid: r.name for eid, r in ch_data.items()},
                         text)
         if kl:
             parts.append(kl)
-    ks = state_kl(agent.p_state, drives, currency_key, text, thresholds, coin_epsilon)
+    ks = state_kl(agent_layer.p_state, drives, currency_key, text, thresholds, coin_epsilon)
     if ks: parts.append(ks)
-    kt = stale_kl(agent.p_stale, text, stale_timeout)
+    kt = stale_kl(agent_layer.p_stale, text, stale_timeout)
     if kt: parts.append(kt)
     return " | ".join(parts)
 
 
-def snapshot_p(agent, sensory, drives, currency_key: str, text: dict,
+def snapshot_p(agent_layer, sensory, drives, currency_key: str, text: dict,
                thresholds=None, coin_epsilon=None):
     for ch_name in sensory.channels:
         channel_kl(ch_name,
-                   agent.p_channels.get(ch_name, {}),
+                   agent_layer.p_channels.get(ch_name, {}),
                    sensory.channels.get(ch_name, {}),
                    {eid: r.name for eid, r in sensory.channels.get(ch_name, {}).items()},
                    text)
-    state_kl(agent.p_state, drives, currency_key, text, thresholds, coin_epsilon)
-    agent.p_stale = time.time()
+    state_kl(agent_layer.p_state, drives, currency_key, text, thresholds, coin_epsilon)
+    agent_layer.p_stale = time.time()

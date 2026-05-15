@@ -12,26 +12,6 @@ class Entity:
 
     layers: dict = field(default_factory=dict)
     describe: str = ""
-    p_distribution: dict = field(default_factory=dict)
-
-    # Layered KL snapshots — one dict per channel, keyed by entity_id
-    p_channels: dict = field(default_factory=dict)
-    p_state:    dict = field(default_factory=dict)
-    p_stale:    float = 0.0
-
-    # Write-pending lock: skip next decide after interacting
-    _write_pending: bool = False
-
-    # Duplication check: last output for each channel
-    _last_dialogue: str = ""
-    _last_visual:   str = ""
-    _last_internal: str = ""
-
-    # observing state
-    expects_reply:     bool = False
-    observing_target:  str = ""
-    observing_since:   float = 0.0
-    observing_timeout: float = 0.0
 
     _world: object = None
 

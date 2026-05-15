@@ -61,6 +61,7 @@ class Brain:
         raw = await self.llm.chat(
             system=system,
             messages=[{"role": "user", "content": prompt}],
+            response_format=schema,
         )
         json_str = extract_json(raw)
         try:

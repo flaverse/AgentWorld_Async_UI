@@ -22,7 +22,7 @@ from llm.client import LLMClient
 from systems.sensory import SensorySystem
 from systems.interaction import InteractionSystem
 from systems.decay import DecaySystem
-from loop import run_agent
+from loop import run_agent, LoopConfig
 
 
 # ═══════════════════════════════════════════════════
@@ -91,7 +91,7 @@ def setup_agent_drives(agents: list, sim: dict, currency: str) -> None:
 # ═══════════════════════════════════════════════════
 
 async def run_concurrent(agents, world, brain, assembler, systems,
-                         runtime: float, cfg: dict,
+                         runtime: float, cfg: LoopConfig,
                          *, trace_fn=None):
     """Run all agents concurrently."""
     tasks = [run_agent(a, world, brain, assembler, systems,
@@ -206,21 +206,21 @@ async def cmd_test(args):
     setup_agent_drives(agents, sim, currency)
 
     kl = sim.get("kl", {})
-    loop_cfg = {
-        "poll_interval": sim.get("poll_interval", 0.3),
-        "thresholds": kl.get("state_thresholds", [30, 60, 80]),
-        "coin_epsilon": kl.get("coin_epsilon", 5),
-        "stale_timeout": sim.get("stale_timeout", 30),
-        "currency": currency,
-        "text": sim.get("text", {}),
-        "labels": cfg["labels"],
-        "intent_ttl": sim.get("intent_ttl", 30),
-        "default_patience": sim.get("default_patience", 5),
-        "speech_window": sim.get("speech_window", 30),
-        "memory_prompt_count": sim.get("memory_prompt_count", 5),
-        "dup_mask": cfg["dup_cfg"].get("mask", ["dialogue", "visual"]),
-        "dup_prefix_len": cfg["dup_cfg"].get("prefix_length", 40),
-    }
+    loop_cfg = LoopConfig(
+        poll_interval=sim.get("poll_interval", 0.3),
+        thresholds=kl.get("state_thresholds", [30, 60, 80]),
+        coin_epsilon=kl.get("coin_epsilon", 5),
+        stale_timeout=sim.get("stale_timeout", 30),
+        currency=currency,
+        text=sim.get("text", {}),
+        labels=cfg["labels"],
+        intent_ttl=sim.get("intent_ttl", 30),
+        default_patience=sim.get("default_patience", 5),
+        speech_window=sim.get("speech_window", 30),
+        memory_prompt_count=sim.get("memory_prompt_count", 5),
+        dup_mask=cfg["dup_cfg"].get("mask", {"dialogue": ["mute"], "visual": ["mute"]}),
+        dup_prefix_len=cfg["dup_cfg"].get("prefix_length", 40),
+    )
 
     print(f"\n{'='*60}")
     print(f"  AgentWorld Async — {cfg['world']['world']['name']}")
@@ -252,6 +252,8 @@ async def cmd_test(args):
 async def cmd_demo(args):
     """Run single-agent demo."""
     cfg = load_config()
+    sim = cfg["world"]["world"].get("simulation", {})
+    currency = sim.get("currency", "coins")
     world, brain, systems = make_world(cfg["world"], cfg["llm"], cfg["assembler"],
                                          cfg.get("modal_map"))
     agents = get_agents(world)
@@ -259,14 +261,31 @@ async def cmd_demo(args):
         print("No autonomous agents found.")
         return
     agent = agents[0]
-    sim = cfg["world"]["world"].get("simulation", {})
+    setup_agent_drives(agents, sim, currency)
+
+    kl = sim.get("kl", {})
+    loop_cfg = LoopConfig(
+        poll_interval=sim.get("poll_interval", 0.3),
+        thresholds=kl.get("state_thresholds", [30, 60, 80]),
+        coin_epsilon=kl.get("coin_epsilon", 5),
+        stale_timeout=sim.get("stale_timeout", 30),
+        currency=currency,
+        text=sim.get("text", {}),
+        labels=cfg["labels"],
+        intent_ttl=sim.get("intent_ttl", 30),
+        default_patience=sim.get("default_patience", 5),
+        speech_window=sim.get("speech_window", 30),
+        memory_prompt_count=sim.get("memory_prompt_count", 5),
+        dup_mask=cfg["dup_cfg"].get("mask", {}),
+        dup_prefix_len=cfg["dup_cfg"].get("prefix_length", 40),
+    )
 
     print(f"Agent: {agent.name} | personality: {agent.get('agent').personality}")
     print(f"{'='*50}")
 
     await run_agent(agent, world, brain, cfg["assembler"],
                     systems,
-                    runtime=30, cfg={"labels": cfg["labels"]},
+                    runtime=30, cfg=loop_cfg,
                     trace_fn=lambda t: print(
                         f"  [{agent.name}] → {t.get('target','?')} | "
                          f"{t.get('action_text','?')[:80]}"))

@@ -10,37 +10,37 @@ from dataclasses import dataclass, field
 logger = logging.getLogger(__name__)
 
 
-def check_observing(agent, sensory, text: dict = None) -> str | None:
+def check_observing(agent_layer, sensory, text: dict = None) -> str | None:
     """Observing 闭环检测。返回结束原因或 None (继续等待)。"""
     if not text:
         text = {"observed_replied": '{name}说："{speech}"',
                 "observed_left": "{name}走远了",
                 "observed_no_reply": "{name}没有回应我"}
-    if not agent.expects_reply or not agent.observing_target:
+    if not agent_layer.expects_reply or not agent_layer.observing_target:
         return None
     heard_ch = sensory.channels.get("auditory", {})
-    heard = heard_ch.get(agent.observing_target)
+    heard = heard_ch.get(agent_layer.observing_target)
     if heard and (heard.data.get("current_speech", "") or heard.data.get("sound", "")):
         speech = heard.data.get("current_speech", "") or heard.data.get("sound", "")
-        agent.get("agent").memory.record(
+        agent_layer.memory.record(
             text["observed_replied"].format(name=heard.name, speech=speech))
-        agent.expects_reply = False
-        agent.observing_target = ""
+        agent_layer.expects_reply = False
+        agent_layer.observing_target = ""
         return "replied"
 
     seen_ch = sensory.channels.get("visual", {})
-    seen = seen_ch.get(agent.observing_target)
-    if not seen or seen.distance > agent.get("agent").view_radius * 0.8:
-        agent.get("agent").memory.record(
-            text["observed_left"].format(name=agent.observing_target))
-        agent.expects_reply = False
-        agent.observing_target = ""
+    seen = seen_ch.get(agent_layer.observing_target)
+    if not seen or seen.distance > agent_layer.view_radius * 0.8:
+        agent_layer.memory.record(
+            text["observed_left"].format(name=agent_layer.observing_target))
+        agent_layer.expects_reply = False
+        agent_layer.observing_target = ""
         return "left"
-    if time.time() - agent.observing_since > agent.observing_timeout:
-        agent.get("agent").memory.record(
-            text["observed_no_reply"].format(name=agent.observing_target))
-        agent.expects_reply = False
-        agent.observing_target = ""
+    if time.time() - agent_layer.observing_since > agent_layer.observing_timeout:
+        agent_layer.memory.record(
+            text["observed_no_reply"].format(name=agent_layer.observing_target))
+        agent_layer.expects_reply = False
+        agent_layer.observing_target = ""
         return "timeout"
     return None
 
@@ -86,7 +86,7 @@ class InteractionSystem:
             if e.name in action:
                 return e
         for d, e in candidates:
-            desc = getattr(e, 'description', '') or ''
+            desc = getattr(e, 'describe', '') or ''
             for word in [e.name, *desc.split('.')[0].split(' ')]:
                 if len(word) >= 2 and word in action:
                     return e
@@ -119,9 +119,6 @@ class InteractionSystem:
             return list(layer.actions.keys())[0]
         return None
 
-    def update_sensory(self, agent, all_entities: dict) -> None:
-        pass  # no-op: can_interact check moved to interact() time
-
     # ═══════════ core: interact() ═══════════
 
     async def interact(self, agent, target, action_name: str,
@@ -132,37 +129,21 @@ class InteractionSystem:
             logger.warning(f"No action '{action_name}' on {target.name}")
             return None
 
+        agent_layer = agent.get("agent")
         dialogue = decision.get("dialogue", "")
         visual = decision.get("visual", "")
         self_deltas = decision.get("self_deltas", {})
         story = decision.get("story", "")
 
         # ① Write agent's layers (observers poll)
-        if dialogue and agent.has("auditory"):
-            aud = agent.get("auditory")
-            aud.properties["current_speech"] = dialogue
-            aud.properties["speech_ts"] = time.time()
-        if visual and agent.has("visual"):
-            agent.get("visual").properties["expression"] = visual
-            agent.get("visual").properties["expression_ts"] = time.time()
-        if agent.has("agent"):
-            agent.get("agent").memory.record(
-                json.dumps(decision, ensure_ascii=False))
-
-        # Generic modal routing: write unknown fields to their mapped layers
-        if self.modal_map:
-            for field, layer_name in self.modal_map.items():
-                if field in ("dialogue", "visual", "internal"):
-                    continue  # handled above with specific logic
-                value = decision.get(field, "")
-                if value and layer_name in agent.layers:
-                    agent.layers[layer_name].properties[field] = value
+        self._write_agent_layers(agent, agent_layer, decision, dialogue, visual)
 
         # ② Apply self_deltas
         if self_deltas:
             self._apply_deltas(agent, self_deltas)
 
-        agent._write_pending = True
+        if agent_layer:
+            agent_layer._write_pending = True
 
         # ③ NPC→NPC: done
         if target.has("agent"):
@@ -174,49 +155,80 @@ class InteractionSystem:
 
         # ④ NPC→Item: interact_narrative LLM
         narrative = story or f"{agent.name}对{target.name}做了{action_name}"
-        if self.llm and self.assembler:
-            try:
-                agent_inter = agent.get("interaction").private_attrs if agent.has("interaction") else {}
-                context = {
-                    "action_name": action_name,
-                    "caller_name": agent.name,
-                    "caller_personality": agent.get("agent").personality if agent.has("agent") else "",
-                    "caller_state": json.dumps(agent_inter, ensure_ascii=False),
-                    "caller_id": agent.id,
-                    "target_name": target.name,
-                    "target_description": getattr(target, 'description', '') or target.name,
-                    "action_description": action.get("description", action_name),
-                    "target_context": "",
-                    "target_id": agent.id,
-                }
-                prompt = self.assembler.assemble("interact_narrative", context)
-                system = self.assembler.get_system_prompt("interact_narrative")
-                raw = await self.llm.chat(system=system, messages=[{"role":"user","content":prompt}])
-                from agent.brain import extract_json
-                data = json.loads(extract_json(raw))
-                narrative = data.get("narrative", narrative)
-                deltas = data.get("deltas", {})
-                extra = deltas.get(agent.id, {})
-                if extra:
-                    self._apply_deltas(agent, extra)
-            except Exception as e:
-                import sys
-                print(f"  [interact ERR] {agent.name}→{target.name}: {e}", file=sys.stderr, flush=True)
-
-        if narrative:
-            agent.get("agent").memory.record(narrative) if agent.has("agent") else None
+        narrative = await self._resolve_npc_item(agent, target, action, action_name, story, narrative)
 
         # ⑤ Gate transfer
-        gate = action.get("gate")
-        if gate and hasattr(world, 'lifecycle'):
-            world.lifecycle.transfer_zone(agent, gate["to_zone"],
-                                           list(gate.get("to_pos", agent.pos)))
+        self._handle_gate_transfer(agent, action, world)
 
         return ActionResult(
             target_id=target.id,
             caller_deltas=self_deltas,
             narrative=narrative,
         )
+
+    def _write_agent_layers(self, agent, agent_layer, decision, dialogue, visual):
+        """Write dialogue/visual/internal to agent's layers for observers to poll."""
+        if dialogue and agent.has("auditory"):
+            aud = agent.get("auditory")
+            aud.properties["current_speech"] = dialogue
+            aud.properties["speech_ts"] = time.time()
+        if visual and agent.has("visual"):
+            agent.get("visual").properties["expression"] = visual
+            agent.get("visual").properties["expression_ts"] = time.time()
+        if agent_layer:
+            agent_layer.memory.record(json.dumps(decision, ensure_ascii=False))
+        if self.modal_map:
+            for field, layer_name in self.modal_map.items():
+                if field in ("dialogue", "visual", "internal"):
+                    continue
+                value = decision.get(field, "")
+                if value and layer_name in agent.layers:
+                    agent.layers[layer_name].properties[field] = value
+
+    async def _resolve_npc_item(self, agent, target, action, action_name, story, fallback_narrative):
+        """NPC→Item: call LLM for narrative + deltas. Returns narrative string."""
+        narrative = fallback_narrative
+        if not self.llm or not self.assembler:
+            return narrative
+        try:
+            agent_inter = agent.get("interaction").private_attrs if agent.has("interaction") else {}
+            context = {
+                "action_name": action_name,
+                "caller_name": agent.name,
+                "caller_personality": agent.get("agent").personality if agent.has("agent") else "",
+                "caller_state": json.dumps(agent_inter, ensure_ascii=False),
+                "caller_id": agent.id,
+                "target_name": target.name,
+                "target_description": getattr(target, 'describe', '') or target.name,
+                "action_description": action.get("description", action_name),
+                "target_context": "",
+                "target_id": target.id,
+            }
+            prompt = self.assembler.assemble("interact_narrative", context)
+            system = self.assembler.get_system_prompt("interact_narrative")
+            schema = self.assembler.get_output_schema("interact_narrative")
+            raw = await self.llm.chat(system=system, messages=[{"role":"user","content":prompt}],
+                                      response_format=schema)
+            from agent.brain import extract_json
+            data = json.loads(extract_json(raw))
+            narrative = data.get("narrative", narrative)
+            deltas = data.get("deltas", {})
+            extra = deltas.get(agent.id, {})
+            if extra:
+                self._apply_deltas(agent, extra)
+        except Exception as e:
+            import sys
+            print(f"  [interact ERR] {agent.name}→{target.name}: {e}", file=sys.stderr, flush=True)
+        if agent.has("agent") and narrative:
+            agent.get("agent").memory.record(narrative)
+        return narrative
+
+    def _handle_gate_transfer(self, agent, action, world):
+        """If action defines a gate, transfer the agent to the target zone."""
+        gate = action.get("gate")
+        if gate and hasattr(world, 'lifecycle'):
+            world.lifecycle.transfer_zone(agent, gate["to_zone"],
+                                           list(gate.get("to_pos", agent.pos)))
 
     def _apply_deltas(self, entity, deltas: dict) -> None:
         if not entity.has("interaction"):

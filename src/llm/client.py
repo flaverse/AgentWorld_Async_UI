@@ -96,19 +96,23 @@ class LLMClient:
         return "", ""
 
     async def chat(self, system: str, messages: list[dict],
-                   temperature: float = 0.7) -> str:
+                   temperature: float = 0.7,
+                   response_format: dict = None) -> str:
         loop = asyncio.get_running_loop()
         if self.provider == "minimax":
             return await loop.run_in_executor(
-                _executor, self._call_anthropic_sync, system, messages, temperature
+                _executor, self._call_anthropic_sync, system, messages,
+                temperature, response_format
             )
         else:
             return await loop.run_in_executor(
-                _executor, self._call_openai_sync, system, messages, temperature
+                _executor, self._call_openai_sync, system, messages,
+                temperature, response_format
             )
 
     def _call_anthropic_sync(self, system: str, messages: list[dict],
-                             temperature: float) -> str:
+                             temperature: float,
+                             response_format: dict = None) -> str:
         user_content = messages[0]["content"] if messages else ""
 
         for attempt in range(self.max_retries + 1):
@@ -163,20 +167,24 @@ class LLMClient:
         return ""
 
     def _call_openai_sync(self, system: str, messages: list[dict],
-                          temperature: float) -> str:
+                          temperature: float,
+                          response_format: dict = None) -> str:
         import openai
         client = openai.OpenAI(api_key=self.api_key, base_url=self.base_url)
         full = [{"role": "system", "content": system}] + messages
 
         for attempt in range(self.max_retries + 1):
             try:
-                resp = client.chat.completions.create(
-                    model=self.model,
-                    messages=full,
-                    temperature=temperature,
-                    max_tokens=4000,
-                    timeout=120,
-                )
+                kwargs = {
+                    "model": self.model,
+                    "messages": full,
+                    "temperature": temperature,
+                    "max_tokens": 4000,
+                    "timeout": 120,
+                }
+                if response_format:
+                    kwargs["response_format"] = response_format
+                resp = client.chat.completions.create(**kwargs)
                 return resp.choices[0].message.content or ""
             except Exception as e:
                 if attempt < self.max_retries:
