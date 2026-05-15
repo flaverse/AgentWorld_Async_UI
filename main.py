@@ -39,9 +39,8 @@ def load_config():
     assembler = PromptAssembler(loader)
     labels = loader.data.get("text_labels", {})
     modal_map = loader.data.get("modal_layer_map", {})
-    dup_cfg = loader.data.get("duplication", {})
     return {"world": wc, "llm": lc, "assembler": assembler, "labels": labels,
-            "modal_map": modal_map, "dup_cfg": dup_cfg}
+            "modal_map": modal_map}
 
 
 # ═══════════════════════════════════════════════════
@@ -218,8 +217,6 @@ async def cmd_test(args):
         default_patience=sim.get("default_patience", 5),
         speech_window=sim.get("speech_window", 30),
         memory_prompt_count=sim.get("memory_prompt_count", 5),
-        dup_mask=cfg["dup_cfg"].get("mask", {"dialogue": ["mute"], "visual": ["mute"]}),
-        dup_prefix_len=cfg["dup_cfg"].get("prefix_length", 40),
     )
 
     print(f"\n{'='*60}")
@@ -276,8 +273,6 @@ async def cmd_demo(args):
         default_patience=sim.get("default_patience", 5),
         speech_window=sim.get("speech_window", 30),
         memory_prompt_count=sim.get("memory_prompt_count", 5),
-        dup_mask=cfg["dup_cfg"].get("mask", {}),
-        dup_prefix_len=cfg["dup_cfg"].get("prefix_length", 40),
     )
 
     print(f"Agent: {agent.name} | personality: {agent.get('agent').personality}")

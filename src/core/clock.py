@@ -8,15 +8,10 @@ class WorldClock:
         self.start_sim_minutes = self._parse_time(start_time_str)
 
     def now(self) -> float:
+        """返回当前模拟时间 (从 start_sim 起的模拟分钟数)。"""
         elapsed_real = time.time() - self.start_real
         elapsed_sim_seconds = elapsed_real * self.time_scale
-        return self.start_sim_minutes + elapsed_sim_seconds / 60.0
-
-    def time_str(self) -> str:
-        total = self.now()
-        hours = int(total // 60) % 24
-        minutes = int(total % 60)
-        return f"{hours:02d}:{minutes:02d}"
+        return elapsed_sim_seconds / 60.0
 
     def _parse_time(self, s: str) -> float:
         h, m = map(int, s.split(":"))

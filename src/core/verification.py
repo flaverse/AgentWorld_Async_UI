@@ -37,8 +37,3 @@ def check_bounds(entity, deltas: dict, currency_key: str, drive_min: float, driv
             if new_val > drive_max:
                 return f"{attr} would go above max: {current} + {delta} = {new_val}"
     return None
-
-
-@register("entity_existence")
-def check_existence(entity, deltas: dict, *_) -> str | None:
-    return None  # entity always exists in current architecture

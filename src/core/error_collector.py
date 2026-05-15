@@ -59,35 +59,6 @@ class ErrorCollector:
         preview = raw_text[:200].replace("\n", " ")
         self._dedup_and_add(module, f"LLM JSON parse failed. Raw: {preview}", "")
 
-    def log_task_failure(self, task_name: str, exc: Exception):
-        self._dedup_and_add(task_name, f"Task crashed: {type(exc).__name__}: {exc}",
-                           traceback.format_exc())
-
-    def get_recent(self, n: int = 20) -> list[dict]:
-        with self._lock:
-            recent = list(self.records)[-n:]
-        return [{
-            "count": r.count,
-            "module": r.module,
-            "message": r.message,
-            "traceback": r.traceback_str[:500] if r.traceback_str else "",
-            "first_at": r.first_at,
-            "last_at": r.last_at,
-        } for r in recent]
-
-    def get_summary(self) -> dict:
-        with self._lock:
-            return {
-                "total_errors": self.total_errors,
-                "unique_errors": len(self.records),
-                "recent": self.get_recent(10),
-            }
-
-    def clear(self):
-        with self._lock:
-            self.records.clear()
-            self.total_errors = 0
-
 
 # Global singleton
 errors = ErrorCollector()

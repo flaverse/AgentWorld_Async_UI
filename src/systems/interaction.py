@@ -1,6 +1,5 @@
 """InteractionSystem — 统一交互模型
 interact() 是唯一入口。NPC→NPC: 纯同步写层。NPC→Item: +1 LLM。
-check_observing() — observing 闭环检测
 """
 import json
 import time
@@ -8,41 +7,6 @@ import logging
 from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
-
-
-def check_observing(agent_layer, sensory, text: dict = None) -> str | None:
-    """Observing 闭环检测。返回结束原因或 None (继续等待)。"""
-    if not text:
-        text = {"observed_replied": '{name}说："{speech}"',
-                "observed_left": "{name}走远了",
-                "observed_no_reply": "{name}没有回应我"}
-    if not agent_layer.expects_reply or not agent_layer.observing_target:
-        return None
-    heard_ch = sensory.channels.get("auditory", {})
-    heard = heard_ch.get(agent_layer.observing_target)
-    if heard and (heard.data.get("current_speech", "") or heard.data.get("sound", "")):
-        speech = heard.data.get("current_speech", "") or heard.data.get("sound", "")
-        agent_layer.memory.record(
-            text["observed_replied"].format(name=heard.name, speech=speech))
-        agent_layer.expects_reply = False
-        agent_layer.observing_target = ""
-        return "replied"
-
-    seen_ch = sensory.channels.get("visual", {})
-    seen = seen_ch.get(agent_layer.observing_target)
-    if not seen or seen.distance > agent_layer.view_radius * 0.8:
-        agent_layer.memory.record(
-            text["observed_left"].format(name=agent_layer.observing_target))
-        agent_layer.expects_reply = False
-        agent_layer.observing_target = ""
-        return "left"
-    if time.time() - agent_layer.observing_since > agent_layer.observing_timeout:
-        agent_layer.memory.record(
-            text["observed_no_reply"].format(name=agent_layer.observing_target))
-        agent_layer.expects_reply = False
-        agent_layer.observing_target = ""
-        return "timeout"
-    return None
 
 
 @dataclass

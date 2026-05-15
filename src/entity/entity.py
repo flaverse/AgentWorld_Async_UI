@@ -7,7 +7,6 @@ class Entity:
     name: str = ""
     zone: str = ""
     pos: list[int] = field(default_factory=lambda: [0, 0])
-    status: str = "observing"
     last_action_time: float = 0.0
 
     layers: dict = field(default_factory=dict)
@@ -38,10 +37,3 @@ class Entity:
         interaction = self.get("interaction")
         if interaction:
             interaction.apply_deltas(deltas)
-
-    def calc_facing(self, to_pos: list[int]) -> str:
-        dx = to_pos[0] - self.pos[0]
-        dy = to_pos[1] - self.pos[1]
-        if abs(dx) >= abs(dy):
-            return "right" if dx > 0 else "left"
-        return "down" if dy > 0 else "up"

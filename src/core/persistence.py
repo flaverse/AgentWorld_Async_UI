@@ -1,5 +1,5 @@
 """SQLite persistence for agent state snapshots and interactions."""
-import sqlite3, json, time, uuid, os
+import sqlite3, json, time, uuid
 
 
 class WorldDB:
@@ -25,7 +25,6 @@ class WorldDB:
                 pos_x     INT,
                 pos_y     INT,
                 drives    TEXT,
-                status    TEXT,
                 PRIMARY KEY (run_id, tick, entity_id)
             );
             CREATE TABLE IF NOT EXISTS interactions (
@@ -57,9 +56,9 @@ class WorldDB:
                 {k: round(float(v), 1) for k, v in
                  a.get("agent").drives.attrs.items()}, ensure_ascii=False)
             self.conn.execute(
-                "INSERT OR REPLACE INTO snapshots VALUES(?,?,?,?,?,?,?,?,?)",
+                "INSERT OR REPLACE INTO snapshots VALUES(?,?,?,?,?,?,?,?)",
                 (run_id, tick, a.id, a.name, a.zone, a.pos[0], a.pos[1],
-                 drives_json, a.status))
+                 drives_json))
         self.conn.commit()
 
     def log_interaction(self, run_id: str, agent_name: str, target_name: str,

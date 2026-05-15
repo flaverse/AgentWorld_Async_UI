@@ -16,41 +16,41 @@ templates:
     temperature: 0.7
     system_prompt_ref: agent_decision
     slots:
-      - {name: time_info, provider: runtime}
-      - {name: persona, provider: runtime}
-      - {name: world_rules, provider: content}
-      - {name: kl_divergence, provider: runtime, condition: "has_kl"}
-      - {name: drive_state, provider: runtime}
-      - {name: spatial_context, provider: topology}
-      - {name: interactable_section, provider: topology}
-      - {name: visible_section, provider: topology, condition: "has_visible"}
-      - {name: hearing_section, provider: topology, condition: "has_hearing"}
-      - {name: recent_memory, provider: runtime, condition: "has_memory"}
-      - {name: action_guidance, provider: content}
-      - {name: output_format, provider: content}
+      - time_info
+      - persona
+      - world_rules
+      - kl_divergence
+      - drive_state
+      - spatial_context
+      - interactable_section
+      - visible_section
+      - hearing_section
+      - recent_memory
+      - avoid_repetition
+      - action_guidance
+      - output_format
     output_schema: decision_output
 
   interact_narrative:
     temperature: 0.5
     system_prompt_ref: interact_narrative
     slots:
-      - {name: interact_context, provider: runtime}
-      - {name: interact_rules, provider: content}
-      - {name: interact_output_format, provider: content}
+      - interact_context
+      - interact_rules
+      - interact_output_format
     output_schema: interact_output
 
 # ═══════════════════════════════════════
 slots:
   time_info:
-    provider: runtime
+    condition: round
     template: "## 时间\n现在是第{round}轮。"
 
   persona:
-    provider: runtime
+    condition: name
     template: "## 你的身份\n你是{name}。性格: {personality}"
 
   world_rules:
-    provider: content
     template: |
       ## 世界法则 (所有居民默认遵守)
       1. **属性守恒**: 任何属性都不能被消耗到负值。
@@ -60,47 +60,52 @@ slots:
       5. **互惠社交**: 单向付出不可持续。
 
   drive_state:
-    provider: runtime
+    condition: drives_table
     template: |
       ## 你的状态
       {drives_table}
       (高于60=需要关注, 高于80=急需满足)
 
   kl_divergence:
-    provider: runtime
+    condition: kl_text
     template: |
       ## KL 散度 (变化)
       {kl_text}
 
   spatial_context:
-    provider: topology
+    condition: zone_name
     template: "## 空间\n你在{zone_name}({zone_width}x{zone_height}) | 位置: ({pos_x}, {pos_y})"
 
   interactable_section:
-    provider: topology
+    condition: interactable_text
     template: |
       ## 可交互 (在范围内)
       {interactable_text}
 
   visible_section:
-    provider: topology
+    condition: visible_text
     template: |
       ## 看得见但够不着 (需走近)
       {visible_text}
 
   hearing_section:
-    provider: topology
-    template: |
-      {hearing_text}
+    condition: hearing_text
+    template: "{hearing_text}"
 
   recent_memory:
-    provider: runtime
+    condition: memory_text
     template: |
       ## 最近经历
       {memory_text}
 
+  avoid_repetition:
+    condition: memory_text
+    template: |
+      ## 注意
+      检查你的最近经历。如果你即将重复刚说过的话或做过的动作，选择等待或者换个不同的行动。
+      如果对方还没有回复你上次说的话，继续等待。不要重复提问。
+
   action_guidance:
-    provider: content
     template: |
       ## 指引
       action 是你下一步想做的任何事。包含去哪、做什么、说什么。
@@ -111,7 +116,6 @@ slots:
       - null或空 → 歇一会，什么都不做。这是完全合法的选择。
 
   output_format:
-    provider: content
     template: |
       ## 输出格式 (严格JSON)
       {
@@ -136,11 +140,11 @@ slots:
 
   # ── Interact Narrative ──
   interact_context:
-    provider: runtime
+    condition: caller_name
     template: |
       ## 交互
       {caller_name}(id={caller_id}) 对 {target_name}(id={target_id}) 做了：{action_description}。
-      
+
       执行者: {caller_name} ({caller_personality})
       执行者当前状态: {caller_state}
 
@@ -150,7 +154,7 @@ slots:
       {target_context}
 
   interact_rules:
-    provider: runtime
+    condition: caller_name
     template: |
       ## 规则
       写一段50-150字的叙事。计算对{caller_name}({caller_id})和{target_name}({target_id})的属性影响。
@@ -158,7 +162,7 @@ slots:
       只输出JSON。
 
   interact_output_format:
-    provider: runtime
+    condition: caller_name
     template: |
       输出格式:
       {{
@@ -196,27 +200,12 @@ output_schemas:
         required: [narrative, deltas]
 
 # ═══════════════════════════════════════
-duplication:
-  prefix_length: 40
-  mask:
-    dialogue: [mute]
-    visual: [mute]
-    internal: []
-
-# ═══════════════════════════════════════
 modal_layer_map:
   dialogue: auditory
   visual: visual
 
 # ═══════════════════════════════════════
 text_labels:
-  hearing_header: "## 听觉"
-  hearing_entry: '{name}说: "{sound}" ({vol})'
-  interactable_header: "可交互 (直接选下方ID):"
-  expression_label: "表情:"
-  actions_label: "可做: "
-  visible_only_header: "看得见够不着:"
-  empty_sensory: "(无)"
   empty_memory: "无"
   memory_entry: "[+{rel}s] {text}"
   drive_table_header: "| 属性 | 数值 |"
@@ -227,4 +216,3 @@ text_labels:
   drive_no_data: "(无数据)"
   intent_stale: "STALE: "
   intent_prefix: "INTENT: "
-

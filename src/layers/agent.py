@@ -16,7 +16,6 @@ class AgentLayer(Layer):
     drives: object = None
     sensory: object = None
     memory: object = None
-    knowledge: object = None
     inbox: object = None
 
     # ── KL snapshot (P-distribution) ──
@@ -26,14 +25,3 @@ class AgentLayer(Layer):
 
     # ── Write-pending lock ──
     _write_pending: bool = False
-
-    # ── Duplication check ──
-    _last_dialogue: str = ""
-    _last_visual:   str = ""
-    _last_internal: str = ""
-
-    # ── Observing state (expecting reply from target) ──
-    expects_reply:     bool = False
-    observing_target:  str = ""
-    observing_since:   float = 0.0
-    observing_timeout: float = 0.0

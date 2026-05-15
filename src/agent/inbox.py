@@ -4,9 +4,7 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Message:
-    from_agent_id: str = ""
     from_agent_name: str = ""
-    method: str = ""
     content: str = ""
     timestamp: float = 0.0
 

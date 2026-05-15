@@ -36,9 +36,6 @@ world:
       kl_stale: "太久没事做了"
       kl_coin: "coins {sign}{delta}"
       kl_state_cross: "{attr} {arrow}突破{t}"
-      observed_replied: '{name}说："{speech}"'
-      observed_left: "{name}走远了"
-      observed_no_reply: "{name}没有回应我"
 
 zones:
 - id: bar_zone

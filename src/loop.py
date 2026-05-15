@@ -1,18 +1,17 @@
 """Agent loop — phase-based pipeline. All config injected via LoopConfig.
 
-Phase order: sense → observing → KL gate → decide → act
+Phase order: sense → KL gate → decide → act
 Each phase may skip the remainder via continue.
 """
 import time
 import asyncio
 from dataclasses import dataclass, field
 from core.kl_divergence import total_kl, snapshot_p
-from systems.interaction import check_observing
 
 
 @dataclass
 class LoopConfig:
-    """Structured config for agent loop — replaces raw dict. Type-safe, self-documenting."""
+    """Structured config for agent loop — type-safe, self-documenting."""
     poll_interval: float = 0.3
     thresholds: list = field(default_factory=lambda: [30, 60, 80])
     coin_epsilon: float = 5
@@ -24,8 +23,6 @@ class LoopConfig:
     default_patience: int = 5
     speech_window: int = 30
     memory_prompt_count: int = 5
-    dup_mask: dict = field(default_factory=dict)
-    dup_prefix_len: int = 40
 
 
 async def run_agent(agent, world, brain, assembler, systems,
@@ -47,20 +44,10 @@ async def run_agent(agent, world, brain, assembler, systems,
             systems["decay"].tick(agent, elapsed)
             systems["sensory"].update(agent, world.entities, world,
                                        speech_window=cfg.speech_window)
-            world.prune_events()
             sensory = al.sensory
 
             # ═══════════════════════════════════════════
-            #  PHASE 2: OBSERVING — waiting for reply
-            # ═══════════════════════════════════════════
-            if al.expects_reply:
-                result = check_observing(al, sensory, cfg.text)
-                if result:
-                    await asyncio.sleep(cfg.poll_interval)
-                    continue
-
-            # ═══════════════════════════════════════════
-            #  PHASE 3: KL GATE — only act if something changed
+            #  PHASE 2: KL GATE — only act if something changed
             # ═══════════════════════════════════════════
             drives = al.drives
             coins = round(float(agent.get("interaction").private_attrs.get(cfg.currency, 0)))
@@ -72,7 +59,7 @@ async def run_agent(agent, world, brain, assembler, systems,
                 continue
 
             # ═══════════════════════════════════════════
-            #  PHASE 3b: INTENT — execute stale intent if fresh
+            #  PHASE 2b: INTENT — execute stale intent if fresh
             # ═══════════════════════════════════════════
             latest_mem = al.memory.latest()
             intent_prefix = labels.get("intent_prefix", "INTENT:")
@@ -104,7 +91,7 @@ async def run_agent(agent, world, brain, assembler, systems,
                 latest_mem["text"] = labels.get("intent_stale", "STALE: ") + intent_action
 
             # ═══════════════════════════════════════════
-            #  PHASE 4: DECIDE — LLM decision
+            #  PHASE 3: DECIDE — LLM decision
             # ═══════════════════════════════════════════
 
             # Drain inbox only now — we are actually going to decide
@@ -138,21 +125,8 @@ async def run_agent(agent, world, brain, assembler, systems,
 
             decision = await brain.decide(ctx)
 
-            # Duplication check: mute channels that repeat previous output
-            if cfg.dup_mask:
-                from core.duplication import check as dup_check
-                allowed = dup_check(al, decision, cfg.dup_mask, cfg.dup_prefix_len)
-                if not all(allowed.values()):
-                    snapshot_p(al, sensory, drives, cfg.currency, cfg.text,
-                               cfg.thresholds, cfg.coin_epsilon)
-                    await asyncio.sleep(cfg.poll_interval)
-                    continue
-                for ch in cfg.dup_mask:
-                    if not allowed.get(ch, True):
-                        decision[ch] = ""
-
             # ═══════════════════════════════════════════
-            #  PHASE 5: ACT — move / interact
+            #  PHASE 4: ACT — move / interact
             # ═══════════════════════════════════════════
             move_to = decision.get("move_to")
             action_text = decision.get("action")
@@ -185,11 +159,6 @@ async def run_agent(agent, world, brain, assembler, systems,
                             "drives": {k: round(v, 1) for k, v in drives.attrs.items()},
                             "coins": coins, "kl_text": kl_text,
                         })
-                    if decision.get("expects_reply") and target.has("agent"):
-                        al.expects_reply = True
-                        al.observing_target = target.id
-                        al.observing_since = time.time()
-                        al.observing_timeout = decision.get("patience", cfg.default_patience)
                 elif target and not interaction.can_interact(agent, target):
                     agent.move_to(list(target.pos))
                     agent.last_action_time = world.clock.now()

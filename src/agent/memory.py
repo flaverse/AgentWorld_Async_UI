@@ -42,7 +42,3 @@ class AgentMemory:
 
     def latest(self) -> dict | None:
         return self.entries[-1] if self.entries else None
-
-    def pin(self, text: str = ""):
-        """Add a pinned entry that won't be evicted by max_size limit."""
-        self.entries.append({"ts": time.time(), "text": text, "pinned": True})
