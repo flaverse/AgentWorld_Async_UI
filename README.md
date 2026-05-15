@@ -181,32 +181,29 @@ flowchart LR
 ```mermaid
 classDiagram
     class Layer {
-        <<abstract>>
         +observable_radius
         +properties dict
-        +observe(d) dict
+        +observe(d)
     }
 
     class VisualLayer {
         +visible_radius
         +sprite
-        +sprite_sheet
-        +observe(d) → {look, detail, expression}
+        +expression
     }
 
     class AuditoryLayer {
         +audible_radius
         +current_speech
         +speech_ts
-        +observe(d) → {sound, volume, current_speech}
     }
 
     class InteractionLayer {
         +interaction_radius
-        +public_attrs dict
-        +private_attrs dict
-        +actions dict
-        +apply_deltas(d) dict
+        +public_attrs
+        +private_attrs
+        +actions
+        +apply_deltas()
     }
 
     class AgentLayer {
@@ -214,29 +211,29 @@ classDiagram
         +drives · sensory · memory · inbox
         +p_channels · p_state · p_stale
         +_write_pending
-        +expects_reply · observing_target
+        +expects_reply
     }
 
     class Entity {
         +id · name · zone · pos
         +layers dict
         +describe
-        +has(layer) · get(layer)
+        +has() · get()
         +move_to() · distance_to()
     }
 
-    Layer <|-- VisualLayer
-    Layer <|-- AuditoryLayer
-    Layer <|-- InteractionLayer
-    Layer <|-- AgentLayer
-    Entity o-- Layer : layers{}
+    Layer <|-- VisualLayer : inherits
+    Layer <|-- AuditoryLayer : inherits
+    Layer <|-- InteractionLayer : inherits
+    Layer <|-- AgentLayer : inherits
+    Entity o-- Layer : layers
 
     class SensorySystem {
         +update(observer, entities)
-        iterate entity.layers → call observe(d)
+        iterate all entity.layers
     }
 
-    SensorySystem --> Layer : polls
+    SensorySystem --> Layer : polls each layer
 ```
 
 ---
