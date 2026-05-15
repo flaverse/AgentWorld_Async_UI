@@ -139,13 +139,13 @@ slots:
     provider: runtime
     template: |
       ## 交互
-      {caller_name}(id={caller_id}) 对 {target_name}(id={target_id}) 执行了 {action_name}。
+      {caller_name}(id={caller_id}) 对 {target_name}(id={target_id}) 做了：{action_description}。
       
       执行者: {caller_name} ({caller_personality})
-      执行者当前: {caller_state}
+      执行者当前状态: {caller_state}
 
-      对象: {target_description}
-      动作: {action_description}
+      对象描述: {target_description}
+      隐藏属性: {target_hidden}
 
       {target_context}
 

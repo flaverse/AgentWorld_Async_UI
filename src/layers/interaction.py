@@ -5,20 +5,16 @@ from layers.base import Layer
 @dataclass
 class InteractionLayer(Layer):
     interaction_radius: int = 2
-    public_attrs: dict = field(default_factory=dict)
     private_attrs: dict = field(default_factory=dict)
-    actions: dict[str, dict] = field(default_factory=dict)
+    hidden: dict = field(default_factory=dict)
+    gate: dict | None = None
     currency_key: str = "coins"
     drive_min: float = 0.0
     drive_max: float = 100.0
 
-    def interact(self, action: str | None = None) -> list[str]:
-        if action is None:
-            return list(self.actions.keys())
-        raise NotImplementedError("execute via InteractionSystem")
-
-    def get_action(self, action: str) -> dict | None:
-        return self.actions.get(action)
+    def __post_init__(self):
+        if self.interaction_radius:
+            self.observable_radius = self.interaction_radius
 
     def apply_deltas(self, deltas: dict) -> None:
         for key, delta in deltas.items():

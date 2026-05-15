@@ -200,9 +200,9 @@ classDiagram
 
     class InteractionLayer {
         +interaction_radius
-        +public_attrs
         +private_attrs
-        +actions
+        +hidden
+        +gate
         +apply_deltas()
     }
 
@@ -369,7 +369,7 @@ python main.py --output trace.json          # Save trace data
 
 | Version | Milestone |
 |---------|-----------|
-| **v5.1** | Phase pipeline (SENSE→OBSERVING→KL→DECIDE→ACT). AgentLayer state isolation — all 11 agent-specific fields removed from Entity. Typed LoopConfig dataclass. Inbox drain timing fix. InteractionSystem method extraction (_write_agent_layers, _resolve_npc_item, _handle_gate_transfer). |
+| **v5.2** | Action dict eliminated — LLM decides freely via natural language. Interaction layer unified: `properties` (public) + `hidden` (private, interact-only) + `gate`. KL text injection (0 hardcode). Dead config cleanup (-200 YAML lines, -45 Python lines). |
 | **v5** | Generic Layer.observe() + observable_radius. Sensory polls all layers. channel_kl full dict diff. Property verification (@register). SQLite persistence (--persist). Dead code elimination (-24000 lines). |
 | **v4** | P/Q/KL gate + observing baseline + write-pending lock. Unified interact(). Config decoupling. Full memory retention. |
 | v3 | Story-first pipeline + per-agent projection + verify |

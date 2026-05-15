@@ -84,26 +84,23 @@ async def run_agent(agent, world, brain, assembler, systems,
                         agent.zone, agent.pos, intent_action, world.entities,
                         exclude_id=agent.id)
                     if intent_target and interaction.can_interact(agent, intent_target):
-                        action_name = interaction.fuzzy_match_action(
-                            intent_target, intent_action)
-                        if action_name:
-                            result = await interaction.interact(
-                                agent, intent_target, action_name, {}, world)
-                            agent.last_action_time = world.clock.now()
-                            latest_mem["text"] += " ✓"
-                            if trace_fn:
-                                trace_fn({
-                                    "agent": name, "target": intent_target.name,
-                                    "action_text": intent_action, "note": "from_intent",
-                                    "result_narrative": result.narrative if result else "",
-                                    "zone": agent.zone, "pos": list(agent.pos),
-                                    "drives": {k: round(v, 1) for k, v in drives.attrs.items()},
-                                    "coins": coins, "kl_text": kl_text,
-                                })
-                            snapshot_p(al, sensory, drives, cfg.currency, cfg.text,
-                                       cfg.thresholds, cfg.coin_epsilon)
-                            await asyncio.sleep(cfg.poll_interval)
-                            continue
+                        result = await interaction.interact(
+                            agent, intent_target, {}, world)
+                        agent.last_action_time = world.clock.now()
+                        latest_mem["text"] += " ✓"
+                        if trace_fn:
+                            trace_fn({
+                                "agent": name, "target": intent_target.name,
+                                "action_text": intent_action, "note": "from_intent",
+                                "result_narrative": result.narrative if result else "",
+                                "zone": agent.zone, "pos": list(agent.pos),
+                                "drives": {k: round(v, 1) for k, v in drives.attrs.items()},
+                                "coins": coins, "kl_text": kl_text,
+                            })
+                        snapshot_p(al, sensory, drives, cfg.currency, cfg.text,
+                                   cfg.thresholds, cfg.coin_epsilon)
+                        await asyncio.sleep(cfg.poll_interval)
+                        continue
                 latest_mem["text"] = labels.get("intent_stale", "STALE: ") + intent_action
 
             # ═══════════════════════════════════════════
@@ -171,31 +168,28 @@ async def run_agent(agent, world, brain, assembler, systems,
                     agent.zone, agent.pos, action_text, world.entities,
                     exclude_id=agent.id)
                 if target and interaction.can_interact(agent, target):
-                    action_name = interaction.fuzzy_match_action(target, action_text)
-                    if action_name:
-                        result = await interaction.interact(
-                            agent, target, action_name, decision, world)
-                        agent.last_action_time = world.clock.now()
-                        if trace_fn:
-                            trace_fn({
-                                "agent": name, "target": target.name,
-                                "target_id": target.id,
-                                "action_text": action_text,
-                                "action_name": action_name,
-                                "llm1_output": decision,
-                                "llm1_prompt": prompt1,
-                                "result_narrative": result.narrative if result else "",
-                                "result_caller_deltas": result.caller_deltas if result else {},
-                                "result_target_deltas": result.target_deltas if result else {},
-                                "zone": agent.zone, "pos": list(agent.pos),
-                                "drives": {k: round(v, 1) for k, v in drives.attrs.items()},
-                                "coins": coins, "kl_text": kl_text,
-                            })
-                        if decision.get("expects_reply") and target.has("agent"):
-                            al.expects_reply = True
-                            al.observing_target = target.id
-                            al.observing_since = time.time()
-                            al.observing_timeout = decision.get("patience", cfg.default_patience)
+                    result = await interaction.interact(
+                        agent, target, decision, world)
+                    agent.last_action_time = world.clock.now()
+                    if trace_fn:
+                        trace_fn({
+                            "agent": name, "target": target.name,
+                            "target_id": target.id,
+                            "action_text": action_text,
+                            "llm1_output": decision,
+                            "llm1_prompt": prompt1,
+                            "result_narrative": result.narrative if result else "",
+                            "result_caller_deltas": result.caller_deltas if result else {},
+                            "result_target_deltas": result.target_deltas if result else {},
+                            "zone": agent.zone, "pos": list(agent.pos),
+                            "drives": {k: round(v, 1) for k, v in drives.attrs.items()},
+                            "coins": coins, "kl_text": kl_text,
+                        })
+                    if decision.get("expects_reply") and target.has("agent"):
+                        al.expects_reply = True
+                        al.observing_target = target.id
+                        al.observing_since = time.time()
+                        al.observing_timeout = decision.get("patience", cfg.default_patience)
                 elif target and not interaction.can_interact(agent, target):
                     agent.move_to(list(target.pos))
                     agent.last_action_time = world.clock.now()

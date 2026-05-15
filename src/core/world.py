@@ -64,17 +64,11 @@ class World:
 
             if "interaction" in ent_def:
                 inter = ent_def["interaction"]
-                actions = {}
-                for name, a in inter.get("actions", {}).items():
-                    # New format: action has description + optional gate
-                    # Keep backward compat: old format has resolve/rule/effects
-                    adef = dict(a)  # shallow copy to avoid mutating YAML
-                    actions[name] = adef
                 entity.layers["interaction"] = InteractionLayer(
                     interaction_radius=inter.get("interaction_radius", 2),
-                    public_attrs=inter.get("public_attrs", {}),
                     private_attrs=inter.get("private_attrs", {}),
-                    actions=actions,
+                    hidden=inter.get("hidden", {}),
+                    gate=inter.get("gate"),
                 )
 
             if "agent" in ent_def:
@@ -105,9 +99,6 @@ class World:
                     audible_radius=ag.get("hearing_radius", 15),
                     properties={"sound": ""})
                 entity.layers["agent"] = agent_layer
-
-            if "gate" in ent_def:
-                entity.layers["gate"] = ent_def["gate"]
 
             # Generic layers: any unknown layer type → base Layer
             for layer_name, layer_cfg in ent_def.get("layers", {}).items():
@@ -186,11 +177,8 @@ class World:
         )
         entity.layers["interaction"] = InteractionLayer(
             interaction_radius=3,
-            public_attrs={"expression": "好奇地四处张望"},
             private_attrs={},
-            actions={
-                "交谈": {"description": f"和{name}交谈。他/她看起来很好奇。"},
-            },
+            hidden={"description": f"和{name}交谈。他/她看起来很好奇。"},
         )
         entity.layers["agent"] = AgentLayer(
             autonomous=False,

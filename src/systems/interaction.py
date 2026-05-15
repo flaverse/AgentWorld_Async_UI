@@ -95,39 +95,12 @@ class InteractionSystem:
             return best[1]
         return None
 
-    def fuzzy_match_action(self, target, action_text: str) -> str | None:
-        layer = target.get("interaction")
-        if not layer or not layer.actions:
-            return None
-        for name in layer.actions:
-            if name in action_text:
-                return name
-        for name in layer.actions:
-            if len(name) <= 1:
-                continue
-            chars = set(name)
-            overlap = sum(1 for c in chars if c in action_text)
-            if overlap / len(chars) >= 0.5:
-                return name
-        for name in layer.actions:
-            for ch in name:
-                if ch in action_text:
-                    return name
-        if target.name in action_text and layer.actions:
-            return list(layer.actions.keys())[0]
-        if len(layer.actions) == 1:
-            return list(layer.actions.keys())[0]
-        return None
-
     # ═══════════ core: interact() ═══════════
 
-    async def interact(self, agent, target, action_name: str,
+    async def interact(self, agent, target,
                        decision: dict, world) -> ActionResult | None:
         """统一交互入口。同步写层，NPC→Item 加一次 LLM。"""
-        action = target.get("interaction").actions.get(action_name)
-        if not action:
-            logger.warning(f"No action '{action_name}' on {target.name}")
-            return None
+        target_inter = target.get("interaction")
 
         agent_layer = agent.get("agent")
         dialogue = decision.get("dialogue", "")
@@ -150,15 +123,16 @@ class InteractionSystem:
             return ActionResult(
                 target_id=target.id,
                 caller_deltas=self_deltas,
-                narrative=story or f"{agent.name}对{target.name}说了{dialogue or action_name}",
+                narrative=story or f"{agent.name}对{target.name}说了{dialogue or '话'}",
             )
 
         # ④ NPC→Item: interact_narrative LLM
-        narrative = story or f"{agent.name}对{target.name}做了{action_name}"
-        narrative = await self._resolve_npc_item(agent, target, action, action_name, story, narrative)
+        narrative = story or f"{agent.name}对{target.name}做了交互"
+        action_text = decision.get("action", "")
+        narrative = await self._resolve_npc_item(agent, target, action_text, story, narrative)
 
         # ⑤ Gate transfer
-        self._handle_gate_transfer(agent, action, world)
+        self._handle_gate_transfer(agent, target_inter, world)
 
         return ActionResult(
             target_id=target.id,
@@ -185,22 +159,23 @@ class InteractionSystem:
                 if value and layer_name in agent.layers:
                     agent.layers[layer_name].properties[field] = value
 
-    async def _resolve_npc_item(self, agent, target, action, action_name, story, fallback_narrative):
+    async def _resolve_npc_item(self, agent, target, action_text, story, fallback_narrative):
         """NPC→Item: call LLM for narrative + deltas. Returns narrative string."""
         narrative = fallback_narrative
+        target_inter = target.get("interaction")
         if not self.llm or not self.assembler:
             return narrative
         try:
             agent_inter = agent.get("interaction").private_attrs if agent.has("interaction") else {}
             context = {
-                "action_name": action_name,
+                "action_description": action_text or story or "",
                 "caller_name": agent.name,
                 "caller_personality": agent.get("agent").personality if agent.has("agent") else "",
                 "caller_state": json.dumps(agent_inter, ensure_ascii=False),
                 "caller_id": agent.id,
                 "target_name": target.name,
-                "target_description": getattr(target, 'describe', '') or target.name,
-                "action_description": action.get("description", action_name),
+                "target_description": target_inter.properties.get("description", "") if target_inter.properties else getattr(target, 'describe', '') or target.name,
+                "target_hidden": json.dumps(target_inter.hidden, ensure_ascii=False) if target_inter.hidden else "",
                 "target_context": "",
                 "target_id": target.id,
             }
@@ -223,9 +198,9 @@ class InteractionSystem:
             agent.get("agent").memory.record(narrative)
         return narrative
 
-    def _handle_gate_transfer(self, agent, action, world):
-        """If action defines a gate, transfer the agent to the target zone."""
-        gate = action.get("gate")
+    def _handle_gate_transfer(self, agent, target_inter, world):
+        """If target interaction defines a gate, transfer the agent to the target zone."""
+        gate = target_inter.gate if target_inter else None
         if gate and hasattr(world, 'lifecycle'):
             world.lifecycle.transfer_zone(agent, gate["to_zone"],
                                            list(gate.get("to_pos", agent.pos)))

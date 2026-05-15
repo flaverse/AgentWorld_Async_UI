@@ -16,12 +16,12 @@ def channel_kl(channel_name: str, p_data: dict, q_data: dict,
             qv = q_data[eid].data
         if not pv and qv:
             name = records.get(eid, eid)
-            lines.append(f"{channel_name}: {name} 进入")
+            lines.append(text["kl_entered"].format(channel=channel_name, name=name))
         elif pv and not qv:
-            lines.append(f"{channel_name}: {eid} 离开")
+            lines.append(text["kl_left"].format(channel=channel_name, name=name))
         elif pv != qv:
             name = records.get(eid, eid)
-            lines.append(f"{channel_name}: {name} 变化")
+            lines.append(text["kl_changed"].format(channel=channel_name, name=name))
     # Side-effect: update P
     p_data[channel_name] = q_data
     return " | ".join(lines) if lines else ""
