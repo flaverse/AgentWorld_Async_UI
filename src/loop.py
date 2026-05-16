@@ -74,7 +74,7 @@ async def run_agent(agent, world, brain, assembler, systems,
                         result = await interaction.interact(
                             agent, intent_target, {}, world)
                         agent.last_action_time = world.clock.now()
-                        latest_mem["text"] += " ✓"
+                        latest_mem["text"] = labels.get("intent_done", "DONE: ") + intent_action
                         if trace_fn:
                             trace_fn({
                                 "agent": name, "target": intent_target.name,

@@ -228,3 +228,4 @@ text_labels:
   drive_no_data: "(无数据)"
   intent_stale: "STALE: "
   intent_prefix: "INTENT: "
+  intent_done: "DONE: "
