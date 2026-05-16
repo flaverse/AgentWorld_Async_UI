@@ -98,18 +98,23 @@ async def run_agent(agent, world, brain, assembler, systems,
             inbox_text = al.inbox.to_prompt_text()
             al.inbox.drain()
 
+            # Render all sensory channels from YAML
+            sp = labels.get("sensory_prompts", {})
+            sensory_parts = []
+            for ch_name, ch_cfg in sp.items():
+                t = sensory.to_prompt(ch_name, ch_cfg)
+                if t: sensory_parts.append(t)
+
             ctx = {
-                "round": 0, "name": agent.name, "personality": al.personality,
+                "name": agent.name, "personality": al.personality,
                 "drives_table": al.drives.to_prompt_table(labels),
                 "zone_name": world.zones.get(agent.zone, {}).get("name", ""),
                 "zone_width": world.zones.get(agent.zone, {}).get("width", 10),
                 "zone_height": world.zones.get(agent.zone, {}).get("height", 10),
                 "pos_x": agent.pos[0], "pos_y": agent.pos[1],
-                "interactable_text": sensory.to_prompt("visual", labels),
-                "visible_text": "",
-                "memory_text": al.memory.to_prompt_text(cfg.memory_prompt_count, labels),
+                "sensory_text": "\n\n".join(sensory_parts),
                 "messages_text": inbox_text,
-                "hearing_text": sensory.to_prompt("auditory", labels),
+                "memory_text": al.memory.to_prompt_text(cfg.memory_prompt_count, labels),
                 "kl_text": kl_text,
             }
 

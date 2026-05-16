@@ -22,9 +22,7 @@ templates:
       - kl_divergence
       - drive_state
       - spatial_context
-      - interactable_section
-      - visible_section
-      - hearing_section
+      - sensory_section
       - recent_memory
       - avoid_repetition
       - action_guidance
@@ -76,21 +74,9 @@ slots:
     condition: zone_name
     template: "## 空间\n你在{zone_name}({zone_width}x{zone_height}) | 位置: ({pos_x}, {pos_y})"
 
-  interactable_section:
-    condition: interactable_text
-    template: |
-      ## 可交互 (在范围内)
-      {interactable_text}
-
-  visible_section:
-    condition: visible_text
-    template: |
-      ## 看得见但够不着 (需走近)
-      {visible_text}
-
-  hearing_section:
-    condition: hearing_text
-    template: "{hearing_text}"
+  sensory_section:
+    condition: sensory_text
+    template: "{sensory_text}"
 
   recent_memory:
     condition: memory_text
@@ -203,6 +189,21 @@ output_schemas:
 modal_layer_map:
   dialogue: auditory
   visual: visual
+
+# ═══════════════════════════════════════
+sensory_prompts:
+  visual:
+    header: "## 视觉"
+    state: "{name} ({distance}格)"
+    content: "{look}"
+    detail: "  {detail}"
+  auditory:
+    header: "## 听觉"
+    state: "{name}"
+    content: '"{current_speech}"'
+  interaction:
+    header: "## 可交互"
+    state: "{name} — {description}"
 
 # ═══════════════════════════════════════
 text_labels:

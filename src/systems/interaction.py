@@ -114,10 +114,9 @@ class InteractionSystem:
             agent.get("visual").properties["expression"] = visual
             agent.get("visual").properties["expression_ts"] = time.time()
         if agent_layer:
-            mem_text = decision.get("action", "")
-            if decision.get("dialogue"):
-                mem_text += f" | 说: {decision['dialogue'][:80]}"
-            agent_layer.memory.record(mem_text)
+            mem = decision.get("story", "") or decision.get("action", "")
+            if mem:
+                agent_layer.memory.record(mem)
         if self.modal_map:
             for field, layer_name in self.modal_map.items():
                 if field in ("dialogue", "visual", "internal"):

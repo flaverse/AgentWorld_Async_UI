@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from prompt.assembler import safe_format
 
 
 @dataclass
@@ -14,34 +15,25 @@ class SensorRecord:
 
 @dataclass
 class SensoryMemory:
-    channels: dict[str, dict[str, SensorRecord]] = field(
-        default_factory=lambda: {"visual": {}, "auditory": {}})
+    channels: dict = field(default_factory=dict)
 
     def clear(self):
         for ch in self.channels.values():
             ch.clear()
 
-    def to_prompt(self, layer_name: str, labels: dict = None) -> str:
-        if labels is None:
-            labels = _default_labels()
+    def to_prompt(self, layer_name: str, cfg: dict) -> str:
+        """Template-driven channel rendering. cfg from YAML sensory_prompts."""
         ch = self.channels.get(layer_name, {})
         if not ch:
             return ""
-        lines = []
+        lines = [cfg.get("header", layer_name)]
+        slot_keys = [k for k in cfg if k != "header"]
         for r in ch.values():
-            # Generic rendering: dump all data keys
-            for key, val in r.data.items():
-                if key.startswith("_"):
-                    continue
-                if isinstance(val, str) and val:
-                    lines.append(f"  [{layer_name}] {r.name}: {val}")
-        return "\n".join(lines) if lines else ""
-
-
-_DEFAULTS = None
-
-def _default_labels():
-    global _DEFAULTS
-    if _DEFAULTS is None:
-        _DEFAULTS = {"empty": "(无)"}
-    return _DEFAULTS
+            ctx = {**r.data, "name": r.name, "distance": r.distance}
+            for key in slot_keys:
+                tpl = cfg.get(key, "")
+                if tpl:
+                    line = safe_format(tpl, ctx)
+                    if line.strip() and "{" not in line:
+                        lines.append(line)
+        return "\n".join(lines)

@@ -38,6 +38,7 @@ def load_config():
     loader = PromptLoader(os.path.join(base_dir, "config/prompts.yaml"))
     assembler = PromptAssembler(loader)
     labels = loader.data.get("text_labels", {})
+    labels["sensory_prompts"] = loader.data.get("sensory_prompts", {})
     modal_map = loader.data.get("modal_layer_map", {})
     return {"world": wc, "llm": lc, "assembler": assembler, "labels": labels,
             "modal_map": modal_map}
