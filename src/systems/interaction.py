@@ -117,13 +117,6 @@ class InteractionSystem:
             mem = decision.get("story", "") or decision.get("action", "")
             if mem:
                 agent_layer.memory.record(mem)
-        if self.modal_map:
-            for field, layer_name in self.modal_map.items():
-                if field in ("dialogue", "visual", "internal"):
-                    continue
-                value = decision.get(field, "")
-                if value and layer_name in agent.layers:
-                    agent.layers[layer_name].properties[field] = value
 
     async def _resolve_npc_item(self, agent, target, action_text, story, fallback_narrative):
         """NPC→Item: call LLM for narrative + deltas. Returns narrative string."""

@@ -50,24 +50,5 @@ class WorldDB:
                           (time.time(), run_id))
         self.conn.commit()
 
-    def snapshot(self, run_id: str, tick: int, agents: list):
-        for a in agents:
-            drives_json = json.dumps(
-                {k: round(float(v), 1) for k, v in
-                 a.get("agent").drives.attrs.items()}, ensure_ascii=False)
-            self.conn.execute(
-                "INSERT OR REPLACE INTO snapshots VALUES(?,?,?,?,?,?,?,?)",
-                (run_id, tick, a.id, a.name, a.zone, a.pos[0], a.pos[1],
-                 drives_json))
-        self.conn.commit()
-
-    def log_interaction(self, run_id: str, agent_name: str, target_name: str,
-                        action: str, narrative: str, deltas: dict):
-        self.conn.execute(
-            "INSERT INTO interactions VALUES(?,?,?,?,?,?,?)",
-            (run_id, time.time(), agent_name, target_name, action,
-             narrative, json.dumps(deltas, ensure_ascii=False)))
-        self.conn.commit()
-
     def close(self):
         self.conn.close()

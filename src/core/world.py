@@ -10,7 +10,6 @@ from layers.agent import AgentLayer
 from agent.drives import DriveSystem
 from agent.sensory_memory import SensoryMemory
 from agent.memory import AgentMemory
-from agent.inbox import Inbox
 
 
 class World:
@@ -21,7 +20,6 @@ class World:
             self.config.get("start_time", "08:00"),
             time_scale,
         )
-        self.time_scale = time_scale
 
         self.zones: dict[str, dict] = {}
         self.entities: dict[str, Entity] = {}
@@ -84,7 +82,6 @@ class World:
                     )
                 agent_layer.sensory = SensoryMemory()
                 agent_layer.memory = AgentMemory()
-                agent_layer.inbox = Inbox()
                 entity.layers["auditory"] = AuditoryLayer(
                     audible_radius=ag.get("hearing_radius", 15),
                     properties={"sound": ""})

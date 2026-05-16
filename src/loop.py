@@ -90,13 +90,8 @@ async def run_agent(agent, world, brain, assembler, systems,
                         continue
                 latest_mem["text"] = labels.get("intent_stale", "STALE: ") + intent_action
 
-            # ═══════════════════════════════════════════
             #  PHASE 3: DECIDE — LLM decision
             # ═══════════════════════════════════════════
-
-            # Drain inbox only now — we are actually going to decide
-            inbox_text = al.inbox.to_prompt_text()
-            al.inbox.drain()
 
             # Render all sensory channels from YAML
             sp = labels.get("sensory_prompts", {})
@@ -106,6 +101,7 @@ async def run_agent(agent, world, brain, assembler, systems,
                 if t: sensory_parts.append(t)
 
             ctx = {
+                "main_thread": al.main_thread,
                 "name": agent.name, "personality": al.personality,
                 "drives_table": al.drives.to_prompt_table(labels),
                 "zone_name": world.zones.get(agent.zone, {}).get("name", ""),
@@ -113,7 +109,6 @@ async def run_agent(agent, world, brain, assembler, systems,
                 "zone_height": world.zones.get(agent.zone, {}).get("height", 10),
                 "pos_x": agent.pos[0], "pos_y": agent.pos[1],
                 "sensory_text": "\n\n".join(sensory_parts),
-                "messages_text": inbox_text,
                 "memory_text": al.memory.to_prompt_text(cfg.memory_prompt_count, labels),
                 "kl_text": kl_text,
             }
@@ -129,6 +124,9 @@ async def run_agent(agent, world, brain, assembler, systems,
                 continue
 
             decision = await brain.decide(ctx)
+
+            if decision.get("main_thread"):
+                al.main_thread = decision["main_thread"]
 
             # ═══════════════════════════════════════════
             #  PHASE 4: ACT — move / interact

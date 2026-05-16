@@ -11,12 +11,12 @@ class AgentLayer(Layer):
     interaction_radius: int = 3
     personality: str = ""
     drive_rates: dict = field(default_factory=dict)
+    main_thread: str = ""
 
     # Runtime modules
     drives: object = None
     sensory: object = None
     memory: object = None
-    inbox: object = None
 
     # ── KL snapshot (P-distribution) ──
     p_channels: dict = field(default_factory=dict)

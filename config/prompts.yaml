@@ -16,7 +16,7 @@ templates:
     temperature: 0.7
     system_prompt_ref: agent_decision
     slots:
-      - time_info
+      - main_thread
       - persona
       - world_rules
       - kl_divergence
@@ -41,9 +41,14 @@ templates:
 
 # ═══════════════════════════════════════
 slots:
-  time_info:
-    condition: round
-    template: "## 时间\n现在是第{round}轮。"
+  main_thread:
+    condition: main_thread
+    template: |
+      ## 你的当前主线
+      {main_thread}
+      这是你当前的目标。你的每个行动都应该服务于这个目标。
+      如果你完成了目标（在 story 里标"✓完成"），或者环境变化让它不再重要，
+      在输出中更新 main_thread 为新目标，或设为 null 维持当前主线。
 
   persona:
     condition: name
@@ -114,7 +119,7 @@ slots:
 
   output_format:
     template: |
-      ## 输出格式 (严格JSON)
+      ##       输出格式 (严格JSON)
       {
         "thinking": "简短推理",
         "action": "做什么 (自由文本，含位置和意图)" 或 null,
@@ -124,16 +129,18 @@ slots:
         "internal": "你的心里话" 或 null,
         "self_deltas": {"属性": 值},
         "expects_reply": true/false,
-        "patience": 5
+        "patience": 5,
+        "main_thread": "你接下来的长期目标" 或 null
       }
       - action: 你的完整意图(去哪+做什么)。null=歇一会。引擎自己会找目标实体
-      - story: 简短叙事。自己处理简单事务时可留空
+      - story: 简短叙事。可包含"✓完成"标记。自己处理简单事务时可留空
       - dialogue: 你直接说了什么(原话)。null=沉默
       - visual: 你的神态、表情、肢体动作。给观察者看的
       - internal: 你的内心活动(秘密)
       - self_deltas: 这个动作对你自身属性的影响。属性: thirst hunger social energy fun mood coins。范围±30。无影响写{}
       - expects_reply: 这句话是否需要对方回应(true/false)
       - patience: 如果等回应，最多等几秒。不等回应写0
+      - main_thread: 更新你的长期目标。完成了标"✓完成"。有新目标时改写。null=维持当前不变
 
   # ── Interact Narrative ──
   interact_context:
@@ -186,6 +193,7 @@ output_schemas:
         self_deltas: {type: object}
         expects_reply: {type: boolean}
         patience: {type: number}
+        main_thread: {type: string}
 
   interact_output:
     type: json_object

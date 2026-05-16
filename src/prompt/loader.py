@@ -12,8 +12,5 @@ class PromptLoader:
     def get_template(self, name: str) -> dict:
         return self.data.get("templates", {}).get(name, {})
 
-    def get_slot(self, name: str) -> dict:
-        return self.data.get("slots", {}).get(name, {})
-
     def get_output_schema(self, name: str) -> dict:
         return self.data.get("output_schemas", {}).get(name, {})

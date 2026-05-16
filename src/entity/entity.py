@@ -32,8 +32,3 @@ class Entity:
         if self._world:
             self._world.notify_moved(self.id, old_pos, target_pos, self.zone)
         return int(dist * speed)
-
-    def apply_deltas(self, deltas: dict) -> None:
-        interaction = self.get("interaction")
-        if interaction:
-            interaction.apply_deltas(deltas)
