@@ -25,6 +25,7 @@ templates:
       - sensory_section
       - recent_memory
       - avoid_repetition
+      - idle_guidance
       - action_guidance
       - output_format
     output_schema: decision_output
@@ -90,6 +91,16 @@ slots:
       ## 注意
       检查你的最近经历。如果你即将重复刚说过的话或做过的动作，选择等待或者换个不同的行动。
       如果对方还没有回复你上次说的话，继续等待。不要重复提问。
+
+  idle_guidance:
+    condition: memory_text
+    template: |
+      ## 关于等待 (null action)
+      把 action 设为 null 是完全合法的——而且通常是最自然的选择。
+      如果你已经在目标位置、正在听别人聊天、或者刚刚说完话在等对方回应，你不需要再次行动。
+      引擎会让你留在原地继续观察。等到真正需要你回应的时候自然会触发。
+      与其反复说"走近桌子"或"打个招呼"，不如输出 null——让对话自然流动。
+      只有当你有新的重要信息要说、或者需要移动到别处时，才输出具体 action。
 
   action_guidance:
     template: |
