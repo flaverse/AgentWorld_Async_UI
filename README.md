@@ -11,12 +11,12 @@
 </h1>
 
 <p align="center">
-  <b>P/Q/KL-Driven · Layer-Architected · 4-Phase Pipeline · Slot-Vector Prompting</b>
+  <b>感知和行动之间的代码只做一件事：比较世界模型和感官输入。<br/>
+  其余一切——什么重要、该做什么、不该做什么——都是声明，不是代码。</b>
 </p>
 
 <p align="center">
-  <i>The world doesn't change — the agent doesn't think.<br/>
-  世界不动，Agent 不动。</i>
+  <i>The world doesn't change — the agent doesn't think.</i>
 </p>
 
 ---
@@ -25,7 +25,18 @@
 
 ## 是什么
 
-一个 **纯 Python 异步多智能体自主世界引擎**。8 个 LLM 驱动的 Agent 在 3 个区域、28 个实体的世界中自主生活、社交、工作。全部行为由 YAML 配置驱动，Python 代码零领域知识硬编码。
+一个 **纯 Python 异步多智能体自主世界引擎**。最多 25 个 LLM 驱动的 Agent 在最多 7 个区域的世界中自主生活、社交、工作。全部行为由 YAML 配置驱动，Python 代码零领域知识硬编码。
+
+### 核心主旨
+
+> **引擎提供世界，LLM 提供认知。**
+>
+> 引擎不替 LLM 做判断。引擎的代码说"你周围有 3 个人"——不说"你应该跟谁说话"。
+> 引擎的代码说"世界变了"——不说"这个变化重要"。
+> 引擎的代码说"你上次做了 X"——不说"你不应该再做 X"。
+>
+> 所有认知判断（什么重要、该做什么、不该重复什么、目标要不要换）全部通过 **12 个 YAML slot** 引导 LLM 自主完成。
+> **0 行认知代码**。新增一个认知能力 = YAML 加一个 slot 定义 + 模板加一行名字。
 
 ---
 
@@ -382,7 +393,18 @@ MIT
 
 ## What It Is
 
-A **pure-Python asynchronous multi-agent autonomous world engine**. Eight LLM-driven agents live, socialize, and work across 3 zones with 28 entities. All behavior is driven by YAML configuration; Python contains zero hardcoded domain knowledge.
+A **pure-Python asynchronous multi-agent autonomous world engine**. Up to 25 LLM-driven agents live, socialize, and work across up to 7 zones. All behavior is driven by YAML configuration; Python contains zero hardcoded domain knowledge.
+
+### Core Thesis
+
+> **The engine provides the world. The LLM provides cognition.**
+>
+> The engine never makes decisions about content. The engine says "there are 3 people nearby" — not "you should talk to them."
+> The engine says "the world changed" — not "this change matters."
+> The engine says "you did X last time" — not "you shouldn't do X again."
+>
+> All cognitive judgments (what matters, what to do, whether to update goals) are guided by **12 YAML slots** — declarative prompt fragments that assemble into the LLM's decision context.
+> **0 lines of cognitive code.** Adding a new cognitive capability = one slot definition in YAML + one name in a template's slot list.
 
 ---
 
