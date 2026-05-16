@@ -4,16 +4,24 @@
 import time
 
 
+def _extract_data(val) -> dict:
+    """Extract .data dict from SensorRecord or dict, uniformly."""
+    if val is None:
+        return {}
+    if hasattr(val, 'data'):
+        return val.data or {}
+    if isinstance(val, dict):
+        return val.get("data", {})
+    return {}
+
+
 def channel_kl(channel_name: str, p_data: dict, q_data: dict,
                records: dict, text: dict) -> str:
     """通用 channel diff: 逐 entity 比较 data dict。任何 key 变化 = 信号。"""
     lines = []
     for eid in set(p_data) | set(q_data):
-        pv = p_data.get(eid, {}).get("data", {})
-        qv = q_data.get(eid, {}).get("data", {}) if isinstance(q_data.get(eid), dict) else q_data.get(eid, {})
-        # q_data values are SensorRecord objects, extract .data
-        if hasattr(q_data.get(eid), 'data'):
-            qv = q_data[eid].data
+        pv = _extract_data(p_data.get(eid))
+        qv = _extract_data(q_data.get(eid))
         if not pv and qv:
             name = records.get(eid, eid)
             lines.append(text["kl_entered"].format(channel=channel_name, name=name))
@@ -22,8 +30,6 @@ def channel_kl(channel_name: str, p_data: dict, q_data: dict,
         elif pv != qv:
             name = records.get(eid, eid)
             lines.append(text["kl_changed"].format(channel=channel_name, name=name))
-    # Side-effect: update P
-    p_data[channel_name] = q_data
     return " | ".join(lines) if lines else ""
 
 
@@ -73,6 +79,7 @@ def total_kl(agent_layer, sensory, drives, currency_key: str, text: dict,
                         text)
         if kl:
             parts.append(kl)
+        agent_layer.p_channels[ch_name] = ch_data
     ks = state_kl(agent_layer.p_state, drives, currency_key, text, thresholds, coin_epsilon)
     if ks: parts.append(ks)
     kt = stale_kl(agent_layer.p_stale, text, stale_timeout)
@@ -88,5 +95,6 @@ def snapshot_p(agent_layer, sensory, drives, currency_key: str, text: dict,
                    sensory.channels.get(ch_name, {}),
                    {eid: r.name for eid, r in sensory.channels.get(ch_name, {}).items()},
                    text)
+        agent_layer.p_channels[ch_name] = sensory.channels.get(ch_name, {})
     state_kl(agent_layer.p_state, drives, currency_key, text, thresholds, coin_epsilon)
     agent_layer.p_stale = time.time()

@@ -64,9 +64,9 @@ async def run_agent(agent, world, brain, assembler, systems,
             latest_mem = al.memory.latest()
             intent_prefix = labels.get("intent_prefix", "INTENT:")
             if latest_mem and latest_mem.get("text", "").startswith(intent_prefix):
+                intent_action = latest_mem["text"][len(intent_prefix):].strip()
                 mem_age = time.time() - latest_mem["ts"]
                 if mem_age < cfg.intent_ttl:
-                    intent_action = latest_mem["text"][len(intent_prefix):].strip()
                     intent_target = interaction.find_entity_at(
                         agent.zone, agent.pos, intent_action, world.entities,
                         exclude_id=agent.id)

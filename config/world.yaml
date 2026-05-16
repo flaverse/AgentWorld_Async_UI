@@ -7,9 +7,6 @@ world:
     currency: coins
     poll_interval: 0.3
     stale_timeout: 30
-    memory_prompt_count: 5
-    intent_ttl: 30
-    default_patience: 5
     speech_window: 30
     kl:
       state_thresholds: [30, 60, 80]
@@ -40,549 +37,834 @@ world:
 zones:
 - id: bar_zone
   name: 狐狸与鹅酒馆
-  width: 24
-  height: 16
-- id: square
-  name: 白果园广场
+  width: 60
+  height: 40
+- id: village
+  name: 白果园村与郊外
+  width: 60
+  height: 40
+- id: garrison
+  name: 尼弗迦德营地与草药小屋
   width: 40
   height: 30
-- id: herb_hut
-  name: 托蜜拉的草药小屋
-  width: 16
-  height: 12
+
 entities:
-# ═══ GATES ═══
+# ═══════════════════════════════════════
+#  BAR ZONE — 酒馆 (keep all + 3 new items + 3 new agents + square entities)
+# ═══════════════════════════════════════
+
+# ── Tavern ↔ Square ──
 - id: bar_door
   name: 酒馆门口
   zone: bar_zone
   pos: [0, 4]
-  visual:
-    visible_radius: 20
-    sprite: door
-    properties:
-      look: 酒馆的木质大门，通向白果园广场
-  interaction:
-    interaction_radius: 1
-    properties:
-      description: 狐狸与鹅酒馆的橡木大门。推开走出去就是白果园广场。
-    gate: {to_zone: square, to_pos: [13, 5]}
+  visual: {visible_radius: 20, sprite: door, properties: {look: 酒馆的木质大门，通向白果园广场}}
+  interaction: {interaction_radius: 1, properties: {description: 狐狸与鹅酒馆的橡木大门。推开出去是白果园广场。}, gate: {to_zone: square, to_pos: [13, 5]}}
   description: 酒馆的木质大门，通向白果园广场。
 
 - id: square_bar_gate
   name: 酒馆入口
-  zone: square
+  zone: bar_zone
   pos: [13, 5]
-  visual:
-    visible_radius: 20
-    sprite: door
-    properties:
-      look: 狐狸与鹅酒馆的招牌在风中摇晃，里面传来麦酒香
-  interaction:
-    interaction_radius: 1
-    properties:
-      description: 狐狸与鹅酒馆的橡木大门。门缝里透出麦酒香和暖黄灯光。
-    gate: {to_zone: bar_zone, to_pos: [1, 4]}
-  description: 狐狸与鹅酒馆的橡木大门。门缝里透出麦酒香和暖黄的灯光。
+  visual: {visible_radius: 20, sprite: door, properties: {look: 狐狸与鹅酒馆的招牌在风中摇晃，里面传来麦酒香}}
+  interaction: {interaction_radius: 1, properties: {description: 狐狸与鹅酒馆的橡木大门。门缝里透出麦酒香和暖黄灯光。}, gate: {to_zone: bar_zone, to_pos: [1, 4]}}
+  description: 狐狸与鹅酒馆的橡木大门。
 
+# ── Square ↔ Herb Hut ──
 - id: square_herb_gate
   name: 草药小屋入口
-  zone: square
+  zone: bar_zone
   pos: [0, 6]
-  visual:
-    visible_radius: 20
-    sprite: door
-    properties:
-      look: 一间歪斜的小木屋，门口挂满了干草药
-  interaction:
-    interaction_radius: 1
-    properties:
-      description: 一间歪斜的小木屋，门口挂满干草药。推门进去是托蜜拉的草药小屋。
-    gate: {to_zone: herb_hut, to_pos: [7, 5]}
-  description: 一间歪斜的小木屋，门口挂满了干草药。门缝里透出药草的混合气味。
+  visual: {visible_radius: 20, sprite: door, properties: {look: 一间歪斜的小木屋，门口挂满了干草药}}
+  interaction: {interaction_radius: 1, properties: {description: 一间歪斜的小木屋，门口挂满干草药。推门进去是托蜜拉的草药小屋。}, gate: {to_zone: herb_hut, to_pos: [7, 5]}}
+  description: 一间歪斜的小木屋，门口挂满了干草药。
 
 - id: herb_door
   name: 小屋门口
-  zone: herb_hut
+  zone: garrison
   pos: [7, 5]
-  visual:
-    visible_radius: 20
-    sprite: door
-    properties:
-      look: 透过门缝能看到白果园广场
-  interaction:
-    interaction_radius: 1
-    properties:
-      description: 草药小屋的木门。推门出去就是白果园广场。
-    gate: {to_zone: square, to_pos: [1, 6]}
-  description: 草药小屋的木门。透过门缝能看到白果园广场。
+  visual: {visible_radius: 20, sprite: door, properties: {look: 透过门缝能看到白果园广场}}
+  interaction: {interaction_radius: 1, properties: {description: 草药小屋的木门。推门出去就是白果园广场。}, gate: {to_zone: square, to_pos: [1, 6]}}
+  description: 草药小屋的木门。
 
-# ═══ BAR ZONE ═══
+# ── Square ↔ Village ──
+- id: square_village_gate
+  name: 村口路牌
+  zone: bar_zone
+  pos: [20, 0]
+  visual: {visible_radius: 20, sprite: door, properties: {look: 一块歪斜的木路牌，指向白果园村的方向}}
+  interaction: {interaction_radius: 1, properties: {description: 一条土路通往白果园村。远远能看到水车磨坊的尖顶。}, gate: {to_zone: village, to_pos: [15, 19]}}
+  description: 一块歪斜的木路牌，指向白果园村的方向。
+
+- id: village_gate
+  name: 村口
+  zone: village
+  pos: [15, 19]
+  visual: {visible_radius: 20, sprite: door, properties: {look: 白果园村的入口，一条土路通向广场方向}}
+  interaction: {interaction_radius: 1, properties: {description: 白果园村的入口。回头能看到白果园广场的轮廓。}, gate: {to_zone: square, to_pos: [21, 1]}}
+  description: 白果园村的村口，通向广场。
+
+# ── Square ↔ Garrison ──
+- id: square_garrison_gate
+  name: 军营大门
+  zone: bar_zone
+  pos: [0, 15]
+  visual: {visible_radius: 20, sprite: door, properties: {look: 尼弗迦德军营的黑色大门，岗哨上有士兵巡逻}}
+  interaction: {interaction_radius: 1, properties: {description: 黑色铁门通向尼弗迦德驻军营地。岗哨上的士兵斜眼看着你。}, gate: {to_zone: garrison, to_pos: [19, 8]}}
+  description: 黑色铁门，通向尼弗迦德军营。
+
+- id: garrison_gate
+  name: 营地大门
+  zone: garrison
+  pos: [19, 8]
+  visual: {visible_radius: 20, sprite: door, properties: {look: 从军营内侧看大门，上面挂着黑色日轮旗}}
+  interaction: {interaction_radius: 1, properties: {description: 营地的出口。推门出去就是白果园广场。}, gate: {to_zone: square, to_pos: [1, 16]}}
+  description: 营地的黑色铁门，通向广场。
+
+# ── Village ↔ Outskirts ──
+- id: village_outskirts_gate
+  name: 郊外小路
+  zone: village
+  pos: [29, 10]
+  visual: {visible_radius: 20, sprite: door, properties: {look: 一条土路延伸向郊外的农田和风车}}
+  interaction: {interaction_radius: 1, properties: {description: 土路通向白果园郊外。远处能看到风车在转动。}, gate: {to_zone: outskirts, to_pos: [0, 10]}}
+  description: 一条土路，通向白果园郊外。
+
+- id: outskirts_village_gate
+  name: 回村小路
+  zone: village
+  pos: [0, 10]
+  visual: {visible_radius: 20, sprite: door, properties: {look: 土路通向村庄方向，能看到水车磨坊的尖顶}}
+  interaction: {interaction_radius: 1, properties: {description: 这条土路通往白果园村。磨坊的尖顶在远处若隐若现。}, gate: {to_zone: village, to_pos: [28, 9]}}
+  description: 一条土路，通向白果园村。
+
+# ═══════════════════════════════════════
+#  BAR ZONE — 酒馆 (keep all + 3 new items + 3 new agents)
+# ═══════════════════════════════════════
+
 - id: bar_counter
   name: 吧台
   zone: bar_zone
   pos: [7, 2]
-  visual:
-    visible_radius: 20
-    sprite: counter_bar
-    properties:
-      look: 木制吧台，后面站着矮人老板
-      detail: 酒架上有几瓶酒，吧台有些年头了
+  visual: {visible_radius: 20, sprite: counter_bar, properties: {look: 木制吧台，后面站着矮人老板, detail: 酒架上有几瓶酒，吧台有些年头了}}
   interaction:
     interaction_radius: 3
-    properties:
-      description: 被无数酒杯磨得光滑发亮的橡木吧台。矮人老板在用脏布擦杯子。可以搭话聊天或倚靠休息。
-    hidden:
-      atmosphere: "喧闹温馨的乡村酒馆。老板粗鲁但热情，熟客多倒半杯。"
-      service: "心情好时透点消息，心情差时哼唧两句。"
-  description: 被无数酒杯磨得光滑发亮的橡木吧台。矮人老板站在吧台后。墙上挂着一面公告板。
+    properties: {description: 被无数酒杯磨得光滑发亮的橡木吧台。矮人老板在用脏布擦杯子。可以搭话聊天或倚靠休息。}
+    hidden: {atmosphere: "喧闹温馨的乡村酒馆。老板粗鲁但热情，熟客多倒半杯。", service: "心情好时透点消息，心情差时哼唧两句。"}
+  description: 被无数酒杯磨得光滑发亮的橡木吧台。矮人老板站在吧台后。
 
 - id: drink_ale
   name: 麦酒
   zone: bar_zone
   pos: [7, 2]
-  visual:
-    visible_radius: 3
-    sprite: null
-    properties:
-      look: 一杯琥珀色麦酒，泡沫细密
-      detail: 闻起来有麦芽香气
+  visual: {visible_radius: 3, sprite: null, properties: {look: 一杯琥珀色麦酒，泡沫细密, detail: 闻起来有麦芽香气}}
   interaction:
     interaction_radius: 2
-    properties:
-      description: 一杯琥珀色麦酒，泡沫细密。矮人老板刚从酒桶里打出来的，还冒着凉气。
-    hidden:
-      taste: "醇厚微苦，后味有蜂蜜甜。冰凉解渴。大概5个克朗。"
-      aroma: "浓郁麦芽香，带一点啤酒花苦味。"
-  description: 一杯琥珀色的麦酒，泡沫细密。矮人老板刚从酒桶里打出来的。
+    properties: {description: 一杯琥珀色麦酒，泡沫细密。矮人老板刚从酒桶里打出来的，还冒着凉气。}
+    hidden: {taste: "醇厚微苦，后味有蜂蜜甜。冰凉解渴。大概5个克朗。", aroma: "浓郁麦芽香，带一点啤酒花苦味。"}
+  description: 一杯琥珀色的麦酒，泡沫细密。
 
 - id: drink_wine
   name: 葡萄酒
   zone: bar_zone
   pos: [7, 2]
-  visual:
-    visible_radius: 3
-    sprite: null
-    properties:
-      look: 一杯深红色葡萄酒，果香浓郁
+  visual: {visible_radius: 3, sprite: null, properties: {look: 一杯深红色葡萄酒，果香浓郁}}
   interaction:
     interaction_radius: 2
-    properties:
-      description: 一杯深红色葡萄酒，果香浓郁。陶森特的上等货，价格不菲。
-    hidden:
-      taste: "黑莓和橡木的香气，丝滑醇厚。大概12个克朗。"
-      aroma: "果香芬芳，带陈年橡木桶气息。"
+    properties: {description: 一杯深红色葡萄酒，果香浓郁。陶森特的上等货，价格不菲。}
+    hidden: {taste: "黑莓和橡木的香气，丝滑醇厚。大概12个克朗。", aroma: "果香芬芳，带陈年橡木桶气息。"}
   description: 一杯深红色的葡萄酒，果香浓郁。陶森特的上等货。
 
 - id: table_01
   name: 散桌
   zone: bar_zone
   pos: [3, 5]
-  visual:
-    visible_radius: 15
-    sprite: table
-    properties:
-      look: 靠窗的散桌，阳光正好洒在桌面
+  visual: {visible_radius: 15, sprite: table, properties: {look: 靠窗的散桌，阳光正好洒在桌面}}
   interaction:
     interaction_radius: 2
-    properties:
-      description: 靠窗的一张散桌。阳光透过窗格洒在木桌上，桌面上还有上一杯酒的杯印。
-    hidden:
-      feel: "阳光暖洋洋的，是个安静歇脚的好位置。"
+    properties: {description: 靠窗的一张散桌。阳光透过窗格洒在木桌上，桌面上还有上一杯酒的杯印。}
+    hidden: {feel: "阳光暖洋洋的，是个安静歇脚的好位置。"}
   description: 靠窗的一张散桌。阳光透过窗格洒在木桌上。
 
 - id: notice_board
   name: 公告板
   zone: bar_zone
   pos: [5, 7]
-  visual:
-    visible_radius: 10
-    sprite: null
-    properties:
-      look: 一面钉满委托书的木制公告板
-      detail: 上面贴满了猎魔委托：狮鹫兽、水鬼、日间妖灵...
+  visual: {visible_radius: 10, sprite: null, properties: {look: 一面钉满委托书的木制公告板, detail: 上面贴满了猎魔委托：狮鹫兽、水鬼、日间妖灵...}}
   interaction:
     interaction_radius: 2
-    properties:
-      description: 一面钉满委托书的木制公告板。最上面是狮鹫兽委托，悬赏500金币，找维瑟米尔。
-    hidden:
-      content: "狮鹫兽出没白果园郊外，悬赏500金币。水鬼在沼泽区骚扰农户。日间妖灵出现在废弃灯塔。"
+    properties: {description: 一面钉满委托书的木制公告板。最上面是狮鹫兽委托，悬赏500金币，找维瑟米尔。}
+    hidden: {content: "狮鹫兽出没白果园郊外，悬赏500金币。水鬼在沼泽区骚扰农户。日间妖灵出现在废弃灯塔。"}
   description: 一面钉满委托书的木制公告板。
 
-# ═══ SQUARE ═══
-- id: square_well
-  name: 水井
-  zone: square
-  pos: [7, 6]
-  visual:
-    visible_radius: 20
-    sprite: null
-    properties:
-      look: 一口石砌水井，井水清澈见底
+- id: lute_stand
+  name: 鲁特琴架
+  zone: bar_zone
+  pos: [2, 5]
+  visual: {visible_radius: 8, sprite: null, properties: {look: 一个木制琴架，上面放着一把旧鲁特琴}}
   interaction:
     interaction_radius: 2
-    properties:
-      description: 广场中央的石砌水井。井绳和木桶挂在辘轳上。
-    hidden:
-      taste: "井水来自地下暗河，常年清凉甘甜。喝下去喉咙一阵冰凉。"
-      secret: "低头往井里看，深不见底。隐约能听到水滴声，自己的倒影在水面上微微晃动。"
-  description: 广场中央的石砌水井。井沿被无数只手磨得光滑。
+    properties: {description: 一把旧的鲁特琴。弦有些旧了但调音还在。丹德里恩经常用它即兴表演。}
+    hidden: {feel: "琴颈上有几道指甲痕，是丹德里恩弹太嗨时留下的。", sound: "拨一下琴弦，声音有点闷但别有味道。"}
+  description: 一个木制琴架，上面放着一把旧鲁特琴。
 
-- id: square_bench
-  name: 长椅
-  zone: square
-  pos: [5, 7]
-  visual:
-    visible_radius: 15
-    sprite: null
-    properties:
-      look: 树荫下的木制长椅，有老人在打盹
-  interaction:
-    interaction_radius: 2
-    properties:
-      description: 广场大树下的木制长椅。树荫遮住了太阳，有老人正在打盹。
-    hidden:
-      feel: "风吹过树叶沙沙响。是个发呆歇脚的好地方。"
-  description: 广场大树下的木制长椅。椅子上有老人正在打盹。
-
-- id: square_merchant
-  name: 商人摊位
-  zone: square
+- id: backroom_door
+  name: 后屋门
+  zone: bar_zone
   pos: [10, 3]
-  visual:
-    visible_radius: 15
-    sprite: null
-    properties:
-      look: 一个摆满货物的临时摊位，商人正在吆喝
-  interaction:
-    interaction_radius: 3
-    properties:
-      description: 摆满面包、草药和杂货的临时摊位。矮人商贩正在大声吆喝。
-    hidden:
-      goods: "面包、草药、磨刀石、不知名瓶罐。讨价还价是矮人喜欢的调调，别砍太狠。"
-      service: "矮人商贩热情豪爽，成交时咧嘴笑。"
-  description: 一个摆满面包、草药和杂货的临时摊位。
-
-- id: coin_ground
-  name: 硬币
-  zone: square
-  pos: [4, 10]
-  visual:
-    visible_radius: 1
-    sprite: null
-    properties:
-      look: 地上有一枚亮闪闪的硬币
+  visual: {visible_radius: 5, sprite: null, properties: {look: 一扇挂着帘布的小门，通向酒馆后屋}}
   interaction:
     interaction_radius: 1
-    properties:
-      description: 一枚亮闪闪的泰莫利亚金币，不知道是谁掉的。
-    hidden:
-      detail: "上面有泰莫利亚的纹章。看起来刚掉不久。"
-  description: 地上躺着一枚亮闪闪的硬币。
+    properties: {description: 酒馆的后屋门。帘布后面是存货间和老板的私人账房。外人勿入。}
+    hidden: {secret: "老板在后屋藏了几箱走私的玛哈坎烈酒，还有一本记着谁欠账的破账本。"}
+  description: 酒馆后屋门，挂着帘布。
 
-# ═══ HERB HUT ═══
-- id: herb_shelf
-  name: 草药架
-  zone: herb_hut
-  pos: [3, 2]
-  visual:
-    visible_radius: 10
-    sprite: null
-    properties:
-      look: 一个摆满瓶瓶罐罐的草药架，散发着各种草药混合的气味
-      detail: 曼德拉草根、狼毒乌头、白屈花...每样都标注了功效
-  interaction:
-    interaction_radius: 2
-    properties:
-      description: 摆满瓶瓶罐罐的草药架。曼德拉草根——重伤。狼毒乌头——剧毒需稀释。白屈花——魔药基底。
-    hidden:
-      herbs: "曼德拉草根还能微微颤动，能做出最强治疗药水。白屈花花瓣散发淡淡荧光。"
-      labels: "每个瓶罐都贴着褪色标签，托蜜拉亲手写的功效和年份。"
-  description: 一个摆满瓶瓶罐罐的草药架。每样都贴着褪色标签。
-
-- id: herb_mortar
-  name: 研钵
-  zone: herb_hut
-  pos: [3, 3]
-  visual:
-    visible_radius: 8
-    sprite: null
-    properties:
-      look: 一个石制研钵，里面还残留着一些绿色粉末
-  interaction:
-    interaction_radius: 2
-    properties:
-      description: 石制研钵，里面残留着绿色粉末。研杵还沾着上批草药的痕迹。
-    hidden:
-      feel: "石钵冰凉，粉末在指尖闪着微弱的荧光。研磨需要耐心和手腕力气。"
-  description: 一个石制研钵，里面残留着某种绿色粉末。
-
-- id: herb_recipe_book
-  name: 配方书
-  zone: herb_hut
-  pos: [4, 2]
-  visual:
-    visible_radius: 6
-    sprite: null
-    properties:
-      look: 一本厚重的皮制笔记本，书页边缘已经泛黄
-  interaction:
-    interaction_radius: 1
-    properties:
-      description: 厚重的皮制笔记本，书页泛黄。里面密密麻麻写满魔药配方和批注。
-    hidden:
-      content: "燕子——加速愈合。猫——夜视。暴雪——强化反应。每页都有托蜜拉的手写批注：草药的年份、用量调整、实验结果。"
-  description: 一本厚重的皮制笔记本。书页泛黄，写满魔药配方。
-
-- id: herb_cauldron
-  name: 炼金坩埚
-  zone: herb_hut
-  pos: [5, 3]
-  visual:
-    visible_radius: 10
-    sprite: null
-    properties:
-      look: 一口冒着热气的小坩埚，里面煮着某种墨绿色的液体
-  interaction:
-    interaction_radius: 2
-    properties:
-      description: 黑色小坩埚，煮着墨绿色液体。热气蒸腾，空气中弥漫草药苦味。
-    hidden:
-      content: "墨绿色液体咕嘟冒泡，闻起来像猫眼药水——还差最后一步。投入材料后颜色开始变化——可能成功，也可能炸锅。"
-      secret: "坩埚底下压着一张揉皱的字条。"
-  description: 一口黑色小坩埚，煮着墨绿色液体。底下压着字条。
-
-- id: herb_basket
-  name: 原料篮
-  zone: herb_hut
-  pos: [6, 2]
-  visual:
-    visible_radius: 6
-    sprite: null
-    properties:
-      look: 一个柳条编的大篮子，里面堆满了刚采回来的草药
-  interaction:
-    interaction_radius: 2
-    properties:
-      description: 柳条编的大篮子，堆满刚采的草药。散发泥土和植物的混合气味。
-    hidden:
-      content: "里面有蒲公英、鼠尾草、白色骨粉——不知道什么生物。还有一束散发荧光的沼泽苔藓。"
-  description: 一个柳条编的大篮子，堆满新鲜草药。
-
-- id: herb_potion_finished
-  name: 成品魔药
-  zone: herb_hut
-  pos: [5, 2]
-  visual:
-    visible_radius: 4
-    sprite: null
-    properties:
-      look: 一排已经完成的魔药瓶，标签上写着燕子、猫、暴雪
-  interaction:
-    interaction_radius: 2
-    properties:
-      description: 一排已经完成的魔药瓶。标签上写着燕子、猫、暴雪。托蜜拉亲手调制。
-    hidden:
-      quality: "燕子魔药暗红色液体摇晃时冒出细小气泡——品质不错。但副作用永远是个未知数。"
-  description: 一排已经完成的魔药瓶。每瓶都是托蜜拉亲手调制。
-
-- id: herb_note
-  name: 字条
-  zone: herb_hut
-  pos: [5, 1]
-  visual:
-    visible_radius: 3
-    sprite: null
-    properties:
-      look: 一张压在坩埚下的字条，字迹潦草
-  interaction:
-    interaction_radius: 1
-    properties:
-      description: 压在坩埚下的小字条。字迹潦草但有力。
-    hidden:
-      message: "叶奈法大人——您要的星辉石粉末我放在后屋了。白果园郊外最近出现狮鹫兽，杰洛特大人可能会感兴趣。——托蜜拉"
-  description: 一张压在坩埚下的小字条。看起来是匆忙写下的留言。
-
-# ═══ AGENTS ═══
+# ── BAR ZONE AGENTS (7) ──
 - id: geralt
   name: 杰洛特
-  zone: square
-  pos: [7, 5]
-  visual:
-    visible_radius: 20
-    sprite: char_witcher
-    properties:
-      look: 白发猎魔人，背后背着两把剑——银剑斩妖，钢剑杀人
+  zone: bar_zone
+  pos: [5, 3]
+  visual: {visible_radius: 20, sprite: char_witcher, properties: {look: 白发猎魔人，背后背着两把剑——银剑斩妖，钢剑杀人}}
   interaction:
     interaction_radius: 3
     private_attrs: {coins: 150, hunger: 50, thirst: 60, social: 20, energy: 85, fun: 15, mood: 50}
-    properties:
-      description: 可以压低声音聊两句。谈到怪物和报酬时话会多些。也可以拍拍肩膀打招呼——他会抬头看你一眼。
-  agent:
-    autonomous: true
-    speed: 1.2
-    view_radius: 25
-    hearing_radius: 20
-    interaction_radius: 3
-    personality: 利维亚的杰洛特，狼学派猎魔人。寡言少语，行事果断。刚刚完成一个水鬼委托，回到白果园休整。习惯在酒馆喝一杯，顺便看看公告板有没有新委托。
+    properties: {description: 可以压低声音聊两句。谈到怪物和报酬时话会多些。也可以拍拍肩膀打招呼。}
+  agent: {autonomous: true, speed: 1.2, view_radius: 25, hearing_radius: 20, interaction_radius: 3, personality: 利维亚的杰洛特，狼学派猎魔人。寡言少语，行事果断。刚刚完成一个水鬼委托，回到酒馆休整。习惯喝一杯麦酒，顺便看看公告板有没有新委托。}
   description: 白发猎魔人，猫眼，脸上有疤。背着银剑和钢剑。
-
-- id: yennefer
-  name: 叶奈法
-  zone: herb_hut
-  pos: [4, 2]
-  visual:
-    visible_radius: 20
-    sprite: char_sorceress
-    properties:
-      look: 黑发紫眼的女术士，周身环绕着淡淡的魔法气息
-  interaction:
-    interaction_radius: 3
-    private_attrs: {coins: 500, hunger: 30, thirst: 40, social: 10, energy: 70, fun: 40, mood: 55}
-    properties:
-      description: 可以和她交谈或请教魔法。说话带着术士的优雅和距离感。提到魔法材料或杰洛特时眼神会亮起来。
-  agent:
-    autonomous: true
-    speed: 1.0
-    view_radius: 22
-    hearing_radius: 18
-    interaction_radius: 3
-    personality: 温格堡的叶奈法，强大的女术士。正在寻找稀有的魔法材料，被草药小屋的收藏吸引而来。高傲但关心杰洛特。
-  description: 黑发紫眼的女术士，长袍上散发着紫丁香与醋栗的香气。
 
 - id: dandelion
   name: 丹德里恩
   zone: bar_zone
   pos: [2, 6]
-  visual:
-    visible_radius: 20
-    sprite: char_bard
-    properties:
-      look: 衣着花哨的吟游诗人，手里抱着鲁特琴，一脸轻松
+  visual: {visible_radius: 20, sprite: char_bard, properties: {look: 衣着花哨的吟游诗人，手里抱着鲁特琴，一脸轻松}}
   interaction:
     interaction_radius: 3
     private_attrs: {coins: 80, hunger: 45, thirst: 75, social: 90, energy: 60, fun: 85, mood: 80}
-    properties:
-      description: 可以和他聊天或听他弹唱。一开口就停不下来，从白果园女巫偷蜂蜜酒到尼弗迦德宫廷秘闻都能编进歌里。
-  agent:
-    autonomous: true
-    speed: 0.9
-    view_radius: 18
-    hearing_radius: 15
-    interaction_radius: 3
-    personality: 丹德里恩，北境最有名的吟游诗人。喜欢喝酒聊天，顺便收集新歌素材。杰洛特的老朋友。今天想在酒馆即兴表演一首。
+    properties: {description: 可以和他聊天或听他弹唱。一开口就停不下来，从白果园女巫偷蜂蜜酒到尼弗迦德宫廷秘闻都能编进歌里。}
+  agent: {autonomous: true, speed: 0.9, view_radius: 18, hearing_radius: 15, interaction_radius: 3, personality: 丹德里恩，北境最有名的吟游诗人。喜欢喝酒聊天，顺便收集新歌素材。杰洛特的老朋友。今天想在酒馆即兴表演一首。}
   description: 衣着花哨的吟游诗人，手里抱着鲁特琴。
 
 - id: vesemir
   name: 维瑟米尔
   zone: bar_zone
   pos: [7, 2]
-  visual:
-    visible_radius: 20
-    sprite: null
-    properties:
-      look: 灰白胡子的老猎魔人，眼神锐利，腰间挂着几瓶剑油
+  visual: {visible_radius: 20, sprite: null, properties: {look: 灰白胡子的老猎魔人，眼神锐利，腰间挂着几瓶剑油}}
   interaction:
     interaction_radius: 3
     private_attrs: {coins: 200, hunger: 40, thirst: 50, social: 30, energy: 70, fun: 40, mood: 55}
-    properties:
-      description: 可以压低声音聊两句。说话慢而沉稳，每句话都值得听。
-  agent:
-    autonomous: true
-    speed: 1.0
-    view_radius: 22
-    hearing_radius: 18
-    interaction_radius: 3
-    personality: 维瑟米尔，狼学派最年长的猎魔人。凯尔莫罕的导师。稳重但偶尔露出老顽童的一面。
-  description: 灰白胡子的老猎魔人，眼神锐利。面前放着一杯麦酒。
-
-- id: triss
-  name: 特莉丝
-  zone: square
-  pos: [35, 15]
-  visual:
-    visible_radius: 20
-    sprite: char_sorceress
-    properties:
-      look: 栗色卷发的女术士，灰蓝色的眼睛带着精灵血统的狡黠
-  interaction:
-    interaction_radius: 3
-    private_attrs: {coins: 300, hunger: 35, thirst: 35, social: 25, energy: 75, fun: 50, mood: 50}
-    properties:
-      description: 可以压低声音聊两句。说话带一丝嘲讽但眼神认真。也可以友好地拍拍肩膀打招呼。
-  agent:
-    autonomous: true
-    speed: 1.0
-    view_radius: 22
-    hearing_radius: 18
-    interaction_radius: 3
-    personality: 特莉丝·梅里葛德，女术士。聪明狡黠，关心杰洛特。刚从诺维格瑞赶来白果园。
-  description: 栗色卷发的女术士，穿着旅行长袍。
+    properties: {description: 可以压低声音聊两句。说话慢而沉稳，每句话都值得听。}
+  agent: {autonomous: true, speed: 1.0, view_radius: 22, hearing_radius: 18, interaction_radius: 3, personality: 维瑟米尔，狼学派最年长的猎魔人。凯尔莫罕的导师。稳重但偶尔露出老顽童的一面。}
+  description: 灰白胡子的老猎魔人，眼神锐利。
 
 - id: zoltan
   name: 卓尔坦
   zone: bar_zone
   pos: [7, 2]
-  visual:
-    visible_radius: 20
-    sprite: null
-    properties:
-      look: 粗壮的矮人商人，胡子编成两根粗辫子，嗓门大得能震裂酒桶
+  visual: {visible_radius: 20, sprite: null, properties: {look: 粗壮的矮人商人，胡子编成两根粗辫子，嗓门大得能震裂酒桶}}
   interaction:
     interaction_radius: 3
     private_attrs: {coins: 500, hunger: 45, thirst: 65, social: 60, energy: 80, fun: 55, mood: 70}
-    properties:
-      description: 和他聊天开口就是生意经——矿脉、商路、走私货。消息灵通，为人爽快。
-  agent:
-    autonomous: true
-    speed: 0.8
-    view_radius: 18
-    hearing_radius: 15
-    interaction_radius: 3
-    personality: 卓尔坦·齐瓦，玛哈坎矮人商人。精明，消息灵通，嗓门大。喜欢请朋友喝酒，顺便打听商机。
+    properties: {description: 和他聊天开口就是生意经——矿脉、商路、走私货。消息灵通，为人爽快。}
+  agent: {autonomous: true, speed: 0.8, view_radius: 18, hearing_radius: 15, interaction_radius: 3, personality: 卓尔坦·齐瓦，玛哈坎矮人商人。精明，消息灵通，嗓门大。喜欢请朋友喝酒，顺便打听商机。}
   description: 粗壮的矮人商人，胡子编成辫子。手里永远有一杯麦酒。
 
-- id: keira
-  name: 凯拉
-  zone: herb_hut
-  pos: [8, 3]
-  visual:
-    visible_radius: 20
-    sprite: null
-    properties:
-      look: 年轻的金发女术士，穿着干净的学徒袍，手上沾着草药的汁液
+- id: dijkstra
+  name: 迪杰斯特拉
+  zone: bar_zone
+  pos: [12, 8]
+  visual: {visible_radius: 20, sprite: null, properties: {look: 一个光头大汉，跛足但气势压人，手里转着一枚金币}}
   interaction:
     interaction_radius: 3
-    private_attrs: {coins: 150, hunger: 38, thirst: 30, social: 15, energy: 72, fun: 45, mood: 60}
-    properties:
-      description: 可以和她聊聊魔法和草药。热情好学的新手法师，容易被人套话。
-  agent:
-    autonomous: true
-    speed: 1.0
-    view_radius: 20
-    hearing_radius: 16
-    interaction_radius: 3
-    personality: 凯拉·梅兹，年轻女术士。正在修习炼金术和魔药学。热情、好奇、容易被有经验的前辈吸引。
-  description: 年轻的金发女术士，穿着学徒袍。在草药架和坩埚之间忙碌。
+    private_attrs: {coins: 2000, hunger: 30, thirst: 20, social: 10, energy: 60, fun: 10, mood: 45}
+    properties: {description: 可以压低声音和他聊两句。他说话滴水不漏，但如果你有他想要的情报，他会付个好价钱。}
+  agent: {autonomous: true, speed: 0.7, view_radius: 22, hearing_radius: 20, interaction_radius: 3, personality: 西吉斯蒙德·迪杰斯特拉，前瑞达尼亚间谍头子。跛足但头脑是北方最精密的机器。掌控诺维格勒地下情报网。来酒馆是为了等一个线人，但会在吧台角落观察所有人。}
+  description: 光头大汉，跛足。坐在角落，手里转着一枚金币。
 
+- id: innkeeper
+  name: 酒馆老板
+  zone: bar_zone
+  pos: [7, 1]
+  visual: {visible_radius: 20, sprite: null, properties: {look: 矮人老店主，胡子花白，用一块脏布擦着吧台}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 300, hunger: 20, thirst: 10, social: 40, energy: 60, fun: 30, mood: 60}
+    properties: {description: 矮人老板。擦着杯子，嘴里嘟囔着什么。你可以点酒、打听消息、或者听他抱怨赊账的顾客。}
+  agent: {autonomous: true, speed: 0.6, view_radius: 18, hearing_radius: 15, interaction_radius: 3, personality: 老矮人酒馆老板。经营这间酒馆二十年了。认识每一个常客，知道他们欠了多少账。雇丹德里恩来表演吸引顾客。粗鲁但热心——对赊账三天以上的就翻脸。}
+  description: 矮人老店主，站在吧台后擦拭杯子。
+
+- id: bard_apprentice
+  name: 吟游学徒
+  zone: bar_zone
+  pos: [8, 8]
+  visual: {visible_radius: 20, sprite: null, properties: {look: 一个年轻人，怀里抱着一把走调的鲁特琴，满脸崇拜地看着丹德里恩}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 15, hunger: 55, thirst: 70, social: 80, energy: 90, fun: 70, mood: 85}
+    properties: {description: 丹德里恩的学生。笨拙但热情。弹错和弦是日常，但记歌词的天赋惊人。}
+  agent: {autonomous: true, speed: 1.0, view_radius: 16, hearing_radius: 14, interaction_radius: 3, personality: 年轻的吟游学徒，丹德里恩的学生。热情过头但技艺欠佳。梦想写出传世名曲，但目前为止最好的一首歌词被老师偷去用了。崇拜丹德里恩但总搞砸——弹和弦弹成噪音、敬酒打翻酒杯、记录素材写错名字。}
+  description: 一个年轻人，怀里抱着走调的鲁特琴。
+
+# ═══════════════════════════════════════
+#  SQUARE — 白果园广场 (keep 4 + 1 new item + 3 agents)
+# ═══════════════════════════════════════
+
+- id: square_well
+  name: 水井
+  zone: bar_zone
+  pos: [7, 6]
+  visual: {visible_radius: 20, sprite: null, properties: {look: 一口石砌水井，井水清澈见底}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 广场中央的石砌水井。井绳和木桶挂在辘轳上。}
+    hidden: {taste: "井水来自地下暗河，常年清凉甘甜。喝下去喉咙一阵冰凉。", secret: "低头往井里看，深不见底。隐约能听到水滴声，自己的倒影在水面上微微晃动。"}
+  description: 广场中央的石砌水井。井沿被无数只手磨得光滑。
+
+- id: square_bench
+  name: 长椅
+  zone: bar_zone
+  pos: [5, 7]
+  visual: {visible_radius: 15, sprite: null, properties: {look: 树荫下的木制长椅，有老人在打盹}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 广场大树下的木制长椅。树荫遮住了太阳，有老人正在打盹。}
+    hidden: {feel: "风吹过树叶沙沙响。是个发呆歇脚的好地方。"}
+  description: 广场大树下的木制长椅。椅子上有老人正在打盹。
+
+- id: square_merchant
+  name: 商人摊位
+  zone: bar_zone
+  pos: [10, 3]
+  visual: {visible_radius: 15, sprite: null, properties: {look: 一个摆满货物的临时摊位，商人正在吆喝}}
+  interaction:
+    interaction_radius: 3
+    properties: {description: 摆满面包、草药和杂货的临时摊位。矮人商贩正在大声吆喝。}
+    hidden: {goods: "面包、草药、磨刀石、不知名瓶罐。讨价还价是矮人喜欢的调调，别砍太狠。", service: "矮人商贩热情豪爽，成交时咧嘴笑。"}
+  description: 一个摆满面包、草药和杂货的临时摊位。
+
+- id: coin_ground
+  name: 硬币
+  zone: bar_zone
+  pos: [4, 10]
+  visual: {visible_radius: 1, sprite: null, properties: {look: 地上有一枚亮闪闪的硬币}}
+  interaction:
+    interaction_radius: 1
+    properties: {description: 一枚亮闪闪的泰莫利亚金币，不知道是谁掉的。}
+    hidden: {detail: "上面有泰莫利亚的纹章。看起来刚掉不久。"}
+  description: 地上躺着一枚亮闪闪的硬币。
+
+- id: forge_stall
+  name: 铁匠摊
+  zone: bar_zone
+  pos: [30, 5]
+  visual: {visible_radius: 15, sprite: null, properties: {look: 一个临时搭建的铁匠摊，炉火烧得正旺，铁砧上放着一把半成品剑}}
+  interaction:
+    interaction_radius: 3
+    properties: {description: 矮人铁匠的临时摊位。炉火烧得正旺，可以修武器、买磨刀石、或者聊聊天。}
+    hidden: {craft: "铁砧上这把剑是要打折卖的——剑脊有一点暗纹，一般买家看不出来但猎魔人会。", service: "矮人铁匠抱怨尼弗迦德军官总爱砍价。"}
+  description: 临时搭建铁匠摊。炉火正旺，铁砧上放着半成品剑。
+
+# ── SQUARE AGENTS (3) ──
 - id: lambert
   name: 兰伯特
-  zone: square
+  zone: bar_zone
   pos: [20, 10]
-  visual:
-    visible_radius: 20
-    sprite: char_witcher
-    properties:
-      look: 猎魔人，嘴角永远挂着一丝玩世不恭的笑意
+  visual: {visible_radius: 20, sprite: char_witcher, properties: {look: 猎魔人，嘴角永远挂着一丝玩世不恭的笑意}}
   interaction:
     interaction_radius: 3
     private_attrs: {coins: 100, hunger: 55, thirst: 70, social: 15, energy: 80, fun: 25, mood: 40}
-    properties:
-      description: 和他聊几句——嘴臭心不坏。谈到怪物和赏金时眼神会亮起来。
-  agent:
-    autonomous: true
-    speed: 1.2
-    view_radius: 22
-    hearing_radius: 18
-    interaction_radius: 3
-    personality: 兰伯特，狼学派猎魔人。嘴臭心软，喜欢挖苦杰洛特和维瑟米尔。最近在白果园附近活动，正找活儿干。
+    properties: {description: 和他聊几句——嘴臭心不坏。谈到怪物和赏金时眼神会亮起来。}
+  agent: {autonomous: true, speed: 1.2, view_radius: 22, hearing_radius: 18, interaction_radius: 3, personality: 兰伯特，狼学派猎魔人。嘴臭心软，喜欢挖苦杰洛特和维瑟米尔。最近在白果园附近活动，正找活儿干。}
   description: 猎魔人，嘴角挂着玩世不恭的笑。
+
+- id: triss
+  name: 特莉丝
+  zone: bar_zone
+  pos: [35, 15]
+  visual: {visible_radius: 20, sprite: char_sorceress, properties: {look: 栗色卷发的女术士，灰蓝色的眼睛带着精灵血统的狡黠}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 300, hunger: 35, thirst: 35, social: 25, energy: 75, fun: 50, mood: 50}
+    properties: {description: 可以压低声音聊两句。说话带一丝嘲讽但眼神认真。}
+  agent: {autonomous: true, speed: 1.0, view_radius: 22, hearing_radius: 18, interaction_radius: 3, personality: 特莉丝·梅里葛德，女术士。聪明狡黠，关心杰洛特。刚从诺维格瑞赶来白果园。}
+  description: 栗色卷发的女术士，穿着旅行长袍。
+
+- id: blacksmith
+  name: 矮人铁匠
+  zone: bar_zone
+  pos: [31, 6]
+  visual: {visible_radius: 15, sprite: null, properties: {look: 肌肉发达的矮人铁匠，护目镜推到额头上，手上满是老茧和烫伤}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 250, hunger: 60, thirst: 80, social: 35, energy: 85, fun: 30, mood: 55}
+    properties: {description: 矮人铁匠。可以修武器、买磨刀石、或者听他吹嘘年轻时砍过龙的故事。}
+  agent: {autonomous: true, speed: 0.7, view_radius: 16, hearing_radius: 14, interaction_radius: 3, personality: 矮人铁匠，白果园最好的铁匠。敲了四十年铁砧，说砍过龙——其实是砍了龙的脚趾甲。对尼弗迦德军官动不动砍价很不爽。}
+  description: 肌肉发达的矮人铁匠，护目镜推在额头上。
+
+# ═══════════════════════════════════════
+#  HERB HUT — 草药小屋 (keep all)
+# ═══════════════════════════════════════
+
+- id: herb_shelf
+  name: 草药架
+  zone: garrison
+  pos: [3, 2]
+  visual: {visible_radius: 10, sprite: null, properties: {look: 一个摆满瓶瓶罐罐的草药架，散发着各种草药混合的气味, detail: 曼德拉草根、狼毒乌头、白屈花...每样都标注了功效}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 摆满瓶瓶罐罐的草药架。曼德拉草根——重伤。狼毒乌头——剧毒需稀释。白屈花——魔药基底。}
+    hidden: {herbs: "曼德拉草根还能微微颤动，能做出最强治疗药水。白屈花花瓣散发淡淡荧光。", labels: "每个瓶罐都贴着褪色标签，托蜜拉亲手写的功效和年份。"}
+  description: 一个摆满瓶瓶罐罐的草药架。每样都贴着褪色标签。
+
+- id: herb_mortar
+  name: 研钵
+  zone: garrison
+  pos: [3, 3]
+  visual: {visible_radius: 8, sprite: null, properties: {look: 一个石制研钵，里面还残留着一些绿色粉末}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 石制研钵，里面残留着绿色粉末。研杵还沾着上批草药的痕迹。}
+    hidden: {feel: "石钵冰凉，粉末在指尖闪着微弱的荧光。研磨需要耐心和手腕力气。"}
+  description: 一个石制研钵，里面残留着某种绿色粉末。
+
+- id: herb_recipe_book
+  name: 配方书
+  zone: garrison
+  pos: [4, 2]
+  visual: {visible_radius: 6, sprite: null, properties: {look: 一本厚重的皮制笔记本，书页边缘已经泛黄}}
+  interaction:
+    interaction_radius: 1
+    properties: {description: 厚重的皮制笔记本，书页泛黄。里面密密麻麻写满魔药配方和批注。}
+    hidden: {content: "燕子——加速愈合。猫——夜视。暴雪——强化反应。每页都有托蜜拉的手写批注：草药的年份、用量调整、实验结果。"}
+  description: 一本厚重的皮制笔记本。书页泛黄，写满魔药配方。
+
+- id: herb_cauldron
+  name: 炼金坩埚
+  zone: garrison
+  pos: [5, 3]
+  visual: {visible_radius: 10, sprite: null, properties: {look: 一口冒着热气的小坩埚，里面煮着某种墨绿色的液体}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 黑色小坩埚，煮着墨绿色液体。热气蒸腾，空气中弥漫草药苦味。}
+    hidden: {content: "墨绿色液体咕嘟冒泡，闻起来像猫眼药水——还差最后一步。投入材料后颜色开始变化——可能成功，也可能炸锅。", secret: "坩埚底下压着一张揉皱的字条。"}
+  description: 一口黑色小坩埚，煮着墨绿色液体。底下压着字条。
+
+- id: herb_basket
+  name: 原料篮
+  zone: garrison
+  pos: [6, 2]
+  visual: {visible_radius: 6, sprite: null, properties: {look: 一个柳条编的大篮子，里面堆满了刚采回来的草药}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 柳条编的大篮子，堆满刚采的草药。散发泥土和植物的混合气味。}
+    hidden: {content: "里面有蒲公英、鼠尾草、白色骨粉——不知道什么生物。还有一束散发荧光的沼泽苔藓。"}
+  description: 一个柳条编的大篮子，堆满新鲜草药。
+
+- id: herb_potion_finished
+  name: 成品魔药
+  zone: garrison
+  pos: [5, 2]
+  visual: {visible_radius: 4, sprite: null, properties: {look: 一排已经完成的魔药瓶，标签上写着燕子、猫、暴雪}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 一排已经完成的魔药瓶。标签上写着燕子、猫、暴雪。托蜜拉亲手调制。}
+    hidden: {quality: "燕子魔药暗红色液体摇晃时冒出细小气泡——品质不错。但副作用永远是个未知数。"}
+  description: 一排已经完成的魔药瓶。每瓶都是托蜜拉亲手调制。
+
+- id: herb_note
+  name: 字条
+  zone: garrison
+  pos: [5, 1]
+  visual: {visible_radius: 3, sprite: null, properties: {look: 一张压在坩埚下的字条，字迹潦草}}
+  interaction:
+    interaction_radius: 1
+    properties: {description: 压在坩埚下的小字条。字迹潦草但有力。}
+    hidden: {message: "叶奈法大人——您要的星辉石粉末我放在后屋了。白果园郊外最近出现狮鹫兽，杰洛特大人可能会感兴趣。——托蜜拉"}
+  description: 一张压在坩埚下的小字条。看起来是匆忙写下的留言。
+
+# ── HERB HUT AGENTS (2) ──
+- id: yennefer
+  name: 叶奈法
+  zone: garrison
+  pos: [4, 2]
+  visual: {visible_radius: 20, sprite: char_sorceress, properties: {look: 黑发紫眼的女术士，周身环绕着淡淡的魔法气息}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 500, hunger: 30, thirst: 40, social: 10, energy: 70, fun: 40, mood: 55}
+    properties: {description: 可以和她交谈或请教魔法。说话带着术士的优雅和距离感。提到魔法材料或杰洛特时眼神会亮起来。}
+  agent: {autonomous: true, speed: 1.0, view_radius: 22, hearing_radius: 18, interaction_radius: 3, personality: 温格堡的叶奈法，强大的女术士。正在寻找稀有的魔法材料，被草药小屋的收藏吸引而来。高傲但关心杰洛特。}
+  description: 黑发紫眼的女术士，长袍上散发着紫丁香与醋栗的香气。
+
+- id: keira
+  name: 凯拉
+  zone: garrison
+  pos: [8, 3]
+  visual: {visible_radius: 20, sprite: null, properties: {look: 年轻的金发女术士，穿着干净的学徒袍，手上沾着草药的汁液}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 150, hunger: 38, thirst: 30, social: 15, energy: 72, fun: 45, mood: 60}
+    properties: {description: 可以和她聊聊魔法和草药。热情好学的新手法师，容易被人套话。}
+  agent: {autonomous: true, speed: 1.0, view_radius: 20, hearing_radius: 16, interaction_radius: 3, personality: 凯拉·梅兹，年轻女术士。正在修习炼金术和魔药学。热情、好奇、容易被有经验的前辈吸引。}
+  description: 年轻的金发女术士，穿着学徒袍。在草药架和坩埚之间忙碌。
+
+# ═══════════════════════════════════════
+#  VILLAGE — 白果园村 (新)
+# ═══════════════════════════════════════
+
+- id: shrine
+  name: 神殿
+  zone: village
+  pos: [5, 3]
+  visual: {visible_radius: 20, sprite: null, properties: {look: 一座石砌永恒之火神殿，香炉里飘出檀木香气}}
+  interaction:
+    interaction_radius: 3
+    properties: {description: 一座石砌神殿。永恒之火祭坛上燃着不灭的圣火。祭司在门口守着。}
+    hidden: {blessing: "虔诚者在此祷告可获得圣火祝福。赎罪券售卖中——祭司说买了可以消除罪孽。", atmosphere: "空气中弥漫着檀香味和祭司的诵经声。"}
+  description: 一座石砌永恒之火神殿。圣火永不熄灭。
+
+- id: water_mill
+  name: 水车磨坊
+  zone: village
+  pos: [20, 5]
+  visual: {visible_radius: 15, sprite: null, properties: {look: 一座老旧的水车磨坊，车轮吱吱嘎嘎地转着，下面的溪水清澈见底}}
+  interaction:
+    interaction_radius: 3
+    properties: {description: 村庄的旧水车磨坊。水声潺潺，车轮吱嘎作响，磨盘在转着麦子。}
+    hidden: {feel: "坐在旁边听着水声，是个让人安静下来的好地方。村民说这水车磨的麦粉做面包特别香。", sound: "水声哗啦哗啦，混着木齿轮咯吱咯吱的节奏。"}
+  description: 老旧的水车磨坊。溪水推动车轮，磨盘慢慢转。
+
+- id: elder_bench
+  name: 村长长椅
+  zone: village
+  pos: [10, 8]
+  visual: {visible_radius: 10, sprite: null, properties: {look: 一棵老橡树下的木质长凳，长凳扶手被无数只手磨得发亮}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 老橡树下的长凳。村长每天都坐在这里，是打听村里八卦的最佳位置。}
+    hidden: {gossip: "坐在村长旁边能听到村里所有新闻——谁家牛丢了、谁家闺女跑了、哪家猎魔人又欠了酒钱。"}
+  description: 老橡树下的木质长凳。扶手被磨得发亮。
+
+- id: garden
+  name: 菜园
+  zone: village
+  pos: [25, 15]
+  visual: {visible_radius: 10, sprite: null, properties: {look: 一块围了篱笆的菜园子，里面种着卷心菜和胡萝卜}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 围了篱笆的菜园子。卷心菜长得不错，胡萝卜还要再等等。}
+    hidden: {herbs: "篱笆边上长了些野薄荷和百里香——老村长说他从来不管这些野草，但草药师每周都来采。"}
+  description: 篱笆围着的菜园子。种着卷心菜和胡萝卜。
+
+- id: cobbler_stall
+  name: 鞋匠摊
+  zone: village
+  pos: [15, 12]
+  visual: {visible_radius: 8, sprite: null, properties: {look: 一个简陋的修鞋摊子，上面摆着几双半成品皮靴和一些工具}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 塔勒的鞋匠摊——他的掩护身份。可以定做皮靴或者压低声音交换情报。}
+    hidden: {secret: "摊子底下的暗格里藏着一叠密文信件和一把上了膛的短弩。塔勒的鞋子生意只是表象。", price: "情报不按克朗算——按情报的价值。"}
+  description: 一个简陋修鞋摊。塔勒的掩护身份。
+
+# ── VILLAGE AGENTS (5) ──
+- id: shani
+  name: 夏妮
+  zone: village
+  pos: [8, 12]
+  visual: {visible_radius: 20, sprite: null, properties: {look: 年轻的红发女军医，腰间挂着医药包，袖口上还有碘酒渍}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 120, hunger: 40, thirst: 35, social: 50, energy: 65, fun: 35, mood: 60}
+    properties: {description: 红十字军医。善良务实，从不拒诊。可以请她看伤口或者聊聊最近的伤病情况。}
+  agent: {autonomous: true, speed: 1.0, view_radius: 18, hearing_radius: 15, interaction_radius: 3, personality: 夏妮，瑞达尼亚红十字会军医。善良到几乎天真，但面对伤口和流血比大多数男人都冷静。和杰洛特算老朋友——帮他缝过好多次伤口。目前借住在白果园村一个小屋子里。}
+  description: 年轻的红发女军医，袖口上有碘酒渍。
+
+- id: philippa
+  name: 菲丽芭
+  zone: village
+  pos: [3, 5]
+  visual: {visible_radius: 20, sprite: null, properties: {look: 灰白卷发的女人，穿着深色长袍，眼神像猎鹰一样锐利}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 1500, hunger: 25, thirst: 20, social: 5, energy: 75, fun: 5, mood: 40}
+    properties: {description: 女术士集会所核心成员。和她说话如履薄冰——每句话都滴水不漏。}
+  agent: {autonomous: true, speed: 1.0, view_radius: 24, hearing_radius: 20, interaction_radius: 3, personality: 菲丽芭·艾哈特，女术士集会所真正的权力核心。政治阴谋家。不是针对你——她总是在思考下一步棋。在白果园只是为了等人，但你可以假装这是巧合。}
+  description: 灰白卷发的女人，深色长袍。眼神像猎鹰。
+
+- id: thaler
+  name: 塔勒
+  zone: village
+  pos: [15, 13]
+  visual: {visible_radius: 15, sprite: null, properties: {look: 一个嘴里叼着烟斗的瘦削男人，修理着一只皮靴，嘴里骂骂咧咧}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 400, hunger: 35, thirst: 50, social: 10, energy: 60, fun: 15, mood: 30}
+    properties: {description: 鞋匠塔勒。每句话都带脏字但情报精准度惊人。可以定皮靴，也可以买情报。}
+  agent: {autonomous: true, speed: 0.9, view_radius: 20, hearing_radius: 18, interaction_radius: 3, personality: 塔勒，泰莫利亚间谍大师。最讨厌两件事——尼弗迦德人和不会还价的人。鞋匠摊是掩护（当然靴子也确实做得不错）。一开口就骂人，但你要是忍得住他那张嘴，他说的每句情报都是真金白银。}
+  description: 瘦削男人，叼烟斗修着皮靴。嘴里骂骂咧咧。
+
+- id: priestess
+  name: 永恒之火祭司
+  zone: village
+  pos: [4, 4]
+  visual: {visible_radius: 15, sprite: null, properties: {look: 穿着红白长袍的女祭司，脖子上挂着一枚燃烧日轮坠饰}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 300, hunger: 20, thirst: 15, social: 5, energy: 70, fun: 5, mood: 35}
+    properties: {description: 永恒之火神殿的祭司。道德审判者，看什么都不顺眼。可以忏悔或者买赎罪券。}
+  agent: {autonomous: true, speed: 0.7, view_radius: 16, hearing_radius: 14, interaction_radius: 3, personality: 永恒之火神殿祭司。虔信——或者说狂热。把猎魔人当变异怪物，把术士当亵渎者。但赎罪券卖得挺好的（每张5克朗）。村里人都躲着她走。}
+  description: 红白长袍女祭司，胸前挂着燃烧日轮坠饰。
+
+- id: elder
+  name: 老村长
+  zone: village
+  pos: [11, 9]
+  visual: {visible_radius: 15, sprite: null, properties: {look: 白胡子老头，坐在橡树下的长凳上，手里拄着拐杖}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 50, hunger: 30, thirst: 40, social: 70, energy: 30, fun: 40, mood: 65}
+    properties: {description: 白果园村的村长。什么八卦都知道，喜欢讲重复的故事。坐下来他就不停嘴。}
+  agent: {autonomous: true, speed: 0.4, view_radius: 14, hearing_radius: 12, interaction_radius: 3, personality: 白果园村村长。八十二岁。谁都认识、什么事都知道、什么故事都能讲——只是同一个故事可能讲十遍。喜欢年轻人来听他说话，因为村里人都躲着他了。}
+  description: 白胡子老头，拄着拐杖坐在橡树下。
+
+# ═══════════════════════════════════════
+#  GARRISON — 尼弗迦德军营 (新)
+# ═══════════════════════════════════════
+
+- id: weapon_rack
+  name: 兵器架
+  zone: garrison
+  pos: [5, 4]
+  visual: {visible_radius: 15, sprite: null, properties: {look: 一个木制兵器架，上面插着几杆长矛和一把钝剑}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 军营的兵器架。有长矛、钝剑和几面盾牌。都是常规装备，但保养得还行。}
+    hidden: {quality: "这些兵器是给普通士兵用的。剑刃有点锈迹但战场上够用。", secret: "架子底下藏了半瓶高粱酒——不知道哪个士兵偷藏的。"}
+  description: 木制兵器架。长矛和钝剑。
+
+- id: war_table
+  name: 战情台
+  zone: garrison
+  pos: [10, 5]
+  visual: {visible_radius: 12, sprite: null, properties: {look: 一张铺着地图的大木桌，地图上钉满了红色和蓝色的小旗子}}
+  interaction:
+    interaction_radius: 3
+    properties: {description: 尼弗迦德军的战情台。地图上标记了白果园周边的叛军活动点和水鬼出没区。}
+    hidden: {intel: "地图显示松鼠党在威伦沼泽东北角有活动。红旗子是已确认位置，蓝旗子是可疑点。军官的烟斗还搁在桌角——人刚走。"}
+  description: 一张铺着地图的大木桌。钉满红蓝小旗。
+
+- id: supply_crate
+  name: 军需箱
+  zone: garrison
+  pos: [15, 3]
+  visual: {visible_radius: 8, sprite: null, properties: {look: 一个打上了尼弗迦德日轮封印的木箱，上面写着'第三连队'}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 军需补给箱。密封严实，标签显示是干粮和绷带。但封条好像被撕开重新贴过——有人在里面翻过。}
+    hidden: {smuggling: "箱子底下有一个夹层，里面放着几瓶禁止私下交易的曼德拉草药水。是军需官的sideline。", price: "如果你和军需官关系好，他说不定会卖你一瓶——打折。"}
+  description: 打上尼弗迦德封印的木箱。标签写第三连队。
+
+- id: garrison_notice
+  name: 驻军公告板
+  zone: garrison
+  pos: [3, 8]
+  visual: {visible_radius: 10, sprite: null, properties: {look: 一面钉着官方通告的木牌，盖着尼弗迦德军印}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 军营公告板。上面贴着征兵令、处决公告和物资配额通知。}
+    hidden: {notices: "征兵令——凡年满十六岁男子一律从军。处决公告——昨日绞死一名松鼠党信使。最角落还贴了一张泛黄的酒馆委托传单——有人在军营发这东西，胆够大。"}
+  description: 军营公告板。官方通告。
+
+# ── GARRISON AGENTS (4) ──
+- id: eskel
+  name: 艾斯克尔
+  zone: garrison
+  pos: [8, 10]
+  visual: {visible_radius: 20, sprite: null, properties: {look: 一个脸上有疤的猎魔人，肩膀上坐着一只小山羊——那是他的宠物Lil' Bleater}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 180, hunger: 45, thirst: 55, social: 25, energy: 80, fun: 45, mood: 60}
+    properties: {description: 艾斯克尔，最稳重的狼派猎魔人。身边永远跟着他的宠物山羊。说话慢条斯理但剑术惊人。}
+  agent: {autonomous: true, speed: 1.1, view_radius: 24, hearing_radius: 20, interaction_radius: 3, personality: 艾斯克尔，狼学派猎魔人。维瑟米尔最稳重的学生。如果杰洛特是狼学派的利剑，艾斯克尔就是盾。肩膀上永远蹲着他的宠物山羊Lil' Bleater——他把这小东西当儿子养。}
+  description: 脸上有疤的猎魔人。肩膀上蹲着一只小山羊。
+
+- id: roche
+  name: 罗契
+  zone: garrison
+  pos: [12, 2]
+  visual: {visible_radius: 20, sprite: null, properties: {look: 一个穿着蓝衣铁卫军装的男人，脸上带着一副谁欠他钱的表情}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 350, hunger: 40, thirst: 45, social: 10, energy: 85, fun: 10, mood: 35}
+    properties: {description: 泰莫利亚蓝衣铁卫指挥官。对尼弗迦德恨之入骨。和他聊政治要做好听长篇大论的准备。}
+  agent: {autonomous: true, speed: 1.1, view_radius: 22, hearing_radius: 18, interaction_radius: 3, personality: 弗农·罗契，泰莫利亚特种部队蓝衣铁卫的指挥官。亡国者。他的每一个决定都是为了有朝一日夺回泰莫利亚。对尼弗迦德人只有一种态度——不信任。来军营是侦察情报的。}
+  description: 穿蓝衣铁卫军装的男人。脸上带着谁都欠他钱的表情。
+
+- id: nilf_officer
+  name: 尼弗迦德军官
+  zone: garrison
+  pos: [10, 6]
+  visual: {visible_radius: 20, sprite: null, properties: {look: 一个穿着黑色军装、佩戴日轮徽章的尼弗迦德军官，正用羽毛笔写着报告}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 600, hunger: 25, thirst: 30, social: 15, energy: 55, fun: 10, mood: 30}
+    properties: {description: 尼弗迦德驻军指挥官。职业军人，不是刽子手。厌倦在北境驻扎，想调回南方。}
+  agent: {autonomous: true, speed: 0.9, view_radius: 20, hearing_radius: 16, interaction_radius: 3, personality: 尼弗迦德帝国驻白果园军官。职业军人。尽职但不狂热。在北境驻扎了三年，只想去温暖的金塔之城退休。对猎魔人的态度是中立的——只要不惹麻烦。}
+  description: 尼弗迦德军官。写报告的动作很疲惫。
+
+- id: quartermaster
+  name: 军需官
+  zone: garrison
+  pos: [16, 4]
+  visual: {visible_radius: 15, sprite: null, properties: {look: 一个矮人军需官，鼻梁上架着一副小圆眼镜，手里握着账本}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 800, hunger: 30, thirst: 35, social: 20, energy: 65, fun: 15, mood: 45}
+    properties: {description: 矮人军需官。精打细算，对一切物资讨价还价。可以买卖物资——前提是你有他想要的东西。}
+  agent: {autonomous: true, speed: 0.7, view_radius: 16, hearing_radius: 14, interaction_radius: 3, personality: 矮人军需官。管了二十年军用物资——没人能从他的账本里偷一个子儿。暗地里做了点小生意（把多余物资卖给平民），但这些事他从不公开说。}
+  description: 矮人军需官，鼻梁上架小圆眼镜。握账本的手很紧。
+
+# ═══════════════════════════════════════
+#  OUTSKIRTS — 白果园郊外 (新)
+# ═══════════════════════════════════════
+
+- id: windmill
+  name: 风车
+  zone: village
+  pos: [10, 5]
+  visual: {visible_radius: 25, sprite: null, properties: {look: 一座巨大的老风车，帆布扇叶在风中缓慢转动，齿轮发出咯吱咯吱的响声}}
+  interaction:
+    interaction_radius: 3
+    properties: {description: 白果园的老风车。齿轮缺油，嘣嘣作响。从风车顶层能看到整个白果园郊外。}
+    hidden: {view: "站在风车顶层往下看——郊外的田野像棋盘一样整齐。远处的沼泽上空有乌鸦盘旋。", secret: "齿轮箱的边上刻了一行字——'艾薇+马修·1772'。不知道是谁留的。"}
+  description: 巨大的老风车。帆布扇叶缓慢转动，齿轮咯吱响。
+
+- id: hay_bale
+  name: 草垛
+  zone: village
+  pos: [15, 12]
+  visual: {visible_radius: 10, sprite: null, properties: {look: 一堆刚收割的麦秆堆成的草垛，散着干草的清香味}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 一堆麦秆草垛。软绵绵的，躺上去应该能美美地睡一觉——只要不来怪物。}
+    hidden: {feel: "躺在上面的感觉像睡在云端——如果你不介意麦秆戳进脖子里的话。", secret: "草垛底下有猎人藏的一包干蘑菇——她说过几天回来取。"}
+  description: 一堆麦秆草垛。散着干草清香。
+
+- id: monster_tracks
+  name: 怪物足迹
+  zone: village
+  pos: [25, 8]
+  visual: {visible_radius: 5, sprite: null, properties: {look: 泥地上有几个巨大的爪印，每一个有人的手掌那么大}}
+  interaction:
+    interaction_radius: 1
+    properties: {description: 泥地上的巨大爪印。看起来是狮鹫——爪间距很宽，说明体型不小。方向指向沼泽。}
+    hidden: {tracking: "猎魔人可以追踪这串足迹。狮鹫大概三天前经过这里，往沼泽方向去了。它可能受了伤——爪印深浅不一。", reward: "公告板上的狮鹫委托悬赏500金币。这串足迹是第一条线索。"}
+  description: 泥地上的巨大爪印。每个都有人手掌大小。
+
+- id: wild_herbs
+  name: 野草药丛
+  zone: village
+  pos: [5, 15]
+  visual: {visible_radius: 6, sprite: null, properties: {look: 一丛野生草药，混杂着鼠尾草、迷迭香和一些不认识的蘑菇}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 一丛野草药。可以采来做炼金材料。但要注意辨别——有几朵蘑菇长得像毒蕈。}
+    hidden: {herbs: "鼠尾草可以晒干做熏香。迷迭香能提取精油。那朵红帽白点的蘑菇——绝对不要碰——吃下去你会看到很多小妖精跳舞然后死掉。", value: "这些草药拿去村里卖值几个克朗。但草药师给的价格比商人高——她识货。"}
+  description: 一丛野生草药。混杂着几种植物和蘑菇。
+
+# ── OUTSKIRTS AGENTS (2) ──
+- id: ciri
+  name: 希里
+  zone: village
+  pos: [20, 12]
+  visual: {visible_radius: 20, sprite: null, properties: {look: 灰白头发的年轻女人，腰间挂着一把钢剑，左脸颊有道浅疤}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 80, hunger: 50, thirst: 60, social: 20, energy: 90, fun: 40, mood: 55}
+    properties: {description: 杰洛特的养女。长者之血的继承者。可以聊猎魔训练、她的旅途，或者问问她脸上那道疤的故事。}
+  agent: {autonomous: true, speed: 1.4, view_radius: 26, hearing_radius: 22, interaction_radius: 3, personality: 希里，辛特拉幼狮。长者之血、时空之女。杰洛特的养女，正在修习猎魔人的技艺。冲动但天赋惊人。在郊外追踪狮鹫的踪迹，想向杰洛特证明自己可以独当一面。}
+  description: 灰白头发的年轻女人。腰间挂钢剑，脸颊上有道浅疤。
+
+- id: huntress
+  name: 女猎手
+  zone: village
+  pos: [8, 18]
+  visual: {visible_radius: 15, sprite: null, properties: {look: 一个穿皮甲的沉默女人，背上背着长弓，腰间挂了几只兔子和一把剥皮刀}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 200, hunger: 35, thirst: 40, social: 5, energy: 80, fun: 20, mood: 45}
+    properties: {description: 独居郊外的女猎手。沉默寡言但手艺一流。可以买猎物、卖怪物材料，或者请她带路。}
+  agent: {autonomous: true, speed: 1.2, view_radius: 22, hearing_radius: 18, interaction_radius: 3, personality: 独居森林的女猎手。不跟人废话但不等于没话说——你得先证明你不是来浪费她时间的。对猎魔人有职业尊重：你们都杀怪物，她拿尸体卖材料。共生关系。}
+  description: 穿皮甲的沉默女人。背长弓，腰间挂兔子和剥皮刀。
+
+# ═══════════════════════════════════════
+#  SWAMP — 威伦沼泽 (新)
+# ═══════════════════════════════════════
+
+- id: ancient_ruins
+  name: 古城废墟
+  zone: village
+  pos: [12, 6]
+  visual: {visible_radius: 15, sprite: null, properties: {look: 几根半塌的精灵石柱横在沼泽中，上面刻满了爬满青苔的上古文字}}
+  interaction:
+    interaction_radius: 3
+    properties: {description: 精灵古城废墟。石柱上刻着上古文字——叶奈法或菲丽芭可能会认出上面的内容。}
+    hidden: {writing: "石柱上的上古文字记载了一个关于'长者之血'的预言。只有术士能解读全部内容。", artifact: "废墟角落有一个被水泡了几百年的精灵铜匣——里面有一枚刻着燕子图案的戒指。"}
+  description: 半塌的精灵石柱横在沼泽中。刻满上古文字。
+
+- id: ritual_stones
+  name: 祭祀石圈
+  zone: village
+  pos: [5, 12]
+  visual: {visible_radius: 12, sprite: null, properties: {look: 一圈排列成圆形的巨石，石头上刻着陌生的符文，地面有烧过篝火的痕迹}}
+  interaction:
+    interaction_radius: 3
+    properties: {description: 一个被松鼠党用作秘密集会点的祭祀石圈。篝火痕迹还很新——最近有人在这里聚集过。}
+    hidden: {secret: "石头底下的枯叶里藏着一卷用皮绳绑着的信件——松鼠党的密文。内容是下一次武器交接的时间和地点。", danger: "这地方不安全——如果你不是他们的人，最好别待太久。"}
+  description: 一圈排列成圆形的巨石。刻着符文，地面有篝火痕。
+
+- id: cave_entrance
+  name: 洞穴入口
+  zone: village
+  pos: [20, 8]
+  visual: {visible_radius: 10, sprite: null, properties: {look: 一个黑黢黢的洞穴口，掩藏在灌木丛后面，洞口吹出一股阴冷潮湿的风}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 隐藏在灌木后的洞穴入口。洞口阴冷潮湿，里面可能通向更深处——或者水鬼的老巢。}
+    hidden: {danger: "洞穴深处传来滴水声和某种生物的嘶嘶声。猎魔人徽章在轻微震动——里面有怪物。", loot: "洞壁上嵌着几块发着微光的磷矿石——很值钱，但挖下来的动静可能会惊动里面的东西。"}
+  description: 黑黢黢的洞穴口。吹出阴冷潮湿的风。
+
+- id: drowned_nest
+  name: 水鬼巢穴
+  zone: village
+  pos: [8, 4]
+  visual: {visible_radius: 6, sprite: null, properties: {look: 一堆腐烂的水草和骨头堆成的巢穴，散发着让人窒息的恶臭}}
+  interaction:
+    interaction_radius: 2
+    properties: {description: 水鬼的巢穴。恶臭扑鼻——腐烂的水草、水鬼蜕下的粘液、和一些被拖进巢穴的动物骨头。}
+    hidden: {danger: "巢穴里可能还有水鬼蛋。如果不烧掉，过几个星期又会孵出一窝。", loot: "骨头堆里夹杂着几个遇难者的遗物——一只皮钱包（里面有12克朗）、一把骨柄匕首、一封被水泡烂的歌谣手稿。"}
+  description: 腐烂水草和骨头堆成的巢穴。恶臭扑鼻。
+
+# ── SWAMP AGENTS (2) ──
+- id: scoia_scout
+  name: 松鼠党斥候
+  zone: village
+  pos: [3, 15]
+  visual: {visible_radius: 20, sprite: null, properties: {look: 一个精灵男人，穿着松鼠尾装饰的皮甲，手里握着一把反曲弓}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 60, hunger: 50, thirst: 55, social: 5, energy: 75, fun: 10, mood: 30}
+    properties: {description: 松鼠党游击队员。精灵。藏身在沼泽中。对外人极度警惕，但和卓尔坦有秘密贸易往来。}
+  agent: {autonomous: true, speed: 1.3, view_radius: 24, hearing_radius: 22, interaction_radius: 3, personality: 松鼠党斥候。自由精灵。不是生来就是游击队员——他的村庄被尼弗迦德人烧了，他逃进沼泽学会了射箭。信不过任何人类，除了一个矮人（卓尔坦偷偷给他们供应物资）。}
+  description: 精灵男人。穿松鼠尾皮甲。握反曲弓。
+
+- id: farmer
+  name: 老农夫
+  zone: village
+  pos: [15, 15]
+  visual: {visible_radius: 15, sprite: null, properties: {look: 一个满身泥巴的老农，眼睛盯着沼泽的方向，手里握着一把生锈的草叉}}
+  interaction:
+    interaction_radius: 3
+    private_attrs: {coins: 25, hunger: 55, thirst: 60, social: 30, energy: 45, fun: 5, mood: 20}
+    properties: {description: 被水鬼赶到沼泽边的老农夫。一心想杀回自己的农田。非常健谈——或者说非常需要倾诉。}
+  agent: {autonomous: true, speed: 0.6, view_radius: 14, hearing_radius: 12, interaction_radius: 3, personality: 老农夫。祖祖辈辈在白果园种田。一个月前水鬼群冲毁了他的农田和牛棚。现在住在沼泽边的废墟里，用一把生锈草叉对着整片沼泽。最想找猎魔人帮他把水鬼全杀掉。}
+  description: 满身泥巴的老农。握生锈草叉，盯着沼泽。

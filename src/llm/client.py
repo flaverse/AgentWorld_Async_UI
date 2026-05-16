@@ -5,7 +5,7 @@ import asyncio
 import concurrent.futures
 import requests
 
-_executor = concurrent.futures.ThreadPoolExecutor(max_workers=32)
+_executor = concurrent.futures.ThreadPoolExecutor(max_workers=64)
 
 
 class LLMClient:
