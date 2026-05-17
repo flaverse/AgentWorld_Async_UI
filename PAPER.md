@@ -329,6 +329,8 @@ This pattern suggests a design heuristic for LLM agent systems: **when consideri
 
 7. **No human evaluation.** Narrative quality, social plausibility, and goal coherence are assessed by the authors. A human study comparing agent behavior to human expectations would strengthen claims of "natural social behavior."
 
+8. **Declarative prior experiments not yet conducted.** The SVA's capability for controlled prior experiments (§6.4, item 6) is theoretically motivated but not yet empirically demonstrated. No cross-world, cross-morality, or cross-prior comparison has been run.
+
 ### 6.4 Future Work
 
 1. **Cross-domain SVA deployment.** Test slot vectors in a non-social domain (e.g., a single-agent exploration task) to validate the pattern's generality.
@@ -340,6 +342,20 @@ This pattern suggests a design heuristic for LLM agent systems: **when consideri
 4. **SVA for non-LLM reasoners.** Apply the pattern to classical planners (where slots become planning heuristics) and RL agents (where slots become reward-shaping prompts).
 
 5. **Formal connection to active inference.** The P/Q/KL gate is a discrete symbolic implementation of the free energy principle. A formal mapping between SVA and active inference could ground the architecture in a well-established theoretical framework.
+
+6. **Declarative priors for controlled social simulation.** The SVA's most distinctive capability—and the one we believe will attract the most interest from the social simulation community—is its ability to conduct *controlled experiments on priors at arbitrary granularity*. Because each slot is an independently toggleable, conditionally-rendered prompt fragment, a researcher can vary a single prior (world-level moral rules, group-level information access, individual-level cognitive bias) while holding all other configuration constant. This enables experimental designs that are infeasible in imperative agent architectures.
+
+**World-level priors.** Varying the `world_rules` slot between a "high-morality" and a "low-morality" template, with identical agent populations, measures whether moral priors causally affect emergent social structure.
+
+**Individual-level priors.** Adding a `paranoia` slot to exactly one agent out of 25—while all others share identical configuration—tests whether a single cognitive deviant influences group behavior, information flow, or social network topology.
+
+**Group-level priors.** Varying `sensory_prompts.visual.state` (information transparency) across zones measures how information asymmetry shapes cooperation and exploration.
+
+**Per-attribute priors.** The per-attribute `{min, max, decay, description}` drive system (§3.4) allows experiments on how different physiological models (e.g., short vs. long lifespans via decay rates) shape agent time preferences and risk-taking.
+
+**Controlled comparison protocol.** Each such experiment requires changing only the relevant YAML entries, followed by `python main.py --runtime 600` with identical LLM configuration. No code changes, no recompilation, no risk of accidentally varying an uncontrolled parameter. This is a capability that imperative agent architectures (Generative Agents, CrewAI, AutoGen) lack by design—their cognitive rules are embedded in Python control flow, making isolated prior variation a programming task rather than a configuration switch.
+
+**[TODO: Implement and report results for at least one declarative prior experiment (e.g., world moral-rules gradient) in the camera-ready version.]**
 
 ---
 
