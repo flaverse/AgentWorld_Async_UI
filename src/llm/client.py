@@ -3,9 +3,25 @@ import json
 import time
 import asyncio
 import concurrent.futures
-import requests
 
 _executor = concurrent.futures.ThreadPoolExecutor(max_workers=64)
+
+
+def _retry(fn, max_retries: int, name: str) -> str:
+    """Shared retry wrapper — exponential backoff, error logging, final failure."""
+    for attempt in range(max_retries + 1):
+        try:
+            return fn(attempt)
+        except Exception as e:
+            if attempt < max_retries:
+                from core.error_collector import errors
+                errors.log_error(f"llm.{name}", f"retry {attempt+1}/{max_retries}: {e}")
+                time.sleep(2 ** attempt)
+                continue
+            from core.error_collector import errors
+            errors.log_exception(f"llm.{name}", e, "final failure")
+            raise
+    return ""
 
 
 class LLMClient:
@@ -20,8 +36,6 @@ class LLMClient:
 
         if not api_key:
             base_url, api_key = self._find_credentials(self.provider)
-            if base_url and not config.get("base_url"):
-                pass
 
         self.api_key = api_key
         self.base_url = base_url or config.get("base_url", "")
@@ -35,7 +49,6 @@ class LLMClient:
         return val
 
     def _find_credentials(self, preferred: str):
-        # Env vars
         if preferred == "minimax":
             api_key = os.environ.get("MINIMAX_API_KEY", "").strip()
             if api_key:
@@ -50,49 +63,37 @@ class LLMClient:
                       os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
                 return url, api_key
 
-        # Config files
         config_paths = [
             os.path.expanduser("~/.openclaw/agents/coder/agent/models.json"),
             os.path.expanduser("~/.openclaw/agents/life/agent/models.json"),
         ]
-
         for path in config_paths:
             try:
                 with open(path) as f:
                     raw = f.read()
                 idx = raw.find('"providers"')
-                if idx < 0:
-                    continue
+                if idx < 0: continue
                 brace_idx = raw.find('{', idx)
-                if brace_idx < 0:
-                    continue
+                if brace_idx < 0: continue
                 partial = raw[brace_idx:]
                 depth = 0
                 end = 0
                 for i, c in enumerate(partial):
-                    if c == '{':
-                        depth += 1
+                    if c == '{': depth += 1
                     elif c == '}':
                         depth -= 1
-                        if depth == 0:
-                            end = i + 1
-                            break
-                if end == 0:
-                    continue
+                        if depth == 0: end = i + 1; break
+                if end == 0: continue
                 providers = json.loads(partial[:end])
-
-                # Check by preferred provider first
                 for target in [preferred] + [p for p in providers if p != preferred]:
                     prov = providers.get(target, {})
                     k = prov.get("apiKey", "") or prov.get("api_key", "")
                     u = prov.get("baseUrl", "") or prov.get("base_url", "")
-                    if k and u:
-                        return u, k
+                    if k and u: return u, k
             except Exception as e:
                 from core.error_collector import errors
                 errors.log_exception("llm._find_credentials", e, f"parsing {path}")
                 continue
-
         return "", ""
 
     async def chat(self, system: str, messages: list[dict],
@@ -101,98 +102,68 @@ class LLMClient:
         loop = asyncio.get_running_loop()
         if self.provider == "minimax":
             return await loop.run_in_executor(
-                _executor, self._call_anthropic_sync, system, messages,
-                temperature, response_format
-            )
+                _executor, self._call_anthropic, system, messages,
+                temperature, response_format)
         else:
             return await loop.run_in_executor(
-                _executor, self._call_openai_sync, system, messages,
-                temperature, response_format
-            )
+                _executor, self._call_openai, system, messages,
+                temperature, response_format)
 
-    def _call_anthropic_sync(self, system: str, messages: list[dict],
-                             temperature: float,
-                             response_format: dict = None) -> str:
+    def _call_anthropic(self, system: str, messages: list[dict],
+                        temperature: float, response_format: dict = None) -> str:
+        import requests
+
         user_content = messages[0]["content"] if messages else ""
 
-        for attempt in range(self.max_retries + 1):
+        def call(attempt: int) -> str:
             if attempt == 0:
-                timeout, max_tokens, temp = 180, 8000, temperature
+                to, mt, t = 180, 8000, temperature
             elif attempt == 1:
-                timeout, max_tokens, temp = 120, 3000, min(temperature + 0.2, 1.0)
+                to, mt, t = 120, 3000, min(temperature + 0.2, 1.0)
             else:
-                timeout, max_tokens, temp = 120, 2000, 0.8
+                to, mt, t = 120, 2000, 0.8
 
-            try:
-                resp = requests.post(
-                    f"{self.base_url}/v1/messages",
-                    headers={
-                        "Authorization": f"Bearer {self.api_key}",
-                        "anthropic-version": "2023-06-01",
-                        "anthropic-dangerous-direct-browser-access": "true",
-                        "Content-Type": "application/json",
-                    },
-                    json={
-                        "model": self.model,
-                        "max_tokens": max_tokens,
-                        "temperature": temp,
-                        "system": system,
-                        "messages": [{"role": "user", "content": user_content}],
-                    },
-                    timeout=timeout,
-                )
-                if resp.status_code == 200:
-                    data = resp.json()
-                    blocks = data.get("content", [])
-                    parts = []
-                    for b in blocks:
-                        t = b.get("text", "") or b.get("thinking", "")
-                        if t.strip():
-                            parts.append(t)
-                    return "\n".join(parts).strip()
-                elif resp.status_code == 429 and attempt < self.max_retries:
-                    time.sleep(2 ** attempt)
-                    continue
-                else:
-                    raise RuntimeError(f"API {resp.status_code}: {resp.text[:300]}")
-            except Exception as e:
-                if attempt < self.max_retries:
-                    from core.error_collector import errors
-                    errors.log_error("llm.anthropic", f"retry {attempt+1}/{self.max_retries}: {e}")
-                    time.sleep(2 ** attempt)
-                    continue
-                from core.error_collector import errors
-                errors.log_exception("llm.anthropic", e, f"final failure after {self.max_retries} retries")
-                raise
-        return ""
+            resp = requests.post(
+                f"{self.base_url}/v1/messages",
+                headers={
+                    "Authorization": f"Bearer {self.api_key}",
+                    "anthropic-version": "2023-06-01",
+                    "anthropic-dangerous-direct-browser-access": "true",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": self.model, "max_tokens": mt,
+                    "temperature": t, "system": system,
+                    "messages": [{"role": "user", "content": user_content}],
+                },
+                timeout=to,
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                blocks = data.get("content", [])
+                parts = [b.get("text", "") or b.get("thinking", "")
+                         for b in blocks if (b.get("text") or b.get("thinking", "")).strip()]
+                return "\n".join(parts).strip()
+            if resp.status_code != 429:
+                raise RuntimeError(f"API {resp.status_code}: {resp.text[:300]}")
+            raise RuntimeError("rate limit")
 
-    def _call_openai_sync(self, system: str, messages: list[dict],
-                          temperature: float,
-                          response_format: dict = None) -> str:
+        return _retry(call, self.max_retries, "anthropic")
+
+    def _call_openai(self, system: str, messages: list[dict],
+                     temperature: float, response_format: dict = None) -> str:
         import openai
         client = openai.OpenAI(api_key=self.api_key, base_url=self.base_url)
         full = [{"role": "system", "content": system}] + messages
 
-        for attempt in range(self.max_retries + 1):
-            try:
-                kwargs = {
-                    "model": self.model,
-                    "messages": full,
-                    "temperature": temperature,
-                    "max_tokens": 4000,
-                    "timeout": 120,
-                }
-                if response_format:
-                    kwargs["response_format"] = response_format
-                resp = client.chat.completions.create(**kwargs)
-                return resp.choices[0].message.content or ""
-            except Exception as e:
-                if attempt < self.max_retries:
-                    from core.error_collector import errors
-                    errors.log_error("llm.openai", f"retry {attempt+1}/{self.max_retries}: {e}")
-                    time.sleep(2 ** attempt)
-                else:
-                    from core.error_collector import errors
-                    errors.log_exception("llm.openai", e, f"final failure")
-                    raise
-        return ""
+        def call(attempt: int) -> str:
+            kwargs = {
+                "model": self.model, "messages": full,
+                "temperature": temperature, "max_tokens": 4000, "timeout": 120,
+            }
+            if response_format:
+                kwargs["response_format"] = response_format
+            resp = client.chat.completions.create(**kwargs)
+            return resp.choices[0].message.content or ""
+
+        return _retry(call, self.max_retries, "openai")

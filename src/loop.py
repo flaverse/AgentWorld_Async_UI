@@ -83,6 +83,7 @@ async def run_agent(agent, world, brain, assembler, systems,
                                 "zone": agent.zone, "pos": list(agent.pos),
                                 "drives": {k: round(v, 1) for k, v in drives.attrs.items()},
                                 "coins": coins, "kl_text": kl_text,
+                                "sim_time": world.clock.now(),
                             })
                         snapshot_p(al, sensory, drives, cfg.currency, cfg.text,
                                    cfg.thresholds, cfg.coin_epsilon)
@@ -150,10 +151,10 @@ async def run_agent(agent, world, brain, assembler, systems,
                             "llm1_prompt": prompt1,
                             "result_narrative": result.narrative if result else "",
                             "result_caller_deltas": result.caller_deltas if result else {},
-                            "result_target_deltas": result.target_deltas if result else {},
                             "zone": agent.zone, "pos": list(agent.pos),
                             "drives": {k: round(v, 1) for k, v in drives.attrs.items()},
                             "coins": coins, "kl_text": kl_text,
+                            "sim_time": world.clock.now(),
                         })
                 elif target and not interaction.can_interact(agent, target):
                     agent.move_to(list(target.pos))

@@ -279,6 +279,63 @@ async def cmd_demo(args):
 
 
 # ═══════════════════════════════════════════════════
+#  Config validation
+# ═══════════════════════════════════════════════════
+
+def cmd_validate_config():
+    """Validate world.yaml + prompts.yaml schema without running agents."""
+    errors = []
+    cfg = load_config()
+
+    # 1. Check world has required top-level keys
+    world = cfg["world"]
+    for key in ["world", "zones", "entities"]:
+        if key not in world:
+            errors.append(f"world.yaml missing key: {key}")
+
+    # 2. Check every entity has required keys
+    for e in world.get("entities", []):
+        if "id" not in e: errors.append(f"Entity missing id")
+        if "zone" not in e: errors.append(f"Entity '{e.get('name',e.get('id','?'))}' missing zone")
+
+    # 3. Check prompts.yaml: every template's slot exists in the slots registry
+    loader = cfg["assembler"].loader
+    all_slots = loader.data.get("slots", {})
+    for tpl_name, tpl in loader.data.get("templates", {}).items():
+        for slot_name in tpl.get("slots", []):
+            if slot_name not in all_slots:
+                errors.append(f"Template '{tpl_name}' references undefined slot '{slot_name}'")
+
+    # 4. Check every slot's condition is a known ctx key or empty
+    known_ctx = {"main_thread", "name", "personality", "drives_table", "kl_text",
+                 "zone_name", "sensory_text", "memory_text", "messages_text",
+                 "interactable_text", "visible_text", "hearing_text", "round",
+                 "caller_name", "caller_id", "target_name", "target_id"}
+    for slot_name, slot in all_slots.items():
+        cond = slot.get("condition", "")
+        if cond and cond not in known_ctx:
+            errors.append(f"Slot '{slot_name}' has unknown condition '{cond}' (not in known ctx keys)")
+
+    # 5. Check sensory_prompts channels
+    sp = loader.data.get("sensory_prompts", {})
+    for ch_name in sp:
+        if "header" not in sp[ch_name]:
+            errors.append(f"sensory_prompts.{ch_name} missing 'header'")
+
+    if errors:
+        print(f"❌ Config validation FAILED ({len(errors)} issues):")
+        for e in errors:
+            print(f"  - {e}")
+    else:
+        print(f"✅ Config validation PASSED")
+        zones = len(world.get("zones", []))
+        entities = len(world.get("entities", []))
+        agents = sum(1 for e in world.get("entities", []) if "agent" in e)
+        print(f"   {zones} zones, {entities} entities, {agents} agents")
+        print(f"   {len(all_slots)} slots defined, {len(loader.data.get('templates', {}))} templates")
+
+
+# ═══════════════════════════════════════════════════
 #  CLI
 # ═══════════════════════════════════════════════════
 
@@ -294,11 +351,16 @@ def parse_args():
                         help="Save trace JSON to file")
     parser.add_argument("--persist", type=str, default="",
                         help="SQLite database path for persistence")
+    parser.add_argument("--validate-config", action="store_true",
+                        help="Validate world.yaml + prompts.yaml without running")
     return parser.parse_args()
 
 
 async def main():
     args = parse_args()
+    if args.validate_config:
+        cmd_validate_config()
+        return
     if args.demo:
         await cmd_demo(args)
     else:
