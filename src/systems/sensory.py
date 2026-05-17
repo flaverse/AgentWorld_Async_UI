@@ -54,11 +54,10 @@ class SensorySystem:
 
                 sensory.channels[layer_name][eid] = SensorRecord(
                     entity_id=eid, name=entity.name,
-                    pos=list(entity.pos), distance=d,
+                    distance=d,
                     data=data,
                     first_seen=(time.time() if is_new
                                 else sensory.channels[layer_name][eid].first_seen),
-                    last_seen=time.time(),
                 )
 
                 # Hearing → memory retention

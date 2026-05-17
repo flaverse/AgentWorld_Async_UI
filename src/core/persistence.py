@@ -1,5 +1,5 @@
 """SQLite persistence for agent state snapshots and interactions."""
-import sqlite3, json, time, uuid
+import sqlite3, time, uuid
 
 
 class WorldDB:

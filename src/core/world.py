@@ -25,7 +25,6 @@ class World:
         self.entities: dict[str, Entity] = {}
         self.grids: dict[str, SpatialGrid] = {}
 
-        self._systems = systems
         self.lifecycle = EntityLifecycle(self)
 
         for zone_def in world_config.get("zones", []):
@@ -73,8 +72,6 @@ class World:
                     hearing_radius=ag.get("hearing_radius", 15),
                     interaction_radius=ag.get("interaction_radius", 3),
                     personality=ag.get("personality", ""),
-                    drive_rates={k: v.get("decay", 0)
-                                 for k, v in ag.get("drives", {}).items()},
                 )
                 if entity.has("interaction"):
                     agent_layer.drives = DriveSystem(

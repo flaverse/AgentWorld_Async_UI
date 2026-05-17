@@ -206,11 +206,6 @@ output_schemas:
         required: [narrative, deltas]
 
 # ═══════════════════════════════════════
-modal_layer_map:
-  dialogue: auditory
-  visual: visual
-
-# ═══════════════════════════════════════
 sensory_prompts:
   visual:
     header: "## 视觉"
@@ -229,12 +224,6 @@ sensory_prompts:
 text_labels:
   empty_memory: "无"
   memory_entry: "[+{rel}s] {text}"
-  drive_table_header: "| 属性 | 数值 |"
-  drive_table_sep: "|------|------|"
-  drive_urgent: "⚠️急需"
-  drive_needed: "●需要"
-  drive_normal: "○正常"
-  drive_no_data: "(无数据)"
   intent_stale: "STALE: "
   intent_prefix: "INTENT: "
   intent_done: "DONE: "

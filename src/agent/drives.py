@@ -5,7 +5,6 @@ from dataclasses import dataclass, field
 class DriveSystem:
     attrs: dict = field(default_factory=dict)
     attr_cfg: dict = field(default_factory=dict)
-    currency_key: str = "coins"
     drive_min: float = 0.0
     drive_max: float = 100.0
 

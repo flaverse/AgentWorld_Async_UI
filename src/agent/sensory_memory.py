@@ -6,11 +6,9 @@ from prompt.assembler import safe_format
 class SensorRecord:
     entity_id: str = ""
     name: str = ""
-    pos: list = field(default_factory=lambda: [0, 0])
     distance: int = 0
     data: dict = field(default_factory=dict)
     first_seen: float = 0.0
-    last_seen: float = 0.0
 
 
 @dataclass

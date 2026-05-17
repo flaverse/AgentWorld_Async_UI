@@ -131,14 +131,7 @@ async def run_agent(agent, world, brain, assembler, systems,
             # ═══════════════════════════════════════════
             #  PHASE 4: ACT — move / interact
             # ═══════════════════════════════════════════
-            move_to = decision.get("move_to")
             action_text = decision.get("action")
-
-            if move_to and isinstance(move_to, list) and len(move_to) == 2:
-                agent.move_to(move_to)
-                agent.last_action_time = world.clock.now()
-                systems["sensory"].update(agent, world.entities, world,
-                                           speech_window=cfg.speech_window)
 
             if action_text:
                 target = interaction.find_entity_at(

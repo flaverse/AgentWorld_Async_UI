@@ -13,15 +13,13 @@ logger = logging.getLogger(__name__)
 class ActionResult:
     target_id: str = ""
     caller_deltas: dict = field(default_factory=dict)
-    target_deltas: dict = field(default_factory=dict)
     narrative: str = ""
 
 
 class InteractionSystem:
-    def __init__(self, llm=None, assembler=None, modal_map=None):
+    def __init__(self, llm=None, assembler=None):
         self.llm = llm
         self.assembler = assembler
-        self.modal_map = modal_map or {}
 
     # ═══════════ public API ═══════════
 

@@ -15,7 +15,6 @@ sys.path.insert(0, os.path.join(base_dir, "src"))
 
 from core.world import World
 from agent.brain import Brain
-from agent.drives import DriveSystem
 from prompt.loader import PromptLoader
 from prompt.assembler import PromptAssembler
 from llm.client import LLMClient
@@ -39,21 +38,19 @@ def load_config():
     assembler = PromptAssembler(loader)
     labels = loader.data.get("text_labels", {})
     labels["sensory_prompts"] = loader.data.get("sensory_prompts", {})
-    modal_map = loader.data.get("modal_layer_map", {})
-    return {"world": wc, "llm": lc, "assembler": assembler, "labels": labels,
-            "modal_map": modal_map}
+    return {"world": wc, "llm": lc, "assembler": assembler, "labels": labels}
 
 
 # ═══════════════════════════════════════════════════
 #  World setup
 # ═══════════════════════════════════════════════════
 
-def make_world(world_cfg: dict, llm_cfg: dict, assembler, modal_map=None):
+def make_world(world_cfg: dict, llm_cfg: dict, assembler):
     llm = LLMClient(llm_cfg)
     brain = Brain(llm, assembler)
     systems = {
         "sensory": SensorySystem(),
-        "interaction": InteractionSystem(llm, assembler, modal_map),
+        "interaction": InteractionSystem(llm, assembler),
         "decay": DecaySystem(),
     }
     return World(world_cfg, systems), brain, systems
@@ -74,7 +71,6 @@ def setup_agent_drives(agents: list, sim: dict, currency: str) -> None:
         inter = e.get("interaction")
         if al and al.drives:
             al.drives.attr_cfg = attr_cfg
-            al.drives.currency_key = currency
         if inter:
             inter.attr_bounds = {k: {"min": v.get("min", 0), "max": v.get("max", 100)}
                                  for k, v in attr_cfg.items()}
@@ -194,8 +190,7 @@ async def cmd_test(args):
     cfg = load_config()
     sim = cfg["world"]["world"].get("simulation", {})
     currency = sim.get("currency", "coins")
-    world, brain, systems = make_world(cfg["world"], cfg["llm"], cfg["assembler"],
-                                         cfg.get("modal_map"))
+    world, brain, systems = make_world(cfg["world"], cfg["llm"], cfg["assembler"])
     agents = get_agents(world)
     if not agents:
         print("No autonomous agents found in world.yaml.")
@@ -249,8 +244,7 @@ async def cmd_demo(args):
     cfg = load_config()
     sim = cfg["world"]["world"].get("simulation", {})
     currency = sim.get("currency", "coins")
-    world, brain, systems = make_world(cfg["world"], cfg["llm"], cfg["assembler"],
-                                         cfg.get("modal_map"))
+    world, brain, systems = make_world(cfg["world"], cfg["llm"], cfg["assembler"])
     agents = get_agents(world)
     if not agents:
         print("No autonomous agents found.")

@@ -10,7 +10,6 @@ class AgentLayer(Layer):
     hearing_radius: int = 15
     interaction_radius: int = 3
     personality: str = ""
-    drive_rates: dict = field(default_factory=dict)
     main_thread: str = ""
 
     # Runtime modules
