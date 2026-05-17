@@ -66,24 +66,19 @@ def get_agents(world: World) -> list:
 
 
 def setup_agent_drives(agents: list, sim: dict, currency: str) -> None:
-    """Ensure every agent has a DriveSystem with the configured decay rates and thresholds."""
-    decay_rates = sim.get("decay_rates", {})
-    drive = sim.get("drive", {})
+    """Inject per-attribute drive config into existing DriveSystem + InteractionLayer."""
+    drive_cfg = sim.get("drive", {})
+    attr_cfg = drive_cfg.get("attributes", {})
     for e in agents:
-        if not e.get("agent").drives and e.has("interaction"):
-            e.get("agent").drives = DriveSystem(
-                attrs=e.get("interaction").private_attrs,
-                decay_rates=decay_rates,
-                currency_key=currency,
-                drive_min=drive.get("min", 0),
-                drive_max=drive.get("max", 100),
-                urgent_threshold=drive.get("urgent_threshold", 80),
-                needed_threshold=drive.get("needed_threshold", 60))
+        al = e.get("agent")
         inter = e.get("interaction")
+        if al and al.drives:
+            al.drives.attr_cfg = attr_cfg
+            al.drives.currency_key = currency
         if inter:
+            inter.attr_bounds = {k: {"min": v.get("min", 0), "max": v.get("max", 100)}
+                                 for k, v in attr_cfg.items()}
             inter.currency_key = currency
-            inter.drive_min = drive.get("min", 0)
-            inter.drive_max = drive.get("max", 100)
 
 
 # ═══════════════════════════════════════════════════
@@ -169,7 +164,9 @@ def report(collector: TraceCollector, agents: list, sim: dict,
     issues = []
     for t in actions:
         for dkey in ['result_caller_deltas', 'result_target_deltas']:
-            for attr, val in t.get(dkey, {}).items():
+            deltas = t.get(dkey)
+            if not isinstance(deltas, dict): continue
+            for attr, val in deltas.items():
                 if isinstance(val, (int, float)) and attr != currency and abs(val) > delta_max:
                     issues.append(f"large delta: {t['agent']} {attr}={val}")
     for t in merged:

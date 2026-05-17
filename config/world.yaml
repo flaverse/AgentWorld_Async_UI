@@ -7,6 +7,9 @@ world:
     poll_interval: 0.3
     stale_timeout: 30
     speech_window: 30
+    memory_prompt_count: 5
+    intent_ttl: 30
+    default_patience: 5
     kl:
       state_thresholds:
       - 30
@@ -14,20 +17,40 @@ world:
       - 80
       coin_epsilon: 5
     drive:
-      min: 0
-      max: 100
-      urgent_threshold: 80
-      needed_threshold: 60
+      currency: coins
+      attributes:
+        thirst:
+          min: 0
+          max: 100
+          decay: 0.022
+          description: 口渴。100=喉咙冒烟急需饮水。0=完全不渴。
+        hunger:
+          min: 0
+          max: 100
+          decay: 0.018
+          description: 饥饿。100=体力不支需要进食。0=完全不饿。
+        social:
+          min: 0
+          max: 100
+          decay: 0.015
+          description: 社交需求。100=极度渴望与人交流。0=只想独处。
+        energy:
+          min: 0
+          max: 100
+          decay: -0.01
+          description: 体力。0=精疲力竭需休息。100=精力充沛。
+        fun:
+          min: 0
+          max: 100
+          decay: 0.015
+          description: 娱乐。100=极度无聊需找乐子。0=已尽兴。
+        mood:
+          min: 0
+          max: 100
+          decay: 0.0
+          description: 心情。0=绝望可能轻生或自毁。100=极度愉悦内心平静。
     validation:
       delta_max: 30
-      drive_min: 0
-      drive_max: 100
-    decay_rates:
-      thirst: 0.022
-      hunger: 0.018
-      social: 0.015
-      energy: -0.01
-      fun: 0.015
     text:
       kl_entered: '{channel}: {name} 进入'
       kl_left: '{channel}: {name} 离开'
@@ -49,216 +72,126 @@ zones:
   width: 40
   height: 30
 entities:
-- id: bar_door
-  name: 酒馆门口
-  zone: bar_zone
-  pos:
-  - 22
-  - 10
-  visual:
-    visible_radius: 20
-    sprite: door
-    properties:
-      look: 酒馆的木质大门，通向白果园广场
-  interaction:
-    interaction_radius: 1
-    properties:
-      description: 狐狸与鹅酒馆的橡木大门。推开出去是白果园广场。
-    gate:
-      to_zone: square
-      to_pos:
-      - 13
-      - 5
-  description: 酒馆的木质大门，通向白果园广场。
-- id: square_bar_gate
-  name: 酒馆入口
-  zone: bar_zone
-  pos:
-  - 23
-  - 12
-  visual:
-    visible_radius: 20
-    sprite: door
-    properties:
-      look: 狐狸与鹅酒馆的招牌在风中摇晃，里面传来麦酒香
-  interaction:
-    interaction_radius: 1
-    properties:
-      description: 狐狸与鹅酒馆的橡木大门。门缝里透出麦酒香和暖黄灯光。
-    gate:
-      to_zone: bar_zone
-      to_pos:
-      - 1
-      - 4
-  description: 狐狸与鹅酒馆的橡木大门。
-- id: square_herb_gate
-  name: 草药小屋入口
-  zone: bar_zone
-  pos:
-  - 27
-  - 10
-  visual:
-    visible_radius: 20
-    sprite: door
-    properties:
-      look: 一间歪斜的小木屋，门口挂满了干草药
-  interaction:
-    interaction_radius: 1
-    properties:
-      description: 一间歪斜的小木屋，门口挂满干草药。推门进去是托蜜拉的草药小屋。
-    gate:
-      to_zone: herb_hut
-      to_pos:
-      - 7
-      - 5
-  description: 一间歪斜的小木屋，门口挂满了干草药。
-- id: herb_door
-  name: 小屋门口
-  zone: garrison
-  pos:
-  - 12
-  - 5
-  visual:
-    visible_radius: 20
-    sprite: door
-    properties:
-      look: 透过门缝能看到白果园广场
-  interaction:
-    interaction_radius: 1
-    properties:
-      description: 草药小屋的木门。推门出去就是白果园广场。
-    gate:
-      to_zone: square
-      to_pos:
-      - 1
-      - 6
-  description: 草药小屋的木门。
-- id: square_village_gate
+- id: bar_village_gate
   name: 村口路牌
   zone: bar_zone
   pos:
-  - 29
-  - 10
+  - 45
+  - 20
   visual:
     visible_radius: 20
-    sprite: door
     properties:
-      look: 一块歪斜的木路牌，指向白果园村的方向
+      look: 歪斜木路牌指向白果园村
   interaction:
     interaction_radius: 1
     properties:
-      description: 一条土路通往白果园村。远远能看到水车磨坊的尖顶。
+      description: 土路通往白果园村。水车磨坊的尖顶在远处可见。
     gate:
       to_zone: village
       to_pos:
       - 15
-      - 19
-  description: 一块歪斜的木路牌，指向白果园村的方向。
-- id: village_gate
-  name: 村口
+      - 38
+  description: 歪斜木路牌，指向白果园村。
+- id: village_bar_gate
+  name: 酒馆路牌
   zone: village
   pos:
-  - 21
-  - 10
+  - 15
+  - 38
   visual:
     visible_radius: 20
-    sprite: door
     properties:
-      look: 白果园村的入口，一条土路通向广场方向
+      look: 路牌指向狐狸与鹅酒馆方向
   interaction:
     interaction_radius: 1
     properties:
-      description: 白果园村的入口。回头能看到白果园广场的轮廓。
+      description: 土路通向狐狸与鹅酒馆。远处传来麦酒香。
     gate:
-      to_zone: square
+      to_zone: bar_zone
       to_pos:
+      - 44
       - 21
-      - 1
-  description: 白果园村的村口，通向广场。
-- id: square_garrison_gate
+  description: 路牌指向酒馆方向。
+- id: bar_garrison_gate
   name: 军营大门
   zone: bar_zone
   pos:
-  - 34
+  - 45
   - 10
   visual:
     visible_radius: 20
-    sprite: door
     properties:
-      look: 尼弗迦德军营的黑色大门，岗哨上有士兵巡逻
+      look: 尼弗迦德军营的黑色铁门，挂着日轮旗
   interaction:
     interaction_radius: 1
     properties:
-      description: 黑色铁门通向尼弗迦德驻军营地。岗哨上的士兵斜眼看着你。
+      description: 黑色铁门通向尼弗迦德驻军营地。岗哨士兵警惕地打量路人。
     gate:
       to_zone: garrison
       to_pos:
       - 19
       - 8
   description: 黑色铁门，通向尼弗迦德军营。
-- id: garrison_gate
+- id: garrison_bar_gate
   name: 营地大门
   zone: garrison
   pos:
-  - 13
-  - 7
+  - 19
+  - 8
   visual:
     visible_radius: 20
-    sprite: door
     properties:
-      look: 从军营内侧看大门，上面挂着黑色日轮旗
+      look: 从营地内侧看大门，外面能看到酒馆的灯光
   interaction:
     interaction_radius: 1
     properties:
-      description: 营地的出口。推门出去就是白果园广场。
+      description: 推开铁门走出去。外面是狐狸与鹅酒馆，灯光明亮人声嘈杂。
     gate:
-      to_zone: square
+      to_zone: bar_zone
       to_pos:
-      - 1
-      - 16
-  description: 营地的黑色铁门，通向广场。
-- id: village_outskirts_gate
-  name: 郊外小路
+      - 44
+      - 11
+  description: 营地的出口，通向酒馆。
+- id: village_garrison_gate
+  name: 军营侧门
   zone: village
   pos:
-  - 23
-  - 12
+  - 45
+  - 15
   visual:
     visible_radius: 20
-    sprite: door
     properties:
-      look: 一条土路延伸向郊外的农田和风车
+      look: 军营的侧门，平时少有士兵巡逻
   interaction:
     interaction_radius: 1
     properties:
-      description: 土路通向白果园郊外。远处能看到风车在转动。
+      description: 军营的侧门。这里守卫松一些，但还是要小心尼弗迦德哨兵。
     gate:
-      to_zone: outskirts
+      to_zone: garrison
       to_pos:
-      - 0
-      - 10
-  description: 一条土路，通向白果园郊外。
-- id: outskirts_village_gate
-  name: 回村小路
-  zone: village
+      - 19
+      - 20
+  description: 军营的侧门。通向尼弗迦德营地。
+- id: garrison_village_gate
+  name: 军营后门
+  zone: garrison
   pos:
-  - 27
-  - 11
+  - 19
+  - 20
   visual:
     visible_radius: 20
-    sprite: door
     properties:
-      look: 土路通向村庄方向，能看到水车磨坊的尖顶
+      look: 营地后门，外面是白果园村的农田
   interaction:
     interaction_radius: 1
     properties:
-      description: 这条土路通往白果园村。磨坊的尖顶在远处若隐若现。
+      description: 推开后门走出去。外面是白果园村的菜园和神殿，安静祥和。
     gate:
       to_zone: village
       to_pos:
-      - 28
-      - 9
-  description: 一条土路，通向白果园村。
+      - 44
+      - 14
+  description: 营地的后门。推开后门就是白果园村。
 - id: bar_counter
   name: 吧台
   zone: bar_zone

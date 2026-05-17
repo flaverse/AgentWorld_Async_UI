@@ -103,7 +103,7 @@ async def run_agent(agent, world, brain, assembler, systems,
             ctx = {
                 "main_thread": al.main_thread,
                 "name": agent.name, "personality": al.personality,
-                "drives_table": al.drives.to_prompt_table(labels),
+                "drives_table": al.drives.to_prompt(),
                 "zone_name": world.zones.get(agent.zone, {}).get("name", ""),
                 "zone_width": world.zones.get(agent.zone, {}).get("width", 10),
                 "zone_height": world.zones.get(agent.zone, {}).get("height", 10),

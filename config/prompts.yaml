@@ -68,7 +68,7 @@ slots:
     template: |
       ## 你的状态
       {drives_table}
-      (高于60=需要关注, 高于80=急需满足)
+      参考描述栏理解每个数值的含义。数值本身没有绝对的好坏——描述栏告诉你极端值的后果。
 
   kl_divergence:
     condition: kl_text
@@ -137,7 +137,7 @@ slots:
       - dialogue: 你直接说了什么(原话)。null=沉默
       - visual: 你的神态、表情、肢体动作。给观察者看的
       - internal: 你的内心活动(秘密)
-      - self_deltas: 这个动作对你自身属性的影响。属性: thirst hunger social energy fun mood coins。范围±30。无影响写{}
+      - self_deltas: 这个动作对你自身属性的影响。可用属性见上文"你的状态"。范围见各属性的max。无影响写{}。
       - expects_reply: 这句话是否需要对方回应(true/false)
       - patience: 如果等回应，最多等几秒。不等回应写0
       - main_thread: 更新你的长期目标。完成了标"✓完成"。有新目标时改写。null=维持当前不变

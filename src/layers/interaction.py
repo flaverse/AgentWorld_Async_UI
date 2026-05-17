@@ -11,6 +11,7 @@ class InteractionLayer(Layer):
     currency_key: str = "coins"
     drive_min: float = 0.0
     drive_max: float = 100.0
+    attr_bounds: dict = field(default_factory=dict)
 
     def __post_init__(self):
         if self.interaction_radius:
@@ -31,4 +32,7 @@ class InteractionLayer(Layer):
             if key == self.currency_key:
                 self.private_attrs[key] = max(0, self.private_attrs[key])
             else:
-                self.private_attrs[key] = max(self.drive_min, min(self.drive_max, self.private_attrs[key]))
+                bounds = self.attr_bounds.get(key, {})
+                lo = bounds.get("min", self.drive_min)
+                hi = bounds.get("max", self.drive_max)
+                self.private_attrs[key] = max(lo, min(hi, self.private_attrs[key]))

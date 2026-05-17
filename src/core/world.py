@@ -78,7 +78,6 @@ class World:
                 if entity.has("interaction"):
                     agent_layer.drives = DriveSystem(
                         attrs=entity.get("interaction").private_attrs,
-                        decay_rates=agent_layer.drive_rates,
                     )
                 agent_layer.sensory = SensoryMemory()
                 agent_layer.memory = AgentMemory()
