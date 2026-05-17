@@ -61,6 +61,7 @@ class World:
                     private_attrs=inter.get("private_attrs", {}),
                     hidden=inter.get("hidden", {}),
                     gate=inter.get("gate"),
+                    properties=inter.get("properties", {}),
                 )
 
             if "agent" in ent_def:

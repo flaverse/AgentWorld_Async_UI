@@ -76,16 +76,16 @@ entities:
   name: 村口路牌
   zone: bar_zone
   pos:
-  - 45
-  - 20
+  - 33
+  - 18
   visual:
     visible_radius: 20
     properties:
       look: 歪斜木路牌指向白果园村
   interaction:
-    interaction_radius: 1
+    interaction_radius: 5
     properties:
-      description: 土路通往白果园村。水车磨坊的尖顶在远处可见。
+      description: 土路通往白果园村。水车磨坊的尖顶在远处可见。 【可穿越 → village】
     gate:
       to_zone: village
       to_pos:
@@ -96,16 +96,16 @@ entities:
   name: 酒馆路牌
   zone: village
   pos:
-  - 15
-  - 38
+  - 32
+  - 18
   visual:
     visible_radius: 20
     properties:
       look: 路牌指向狐狸与鹅酒馆方向
   interaction:
-    interaction_radius: 1
+    interaction_radius: 5
     properties:
-      description: 土路通向狐狸与鹅酒馆。远处传来麦酒香。
+      description: 土路通向狐狸与鹅酒馆。远处传来麦酒香。 【可穿越 → bar_zone】
     gate:
       to_zone: bar_zone
       to_pos:
@@ -116,16 +116,16 @@ entities:
   name: 军营大门
   zone: bar_zone
   pos:
-  - 45
-  - 10
+  - 27
+  - 18
   visual:
     visible_radius: 20
     properties:
       look: 尼弗迦德军营的黑色铁门，挂着日轮旗
   interaction:
-    interaction_radius: 1
+    interaction_radius: 5
     properties:
-      description: 黑色铁门通向尼弗迦德驻军营地。岗哨士兵警惕地打量路人。
+      description: 黑色铁门通向尼弗迦德驻军营地。岗哨士兵警惕地打量路人。 【可穿越 → garrison】
     gate:
       to_zone: garrison
       to_pos:
@@ -136,16 +136,16 @@ entities:
   name: 营地大门
   zone: garrison
   pos:
-  - 19
-  - 8
+  - 22
+  - 12
   visual:
     visible_radius: 20
     properties:
       look: 从营地内侧看大门，外面能看到酒馆的灯光
   interaction:
-    interaction_radius: 1
+    interaction_radius: 5
     properties:
-      description: 推开铁门走出去。外面是狐狸与鹅酒馆，灯光明亮人声嘈杂。
+      description: 推开铁门走出去。外面是狐狸与鹅酒馆，灯光明亮人声嘈杂。 【可穿越 → bar_zone】
     gate:
       to_zone: bar_zone
       to_pos:
@@ -156,16 +156,16 @@ entities:
   name: 军营侧门
   zone: village
   pos:
-  - 45
-  - 15
+  - 26
+  - 18
   visual:
     visible_radius: 20
     properties:
       look: 军营的侧门，平时少有士兵巡逻
   interaction:
-    interaction_radius: 1
+    interaction_radius: 5
     properties:
-      description: 军营的侧门。这里守卫松一些，但还是要小心尼弗迦德哨兵。
+      description: 军营的侧门。这里守卫松一些，但还是要小心尼弗迦德哨兵。 【可穿越 → garrison】
     gate:
       to_zone: garrison
       to_pos:
@@ -176,16 +176,16 @@ entities:
   name: 军营后门
   zone: garrison
   pos:
-  - 19
-  - 20
+  - 16
+  - 12
   visual:
     visible_radius: 20
     properties:
       look: 营地后门，外面是白果园村的农田
   interaction:
-    interaction_radius: 1
+    interaction_radius: 5
     properties:
-      description: 推开后门走出去。外面是白果园村的菜园和神殿，安静祥和。
+      description: 推开后门走出去。外面是白果园村的菜园和神殿，安静祥和。 【可穿越 → village】
     gate:
       to_zone: village
       to_pos:
