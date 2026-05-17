@@ -45,21 +45,44 @@ def load_config():
 #  World setup
 # ═══════════════════════════════════════════════════
 
-def make_world(world_cfg: dict, llm_cfg: dict, assembler):
-    llm = LLMClient(llm_cfg)
-    brain = Brain(llm, assembler)
+def spawn_world(cfg: dict):
+    """Create World, Brain, and Systems from loaded config.
+    Returns (world, brain, systems_dict).
+    """
+    llm = LLMClient(cfg["llm"])
+    brain = Brain(llm, cfg["assembler"])
     systems = {
         "sensory": SensorySystem(),
-        "interaction": InteractionSystem(llm, assembler),
+        "interaction": InteractionSystem(llm, cfg["assembler"]),
         "decay": DecaySystem(),
     }
-    return World(world_cfg, systems), brain, systems
+    return World(cfg["world"], systems), brain, systems
 
 
-def get_agents(world: World) -> list:
-    """Return all autonomous agents from the world."""
+def get_autonomous_agents(world: World) -> list:
+    """Return entities that have AgentLayer and are autonomous."""
     return [e for e in world.entities.values()
-            if e.get("agent") and e.get("agent").autonomous]
+            if e.has("agent") and e.get("agent").autonomous]
+
+
+def build_loop_config(sim: dict, labels: dict) -> LoopConfig:
+    """Construct LoopConfig from YAML simulation block.
+    All params sourced from sim dict with safe defaults.
+    """
+    kl = sim.get("kl", {})
+    return LoopConfig(
+        poll_interval=sim.get("poll_interval", 0.3),
+        thresholds=kl.get("state_thresholds", [30, 60, 80]),
+        coin_epsilon=kl.get("coin_epsilon", 5),
+        stale_timeout=sim.get("stale_timeout", 30),
+        currency=sim.get("currency", "coins"),
+        text=sim.get("text", {}),
+        labels=labels,
+        intent_ttl=sim.get("intent_ttl", 30),
+        default_patience=sim.get("default_patience", 5),
+        speech_window=sim.get("speech_window", 30),
+        memory_prompt_count=sim.get("memory_prompt_count", 5),
+    )
 
 
 def setup_agent_drives(agents: list, sim: dict, currency: str) -> None:
@@ -189,28 +212,13 @@ async def cmd_test(args):
     """Run concurrent test: all agents from config."""
     cfg = load_config()
     sim = cfg["world"]["world"].get("simulation", {})
-    currency = sim.get("currency", "coins")
-    world, brain, systems = make_world(cfg["world"], cfg["llm"], cfg["assembler"])
-    agents = get_agents(world)
+    world, brain, systems = spawn_world(cfg)
+    agents = get_autonomous_agents(world)
     if not agents:
         print("No autonomous agents found in world.yaml.")
         return
-    setup_agent_drives(agents, sim, currency)
-
-    kl = sim.get("kl", {})
-    loop_cfg = LoopConfig(
-        poll_interval=sim.get("poll_interval", 0.3),
-        thresholds=kl.get("state_thresholds", [30, 60, 80]),
-        coin_epsilon=kl.get("coin_epsilon", 5),
-        stale_timeout=sim.get("stale_timeout", 30),
-        currency=currency,
-        text=sim.get("text", {}),
-        labels=cfg["labels"],
-        intent_ttl=sim.get("intent_ttl", 30),
-        default_patience=sim.get("default_patience", 5),
-        speech_window=sim.get("speech_window", 30),
-        memory_prompt_count=sim.get("memory_prompt_count", 5),
-    )
+    setup_agent_drives(agents, sim, sim.get("currency", "coins"))
+    loop_cfg = build_loop_config(sim, cfg["labels"])
 
     print(f"\n{'='*60}")
     print(f"  AgentWorld Async — {cfg['world']['world']['name']}")
@@ -220,12 +228,12 @@ async def cmd_test(args):
     tracer = TraceCollector()
     t_start = time.time()
 
-    db = None
     if args.persist:
         from core.persistence import WorldDB
         db = WorldDB(args.persist)
         run_id = db.start_run(cfg['world']['world']['name'])
     else:
+        db = None
         run_id = ""
 
     await run_concurrent(agents, world, brain, cfg["assembler"],
@@ -243,29 +251,14 @@ async def cmd_demo(args):
     """Run single-agent demo."""
     cfg = load_config()
     sim = cfg["world"]["world"].get("simulation", {})
-    currency = sim.get("currency", "coins")
-    world, brain, systems = make_world(cfg["world"], cfg["llm"], cfg["assembler"])
-    agents = get_agents(world)
+    world, brain, systems = spawn_world(cfg)
+    agents = get_autonomous_agents(world)
     if not agents:
         print("No autonomous agents found.")
         return
     agent = agents[0]
-    setup_agent_drives(agents, sim, currency)
-
-    kl = sim.get("kl", {})
-    loop_cfg = LoopConfig(
-        poll_interval=sim.get("poll_interval", 0.3),
-        thresholds=kl.get("state_thresholds", [30, 60, 80]),
-        coin_epsilon=kl.get("coin_epsilon", 5),
-        stale_timeout=sim.get("stale_timeout", 30),
-        currency=currency,
-        text=sim.get("text", {}),
-        labels=cfg["labels"],
-        intent_ttl=sim.get("intent_ttl", 30),
-        default_patience=sim.get("default_patience", 5),
-        speech_window=sim.get("speech_window", 30),
-        memory_prompt_count=sim.get("memory_prompt_count", 5),
-    )
+    setup_agent_drives(agents, sim, sim.get("currency", "coins"))
+    loop_cfg = build_loop_config(sim, cfg["labels"])
 
     print(f"Agent: {agent.name} | personality: {agent.get('agent').personality}")
     print(f"{'='*50}")
