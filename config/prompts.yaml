@@ -120,7 +120,7 @@ slots:
 
   output_format:
     template: |
-      ##       输出格式 (严格JSON)
+      ## 输出格式 (严格JSON)
       {
         "thinking": "简短推理",
         "action": "做什么 (自由文本，含位置和意图)" 或 null,
@@ -138,7 +138,7 @@ slots:
       - dialogue: 你直接说了什么(原话)。null=沉默
       - visual: 你的神态、表情、肢体动作。给观察者看的
       - internal: 你的内心活动(秘密)
-      - self_deltas: 这个动作对你自身属性的影响。可用属性见上文"你的状态"。范围见各属性的max。无影响写{}。
+      - self_deltas: 这个动作对你自身属性的影响。可用属性见上文"你的状态"。范围见各属性的max。无影响写{}
       - expects_reply: 这句话是否需要对方回应(true/false)
       - patience: 如果等回应，最多等几秒。不等回应写0
       - main_thread: 更新你的长期目标。完成了标"✓完成"。有新目标时改写。null=维持当前不变
@@ -156,27 +156,26 @@ slots:
       对象描述: {target_description}
       隐藏属性: {target_hidden}
 
-      {target_context}
-
   interact_rules:
     condition: caller_name
     template: |
       ## 规则
       写一段50-150字的叙事。计算对{caller_name}({caller_id})和{target_name}({target_id})的属性影响。
       属性有: thirst hunger social energy fun mood coins。控制在[-20,+20]。
-      只输出JSON。
+      只输出JSON。如果对象只读，不要输出target_changes。
 
   interact_output_format:
     condition: caller_name
     template: |
       输出格式:
-      {{
+      {
         "narrative": "50-150字的叙事，从执行者视角描述",
-        "deltas": {{
-          "{caller_id}": {{"thirst": -10, "mood": 3}}
-        }}
-      }}
-      只输出JSON。不要标记。
+        "deltas": {
+          "{caller_id}": {"thirst": -10, "mood": 3}
+        },
+        "target_changes": {"visual.properties.look": "新的外观描述"}
+      }
+      只输出JSON。不要标记。如果对象只读，不要输出target_changes。
 
 # ═══════════════════════════════════════
 output_schemas:
@@ -203,6 +202,7 @@ output_schemas:
       properties:
         narrative: {type: string}
         deltas: {type: object}
+        target_changes: {type: object}
         required: [narrative, deltas]
 
 # ═══════════════════════════════════════

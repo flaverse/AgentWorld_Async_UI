@@ -13,6 +13,15 @@ class EntityLifecycle:
         if entity.zone in w.grids:
             w.grids[entity.zone].insert(entity.id, entity.pos)
 
+    def despawn(self, entity_id: str) -> bool:
+        w = self.world
+        entity = w.entities.pop(entity_id, None)
+        if not entity:
+            return False
+        if entity.zone in w.grids:
+            w.grids[entity.zone].remove(entity_id, entity.pos)
+        return True
+
     def transfer_zone(self, entity, new_zone: str, new_pos: list[int]) -> None:
         old_zone = entity.zone
         old_pos = list(entity.pos)

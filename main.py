@@ -182,10 +182,9 @@ def report(collector: TraceCollector, agents: list, sim: dict,
     currency = sim.get("currency", "coins")
     issues = []
     for t in actions:
-        for dkey in ['result_caller_deltas', 'result_target_deltas']:
-            deltas = t.get(dkey)
-            if not isinstance(deltas, dict): continue
-            for attr, val in deltas.items():
+        deltas = t.get('result_caller_deltas')
+        if not isinstance(deltas, dict): continue
+        for attr, val in deltas.items():
                 if isinstance(val, (int, float)) and attr != currency and abs(val) > delta_max:
                     issues.append(f"large delta: {t['agent']} {attr}={val}")
     for t in merged:

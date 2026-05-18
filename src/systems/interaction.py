@@ -148,6 +148,9 @@ class InteractionSystem:
             extra = deltas.get(agent.id, {})
             if extra:
                 self._apply_deltas(agent, extra)
+            target_changes = data.get("target_changes", {})
+            if target_changes and target_inter and not target_inter.readonly:
+                world.update_entity(target.id, target_changes)
         except Exception as e:
             import sys
             print(f"  [interact ERR] {agent.name}→{target.name}: {e}", file=sys.stderr, flush=True)

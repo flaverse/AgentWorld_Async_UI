@@ -29,7 +29,8 @@ class LoopConfig:
 
 def _make_trace(agent_name, target_name, target_id, action_text,
                 zone, pos, drives, coins, kl_text, sim_time,
-                *, llm1_output=None, llm1_prompt=None, result=None) -> dict:
+                *, llm1_output=None, llm1_prompt=None, result=None,
+                note=None) -> dict:
     """Build a trace dict for a single agent action.
     llm1_output and llm1_prompt omitted for intent-executed actions.
     """
@@ -46,6 +47,8 @@ def _make_trace(agent_name, target_name, target_id, action_text,
         trace["llm1_output"] = llm1_output
     if llm1_prompt:
         trace["llm1_prompt"] = llm1_prompt
+    if note:
+        trace["note"] = note
     return trace
 
 

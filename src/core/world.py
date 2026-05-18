@@ -61,6 +61,8 @@ class World:
                     hidden=inter.get("hidden", {}),
                     gate=inter.get("gate"),
                     properties=inter.get("properties", {}),
+                    readonly=inter.get("readonly", False),
+                    filepath=inter.get("filepath", ""),
                 )
 
             if "agent" in ent_def:
@@ -107,3 +109,34 @@ class World:
         grid = self.grids.get(zone_id)
         if grid:
             grid.move(entity_id, old_pos, new_pos)
+
+    def update_entity(self, entity_id: str, updates: dict) -> None:
+        """Apply dotted-path updates to entity properties. Blind execution — no schema."""
+        entity = self.entities.get(entity_id)
+        if not entity:
+            return
+        for path, value in updates.items():
+            parts = path.split(".")
+            target = entity
+            for p in parts[:-1]:
+                target = target.get(p) if hasattr(target, 'get') else getattr(target, p)
+            if hasattr(target, '__setitem__'):
+                target[parts[-1]] = value
+            else:
+                setattr(target, parts[-1], value)
+
+    def spawn_entity(self, entity_def: dict) -> Entity:
+        """Create and spawn an entity from a dict at runtime. Same format as world.yaml."""
+        # Reuse the per-entity logic from _load_entities
+        saved = self.entities.copy()
+        # Temporarily append the def to load
+        self._load_entities([entity_def])
+        # Find the newly created entity (it's the one not in saved)
+        for eid in self.entities:
+            if eid not in saved:
+                return self.entities[eid]
+        raise RuntimeError(f"Failed to spawn entity: {entity_def.get('id', '?')}")
+
+    def despawn_entity(self, entity_id: str) -> bool:
+        """Remove an entity from the world at runtime."""
+        return self.lifecycle.despawn(entity_id)
