@@ -22,6 +22,8 @@ from systems.sensory import SensorySystem
 from systems.interaction import InteractionSystem
 from systems.decay import DecaySystem
 from loop import run_agent, LoopConfig
+from core.director import Director
+from gateway import WorldGateway
 
 
 # ═══════════════════════════════════════════════════
@@ -79,7 +81,6 @@ def build_loop_config(sim: dict, labels: dict) -> LoopConfig:
         currency=sim.get("currency", "coins"),
         text=sim.get("text", {}),
         labels=labels,
-        intent_ttl=sim.get("intent_ttl", 30),
         default_patience=sim.get("default_patience", 5),
         speech_window=sim.get("speech_window", 30),
         memory_prompt_count=sim.get("memory_prompt_count", 5),
@@ -107,10 +108,11 @@ def setup_agent_drives(agents: list, sim: dict, currency: str) -> None:
 
 async def run_concurrent(agents, world, brain, assembler, systems,
                          runtime: float, cfg: LoopConfig,
-                         *, trace_fn=None):
+                         *, trace_fn=None, director=None):
     """Run all agents concurrently."""
     tasks = [run_agent(a, world, brain, assembler, systems,
-                       runtime, trace_fn=trace_fn, cfg=cfg)
+                       runtime, trace_fn=trace_fn, cfg=cfg,
+                       director=director)
              for a in agents]
     await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -220,6 +222,19 @@ async def cmd_test(args):
     setup_agent_drives(agents, sim, sim.get("currency", "coins"))
     loop_cfg = build_loop_config(sim, cfg["labels"])
 
+    # ── Director + Gateway (external agent access) ──
+    director = Director(world)
+    gateway = WorldGateway(world, director)
+    api_task = None
+    if args.api_port:
+        from gateway.api import create_app
+        app = create_app(gateway, poll_interval=sim.get("poll_interval", 0.3))
+        import uvicorn
+        api_config = uvicorn.Config(app, host="0.0.0.0", port=args.api_port, log_level="warning")
+        api_server = uvicorn.Server(api_config)
+        api_task = asyncio.create_task(api_server.serve())
+        print(f"  Gateway API: http://0.0.0.0:{args.api_port}")
+
     print(f"\n{'='*60}")
     print(f"  AgentWorld Async — {cfg['world']['world']['name']}")
     print(f"  {len(agents)} agents | {args.runtime}s | Start: {datetime.now().strftime('%H:%M:%S')}")
@@ -238,7 +253,17 @@ async def cmd_test(args):
 
     await run_concurrent(agents, world, brain, cfg["assembler"],
                          systems, args.runtime, loop_cfg,
-                         trace_fn=tracer.callback())
+                         trace_fn=tracer.callback(), director=director)
+
+    # Stop API
+    if api_task:
+        api_server.should_exit = True
+        api_task.cancel()
+        try:
+            await api_task
+        except (asyncio.CancelledError, Exception):
+            pass
+
     elapsed = time.time() - t_start
     report(tracer, agents, sim, elapsed, args.validate, args.output)
     if db:
@@ -348,11 +373,23 @@ def parse_args():
                         help="Validate world.yaml + prompts.yaml without running")
     parser.add_argument("--world", type=str, default="",
                         help="Path to world YAML (default: config/world.yaml)")
+    parser.add_argument("--eval-report", type=str, default="",
+                        help="Run evaluation report from existing trace JSON")
+    parser.add_argument("--api-port", type=int, default=0,
+                        help="Start Gateway API on given port (0=disabled)")
     return parser.parse_args()
 
 
 async def main():
     args = parse_args()
+    if args.eval_report:
+        from eval import run_eval
+        report = run_eval(args.eval_report)
+        print(report.to_table())
+        if args.output:
+            report.save(args.output)
+            print(f"\n  Saved: {args.output}")
+        return
     if args.validate_config:
         cmd_validate_config(args)
         return

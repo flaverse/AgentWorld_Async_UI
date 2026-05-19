@@ -19,7 +19,6 @@ class LoopConfig:
     currency: str = "coins"
     text: dict = field(default_factory=dict)
     labels: dict = field(default_factory=dict)
-    intent_ttl: int = 30
     default_patience: int = 5
     speech_window: int = 30
     memory_prompt_count: int = 5
@@ -76,7 +75,27 @@ def _build_decision_ctx(agent, al, world, sensory, labels, cfg, kl_text) -> dict
         "sensory_text": _build_sensory_text(sensory, labels),
         "memory_text": al.memory.to_prompt_text(cfg.memory_prompt_count, labels),
         "kl_text": kl_text,
+        "state_description": _build_state_text(al),
     }
+
+
+def _build_state_text(al) -> str:
+    """Render factual state description from agent memory and conversation tracking.
+    Pure facts — no cognitive judgment. Engine says what happened, not what to do.
+    """
+    parts = []
+    latest = al.memory.latest()
+    if latest:
+        raw = latest.get("text", "")
+        for pfx in ("DONE:", "INTENT:"):
+            if raw.startswith(pfx):
+                raw = raw[len(pfx):].strip()
+                break
+        if raw and not raw.startswith('"') and '说：' not in raw:
+            parts.append(f"片刻之前你{raw}")
+    if al._last_target_name:
+        parts.append(f"你上一轮在和{al._last_target_name}交谈")
+    return "；".join(parts) if parts else ""
 
 
 async def _handle_intent(agent, al, world, interaction, labels, cfg,
@@ -199,6 +218,7 @@ async def run_agent(agent, world, brain, assembler, systems,
                     result = await interaction.interact(
                         agent, target, decision, world)
                     agent.last_action_time = world.clock.now()
+                    al._last_target_name = target.name
                     if trace_fn:
                         trace_fn(_make_trace(
                             name, target.name, target.id, action_text,

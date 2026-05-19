@@ -8,7 +8,6 @@ world:
     stale_timeout: 30
     speech_window: 30
     memory_prompt_count: 5
-    intent_ttl: 30
     default_patience: 5
     kl:
       state_thresholds:

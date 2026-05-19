@@ -1,0 +1,415 @@
+world:
+  name: 迷雾小镇 — 评估测试世界
+  time_scale: 60
+  start_time: "08:00"
+  simulation:
+    currency: coins
+    poll_interval: 0.3
+    stale_timeout: 30
+    speech_window: 30
+    memory_prompt_count: 5
+    default_patience: 5
+    kl:
+      state_thresholds:
+      - 30
+      - 60
+      - 80
+      coin_epsilon: 5
+    drive:
+      attributes:
+        thirst:
+          min: 0
+          max: 100
+          decay: 0.022
+          description: 口渴。100=喉咙冒烟急需饮水。0=完全不渴。
+        hunger:
+          min: 0
+          max: 100
+          decay: 0.018
+          description: 饥饿。100=体力不支需要进食。0=完全不饿。
+        social:
+          min: 0
+          max: 100
+          decay: 0.02
+          description: 社交需求。100=极度渴望与人交流。0=只想独处。
+        energy:
+          min: 0
+          max: 100
+          decay: -0.008
+          description: 体力。0=精疲力竭需休息。100=精力充沛。
+        fun:
+          min: 0
+          max: 100
+          decay: 0.015
+          description: 娱乐。100=极度无聊需找乐子。0=已尽兴。
+        mood:
+          min: 0
+          max: 100
+          decay: 0.0
+          description: 心情。0=绝望。100=极度愉悦。
+    validation:
+      delta_max: 30
+    text:
+      kl_entered: '{channel}: {name} 出现'
+      kl_left: '{channel}: {name} 离开'
+      kl_changed: '{channel}: {name} 变化'
+      kl_stale: 很久没动静了
+      kl_coin: 钱 {sign}{delta}
+      kl_state_cross: '{attr} {arrow}突破{t}'
+zones:
+- id: tavern
+  name: 迷雾酒馆
+  width: 40
+  height: 30
+- id: market
+  name: 镇广场集市
+  width: 40
+  height: 30
+entities:
+# ── Gate ──
+- id: tavern_market_gate
+  name: 酒馆大门
+  zone: tavern
+  pos:
+  - 20
+  - 14
+  visual:
+    visible_radius: 20
+    properties:
+      look: 厚重的橡木大门，推开就是镇广场
+  interaction:
+    interaction_radius: 3
+    properties:
+      description: 推开大门就是镇广场集市。外面阳光明媚，商贩的吆喝声隐约可闻。 【可穿越 → market】
+    gate:
+      to_zone: market
+      to_pos:
+      - 20
+      - 14
+  description: 酒馆通向广场的大门。
+- id: market_tavern_gate
+  name: 酒馆入口
+  zone: market
+  pos:
+  - 20
+  - 14
+  visual:
+    visible_radius: 20
+    properties:
+      look: 迷雾酒馆的招牌在风中轻轻摇晃
+  interaction:
+    interaction_radius: 3
+    properties:
+      description: 推开酒馆的木门进去。里面暖暖的，麦酒香飘出来。 【可穿越 → tavern】
+    gate:
+      to_zone: tavern
+      to_pos:
+      - 20
+      - 14
+  description: 酒馆入口。麦酒香从里面飘来。
+# ── Items: Tavern ──
+- id: bar_counter
+  name: 吧台
+  zone: tavern
+  pos:
+  - 18
+  - 6
+  visual:
+    visible_radius: 15
+    properties:
+      look: 木制吧台，上面摆着几瓶酒
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 老橡木吧台。可以点酒、打听消息。
+  description: 老橡木吧台。
+- id: drink_ale
+  name: 麦酒
+  zone: tavern
+  pos:
+  - 22
+  - 10
+  visual:
+    visible_radius: 5
+    properties:
+      look: 一杯琥珀色麦酒，冒着凉气
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 一杯琥珀色麦酒，泡沫细密。
+  description: 一杯麦酒。
+# ── Items: Market ──
+- id: fountain
+  name: 水泉
+  zone: market
+  pos:
+  - 20
+  - 20
+  visual:
+    visible_radius: 20
+    properties:
+      look: 石砌水泉，水清见底
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 镇广场中央的水泉。可以坐下来歇脚、喝水。
+  description: 广场中央的水泉。
+- id: notice_board
+  name: 公告板
+  zone: market
+  pos:
+  - 18
+  - 24
+  visual:
+    visible_radius: 10
+    properties:
+      look: 木制公告板，上面贴着几张委托
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 镇上的公告板。上面有委托和新闻。
+    hidden:
+      jobs: 寻找丢失的猫——赏金10克朗。调查北边废弃矿井——赏金50克朗。
+  description: 木制公告板。
+# ── NPCs: Tavern (4 agents) ──
+- id: innkeeper
+  name: 酒馆老板
+  zone: tavern
+  pos:
+  - 18
+  - 6
+  visual:
+    visible_radius: 15
+    properties:
+      look: 矮人老店主，用一块布擦着吧台
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 300
+      hunger: 20
+      thirst: 10
+      social: 40
+      energy: 60
+      fun: 30
+      mood: 60
+    properties:
+      description: 老矮人店主。可以点酒、打听消息。
+  agent:
+    autonomous: true
+    speed: 0.6
+    view_radius: 18
+    hearing_radius: 15
+    interaction_radius: 3
+    personality: 老矮人酒馆老板。经营酒馆二十年，什么人都见过。粗鲁但热心——对赊账三天以上的翻脸。
+  description: 矮人老店主，在吧台后擦杯子。
+- id: bard
+  name: 流浪诗人
+  zone: tavern
+  pos:
+  - 22
+  - 16
+  visual:
+    visible_radius: 15
+    properties:
+      look: 抱着鲁特琴的年轻诗人，眼神里全是故事
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 50
+      hunger: 45
+      thirst: 80
+      social: 85
+      energy: 70
+      fun: 80
+      mood: 75
+    properties:
+      description: 流浪诗人。可以听他弹唱、聊旅途见闻。
+  agent:
+    autonomous: true
+    speed: 0.9
+    view_radius: 18
+    hearing_radius: 15
+    interaction_radius: 3
+    personality: 流浪诗人，走遍各地收集故事写成歌。今晚想在小镇酒馆即兴表演一首。
+  description: 抱着鲁特琴的诗人。
+- id: mercenary
+  name: 佣兵
+  zone: tavern
+  pos:
+  - 15
+  - 16
+  visual:
+    visible_radius: 15
+    properties:
+      look: 穿着旧皮甲的佣兵，剑靠在桌边
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 200
+      hunger: 40
+      thirst: 70
+      social: 20
+      energy: 80
+      fun: 25
+      mood: 45
+    properties:
+      description: 佣兵。话不多但每句都实在。可以打听委托的消息。
+  agent:
+    autonomous: true
+    speed: 1.2
+    view_radius: 22
+    hearing_radius: 18
+    interaction_radius: 3
+    personality: 佣兵。刚从前线回来，挣了点钱。在酒馆休息，顺便看看有没有新的委托——死水鬼还是巨人不在乎，只要报酬公道。
+  description: 穿旧皮甲的佣兵。
+- id: traveler
+  name: 旅人
+  zone: tavern
+  pos:
+  - 28
+  - 16
+  visual:
+    visible_radius: 15
+    properties:
+      look: 背着大背包的旅人，风尘仆仆
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 80
+      hunger: 65
+      thirst: 55
+      social: 55
+      energy: 40
+      fun: 35
+      mood: 50
+    properties:
+      description: 风尘仆仆的旅人。可以听他讲远方的故事。
+  agent:
+    autonomous: true
+    speed: 1.0
+    view_radius: 18
+    hearing_radius: 15
+    interaction_radius: 3
+    personality: 旅人。从远方来的商人，在邻镇做了一笔好买卖。路过小镇歇脚，顺便打听去王都的路。
+  description: 背着大背包的旅人。
+# ── NPCs: Market (4 agents) ──
+- id: herbalist
+  name: 药师
+  zone: market
+  pos:
+  - 16
+  - 24
+  visual:
+    visible_radius: 15
+    properties:
+      look: 围着草叶围裙的女人，摆了一地药草
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 150
+      hunger: 30
+      thirst: 40
+      social: 35
+      energy: 60
+      fun: 40
+      mood: 60
+    properties:
+      description: 小镇药师。可以买药草、聊草药的秘密。
+  agent:
+    autonomous: true
+    speed: 0.8
+    view_radius: 16
+    hearing_radius: 14
+    interaction_radius: 3
+    personality: 小镇药师，祖传草药铺第三代。认识每一株植物——也认识每一个来买药的村民。最喜欢跟外来人交换远方的药草。
+  description: 围着草叶围裙的药师。
+- id: blacksmith
+  name: 铁匠
+  zone: market
+  pos:
+  - 24
+  - 22
+  visual:
+    visible_radius: 12
+    properties:
+      look: 光膀子的壮汉，在铁砧前忙活
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 400
+      hunger: 55
+      thirst: 80
+      social: 30
+      energy: 85
+      fun: 20
+      mood: 50
+    properties:
+      description: 小镇铁匠。可以修武器、买工具。
+  agent:
+    autonomous: true
+    speed: 0.7
+    view_radius: 16
+    hearing_radius: 14
+    interaction_radius: 3
+    personality: 小镇铁匠，敲了三十年铁砧。手艺一流——打出来的剑能被佣兵抢着买。讨厌讨价还价。
+  description: 光膀子铁匠，在铁砧前忙活。
+- id: elder
+  name: 老镇长
+  zone: market
+  pos:
+  - 20
+  - 24
+  visual:
+    visible_radius: 15
+    properties:
+      look: 拄拐杖的白胡子老头，坐在长凳上
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 100
+      hunger: 25
+      thirst: 35
+      social: 70
+      energy: 25
+      fun: 35
+      mood: 65
+    properties:
+      description: 小镇镇长。什么都管、什么都知道——同一个故事可能讲三遍。
+  agent:
+    autonomous: true
+    speed: 0.4
+    view_radius: 14
+    hearing_radius: 12
+    interaction_radius: 3
+    personality: 小镇镇长，八十岁。对镇上每家每户都了如指掌。最喜欢年轻人来陪他说话——可惜大家都躲着他。
+  description: 拄拐杖的白胡子老头。
+- id: scout
+  name: 斥候
+  zone: market
+  pos:
+  - 26
+  - 26
+  visual:
+    visible_radius: 18
+    properties:
+      look: 瘦削的年轻人，眼神警惕，腰间挂着一把短弓
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 60
+      hunger: 50
+      thirst: 45
+      social: 15
+      energy: 75
+      fun: 15
+      mood: 40
+    properties:
+      description: 小镇斥候。可以问路、打听镇外的情况。
+  agent:
+    autonomous: true
+    speed: 1.3
+    view_radius: 24
+    hearing_radius: 20
+    interaction_radius: 3
+    personality: 小镇斥候。负责监视镇外森林的动静。近几天发现了些不寻常的痕迹——想找个佣兵一起调查。
+  description: 瘦削年轻人，腰间挂短弓。

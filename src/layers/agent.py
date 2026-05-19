@@ -24,3 +24,6 @@ class AgentLayer(Layer):
 
     # ── Write-pending lock ──
     _write_pending: bool = False
+
+    # ── Conversation state (factual — LLM decides what to do with it) ──
+    _last_target_name: str = ""
