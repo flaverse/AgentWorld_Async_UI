@@ -1,46 +1,51 @@
-"""Drive system metrics: convergence, delta alignment, mood trajectory."""
+"""Drive system metrics: convergence, mood trajectory, final state health."""
 
 from collections import defaultdict
 from ..registry import register_metric
 
 
 @register_metric(
-    name="delta_alignment",
+    name="final_drive_health",
     category="drive",
-    description="Fraction of self_deltas that move drives toward satisfaction (reduce high >50, boost low <30).",
+    description="Final attribute values per agent and per-drive status (OK / high / extreme). Pure health check.",
     source="AW built-in"
 )
-def delta_alignment(traces: list[dict]) -> dict:
-    actions = [t for t in traces if t.get("action_text")]
-    aligned, total = 0, 0
-    per_agent_align: dict[str, list[float]] = defaultdict(list)
+def final_drive_health(traces: list[dict]) -> dict:
+    per_agent: dict[str, list[tuple[float, dict]]] = defaultdict(list)
+    for t in traces:
+        d = t.get("drives", {})
+        if d:
+            per_agent[t["agent"]].append((t.get("ts", 0), d))
 
-    for t in actions:
-        llm1 = t.get("llm1_output")
-        if not isinstance(llm1, dict):
-            continue
-        sd = llm1.get("self_deltas", {})
-        drives = t.get("drives", {})
-        if not sd or not drives:
-            continue
-        for attr, delta in sd.items():
-            if attr == "coins" or attr not in drives:
+    final_snapshots: dict[str, dict] = {}
+    for a, snapshots in per_agent.items():
+        if snapshots:
+            snapshots.sort()
+            final_snapshots[a] = snapshots[-1][1]
+
+    # Classify each attribute per agent
+    status_counts: dict[str, int] = {"ok": 0, "high": 0, "extreme": 0}
+    per_agent_detail = {}
+    for a, drives in final_snapshots.items():
+        agent_status = {}
+        for attr, val in drives.items():
+            if attr == "coins":
                 continue
-            val = drives.get(attr, 50)
-            if (val > 50 and delta < 0) or (val < 30 and delta > 0):
-                aligned += 1
-            total += 1
-            a = t["agent"]
-            per_agent_align[a].append(1 if (val > 50 and delta < 0) or (val < 30 and delta > 0) else 0)
+            if 0 <= val <= 50:
+                tag = "ok"
+            elif 50 < val <= 80:
+                tag = "high"
+            else:
+                tag = "extreme"
+            status_counts[tag] += 1
+            agent_status[attr] = f"{val:.0f}"
+        per_agent_detail[a] = agent_status
 
-    rate = round(100 * aligned / max(total, 1), 1)
-    per = {a: round(100 * sum(vals) / len(vals), 1) for a, vals in per_agent_align.items()}
+    total = sum(status_counts.values())
     return {
-        "rate_pct": rate,
-        "aligned": aligned,
-        "total": total,
-        "summary": f"{rate}% delta-drive alignment ({aligned}/{total})",
-        "per_agent": dict(sorted(per.items(), key=lambda x: x[1])[:10]),
+        "per_agent": per_agent_detail,
+        "distribution": {k: f"{v}/{total}" for k, v in status_counts.items()},
+        "summary": f"{status_counts['ok']} ok, {status_counts['high']} high, {status_counts['extreme']} extreme",
     }
 
 
