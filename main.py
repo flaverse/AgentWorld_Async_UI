@@ -30,11 +30,33 @@ from gateway import WorldGateway
 #  Config loading
 # ═══════════════════════════════════════════════════
 
+def _deep_merge(base: dict, override: dict) -> dict:
+    """Recursively merge override into base. Override keys take precedence."""
+    result = dict(base)
+    for k, v in override.items():
+        if k in result and isinstance(result[k], dict) and isinstance(v, dict):
+            result[k] = _deep_merge(result[k], v)
+        else:
+            result[k] = v
+    return result
+
+
 def load_config(world_path: str | None = None):
-    """Load world, prompt, and LLM configs. Returns structured dict."""
+    """Load world, prompt, and LLM configs. Returns structured dict.
+    World YAML inherits simulation defaults from _sim_defaults.yaml.
+    """
+    with open(os.path.join(base_dir, "config/_sim_defaults.yaml")) as f:
+        defaults = yaml.safe_load(f)
     w_path = world_path or os.path.join(base_dir, "config/world.yaml")
     with open(w_path) as f:
         wc = yaml.safe_load(f)
+    # Merge: simulation defaults as base, world overrides as supplement
+    if "world" in wc and "simulation" not in wc["world"]:
+        wc["world"]["simulation"] = defaults["simulation"]
+    else:
+        wc["world"]["simulation"] = _deep_merge(
+            defaults["simulation"],
+            wc.get("world", {}).get("simulation", {}))
     with open(os.path.join(base_dir, "config/llm.yaml")) as f:
         lc = yaml.safe_load(f)
     loader = PromptLoader(os.path.join(base_dir, "config/prompts.yaml"))
@@ -327,7 +349,8 @@ def cmd_validate_config(args):
     known_ctx = {"main_thread", "name", "personality", "drives_table", "kl_text",
                  "zone_name", "sensory_text", "memory_text", "messages_text",
                  "interactable_text", "visible_text", "hearing_text", "round",
-                 "caller_name", "caller_id", "target_name", "target_id"}
+                 "caller_name", "caller_id", "target_name", "target_id",
+                 "gate_text", "item_narrative", "state_description"}
     for slot_name, slot in all_slots.items():
         cond = slot.get("condition", "")
         if cond and cond not in known_ctx:

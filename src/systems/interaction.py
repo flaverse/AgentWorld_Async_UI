@@ -35,15 +35,20 @@ class InteractionSystem:
 
     def find_entity_by_name(self, zone: str, name: str,
                              all_entities: dict, exclude_id: str = "") -> object | None:
-        """Exact name match — no fuzzy, no guessing. Returns entity or None."""
+        """Exact name match — no fuzzy, no guessing. Returns entity or None.
+        If multiple entities share the same name in the zone, returns None (ambiguous).
+        """
+        match = None
         for e in all_entities.values():
             if e.zone != zone or not e.has("interaction"):
                 continue
             if e.id == exclude_id:
                 continue
             if e.name == name:
-                return e
-        return None
+                if match is not None:
+                    return None  # duplicate name — ambiguous, let LLM resolve
+                match = e
+        return match
 
     def find_entity_at(self, zone: str, pos: list[int], action: str,
                        all_entities: dict, exclude_id: str = "") -> object | None:
@@ -120,7 +125,7 @@ class InteractionSystem:
         if visual and agent.has("visual"):
             agent.get("visual").properties["expression"] = visual
             agent.get("visual").properties["expression_ts"] = time.time()
-        if agent_layer:
+        if agent_layer and decision.get("remember"):
             mem = decision.get("story", "") or decision.get("action", "")
             if mem:
                 agent_layer.memory.record(mem)
@@ -170,7 +175,7 @@ class InteractionSystem:
             errors.log_exception("interaction._resolve_npc_item", e,
                                  f"{agent.name}→{target.name}")
         if agent.has("agent") and narrative:
-            agent.get("agent").memory.record(narrative)
+            agent.get("agent")._pending_narrative = narrative
         return narrative, llm2_prompt, llm2_output
 
     def _handle_gate_transfer(self, agent, target_inter, world):

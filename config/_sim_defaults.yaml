@@ -1,0 +1,50 @@
+# Shared simulation defaults — inherited by all world configs.
+# Each world.yaml overrides only what differs (description strings per attribute).
+simulation:
+  currency: coins
+  poll_interval: 0.3
+  stale_timeout: 30
+  memory_prompt_count: 5
+  default_patience: 5
+  kl:
+    state_thresholds:
+    - 30
+    - 60
+    - 80
+    coin_epsilon: 5
+  drive:
+    currency: coins
+    attributes:
+      thirst:
+        min: 0
+        max: 100
+        decay: 0.022
+      hunger:
+        min: 0
+        max: 100
+        decay: 0.018
+      social:
+        min: 0
+        max: 100
+        decay: 0.015
+      energy:
+        min: 0
+        max: 100
+        decay: -0.01
+      fun:
+        min: 0
+        max: 100
+        decay: 0.015
+      mood:
+        min: 0
+        max: 100
+        decay: 0.0
+  validation:
+    delta_max: 30
+  text:
+    kl_entered: '{channel}: {name} 进入'
+    kl_left: '{channel}: {name} 离开'
+    kl_changed: '{channel}: {name} 变化'
+    kl_stale: 太久没事做了
+    kl_coin: coins {sign}{delta}
+    kl_state_cross: '{attr} {arrow}突破{t}'

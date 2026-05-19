@@ -69,7 +69,7 @@ def _build_sensory_text(sensory, labels: dict) -> str:
 
 def _build_decision_ctx(agent, al, world, sensory, labels, cfg, kl_text) -> dict:
     """Construct the LLM decision context dict."""
-    return {
+    ctx = {
         "main_thread": al.main_thread,
         "name": agent.name, "personality": al.personality,
         "drives_table": al.drives.to_prompt(),
@@ -81,7 +81,24 @@ def _build_decision_ctx(agent, al, world, sensory, labels, cfg, kl_text) -> dict
         "memory_text": al.memory.to_prompt_text(cfg.memory_prompt_count, labels),
         "kl_text": kl_text,
         "state_description": _build_state_text(al),
+        "item_narrative": al._pending_narrative,
+        "gate_text": _build_gate_text(agent, world),
     }
+    al._pending_narrative = ""
+    return ctx
+
+
+def _build_gate_text(agent, world) -> str:
+    """Report nearby gate entities as pure fact — no judgment about crossing."""
+    zone_entities = [e for e in world.entities.values() if e.zone == agent.zone]
+    gates = []
+    for e in zone_entities:
+        inter = e.get("interaction") if e.has("interaction") else None
+        if inter and inter.gate:
+            dist = agent.distance_to(e)
+            to_zone_name = world.zones.get(inter.gate.get("to_zone", ""), {}).get("name", "")
+            gates.append(f"{e.name} ({dist}格) → {to_zone_name}")
+    return "\n".join(gates) if gates else ""
 
 
 def _build_state_text(al) -> str:
@@ -164,7 +181,7 @@ async def run_agent(agent, world, brain, assembler, systems,
             ctx = _build_decision_ctx(agent, al, world, sensory, labels, cfg, kl_text)
             prompt1 = assembler.assemble("agent_decision", ctx) if trace_fn else None
 
-            decision = await brain.decide(ctx)
+            decision = await brain.decide(ctx, template_name=al.template or "agent_decision")
             if decision.get("main_thread"):
                 al.main_thread = decision["main_thread"]
 

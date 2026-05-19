@@ -11,6 +11,7 @@ class AgentLayer(Layer):
     interaction_radius: int = 3
     personality: str = ""
     main_thread: str = ""
+    template: str = ""   # override agent_decision template per-agent (YAML configurable)
 
     # Runtime modules
     drives: object = None
@@ -27,3 +28,4 @@ class AgentLayer(Layer):
 
     # ── Conversation state (factual — LLM decides what to do with it) ──
     _last_target_name: str = ""
+    _pending_narrative: str = ""   # NPC→Item narrative queues here, LLM #1 decides

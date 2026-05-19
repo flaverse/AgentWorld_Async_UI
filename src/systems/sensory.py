@@ -60,11 +60,6 @@ class SensorySystem:
                                 else sensory.channels[layer_name][eid].first_seen),
                 )
 
-                # Hearing → memory retention
-                if layer_name == "auditory" and is_new and observer.has("agent"):
-                    observer.get("agent").memory.record(
-                        f"{entity.name}说：\"{speech}\"")
-
         # Cleanup: remove entities that left range
         for layer_name, ch in list(sensory.channels.items()):
             current_ids = current.get(layer_name, set())

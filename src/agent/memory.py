@@ -12,6 +12,7 @@ _DEFAULT_LABELS = {
 class AgentMemory:
     entries: list[dict] = field(default_factory=list)  # [{ts, text}]
     max_size: int = 10
+    evicted_count: int = 0  # how many entries have been silently pruned
 
     def record(self, text: str = "", ts: float = None) -> None:
         self.entries.append({
@@ -23,6 +24,7 @@ class AgentMemory:
             idx = self.entries.index(non_pinned[0])
             self.entries.pop(idx)
             non_pinned.pop(0)
+            self.evicted_count += 1
 
     def recent(self, n: int = 5) -> list[dict]:
         return self.entries[-n:]
@@ -38,6 +40,8 @@ class AgentMemory:
         for e in entries:
             rel = int(e["ts"] - ref_ts)
             lines.append(labels["memory_entry"].format(rel=rel, text=e['text']))
+        if self.evicted_count:
+            lines.append(f"[+{int(time.time() - entries[-1]['ts'])}s] （{self.evicted_count}条更早的记忆已被归档）")
         return "\n".join(lines)
 
     def latest(self) -> dict | None:

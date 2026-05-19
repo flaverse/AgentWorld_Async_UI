@@ -51,11 +51,11 @@ class Brain:
         self.llm = llm_client
         self.assembler = assembler
 
-    async def decide(self, context: dict) -> dict:
-        prompt = self.assembler.assemble("agent_decision", context)
-        system = self.assembler.get_system_prompt("agent_decision")
-        schema = self.assembler.get_output_schema("agent_decision")
-        temp = self.assembler.get_temperature("agent_decision")
+    async def decide(self, context: dict, template_name: str = "agent_decision") -> dict:
+        prompt = self.assembler.assemble(template_name, context)
+        system = self.assembler.get_system_prompt(template_name)
+        schema = self.assembler.get_output_schema(template_name)
+        temp = self.assembler.get_temperature(template_name)
         raw = await self.llm.chat(
             system=system,
             messages=[{"role": "user", "content": prompt}],
@@ -82,4 +82,4 @@ def _parse_llm_json(raw: str, source: str) -> dict:
     except json.JSONDecodeError:
         from core.error_collector import errors
         errors.log_llm_parse_failure(source, raw)
-        return {"thinking": raw}
+        return {"parse_error": True, "source": source, "raw_preview": raw[:200]}

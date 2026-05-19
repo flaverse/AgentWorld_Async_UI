@@ -23,6 +23,7 @@ templates:
       - drive_state
       - spatial_context
       - sensory_section
+      - gate_highlight
       - recent_memory
       - avoid_repetition
       - idle_guidance
@@ -85,6 +86,12 @@ slots:
     condition: sensory_text
     template: "{sensory_text}"
 
+  gate_highlight:
+    condition: gate_text
+    template: |
+      ## 可穿越
+      {gate_text}
+
   recent_memory:
     condition: memory_text
     template: |
@@ -131,7 +138,8 @@ slots:
         "self_deltas": {"属性": 值},
         "expects_reply": true/false,
         "patience": 5,
-        "main_thread": "你接下来的长期目标" 或 null
+        "main_thread": "你接下来的长期目标" 或 null,
+        "remember": true/false
       }
       - action: 你的完整意图(去哪+做什么)。null=歇一会。引擎自己会找目标实体
       - target_name: 你想跟谁或什么东西交互——从周围实体描述中精确抄写名字。没有明确对象时写null
@@ -139,10 +147,11 @@ slots:
       - dialogue: 你直接说了什么(原话)。null=沉默
       - visual: 你的神态、表情、肢体动作。给观察者看的
       - internal: 你的内心活动(秘密)
-      - self_deltas: 这个动作对你自身属性的影响。可用属性见上文"你的状态"。范围见各属性的max。无影响写{}
+      - self_deltas: 这个动作对你自身属性的影响。可用属性见上文"你的状态"。无影响写{}。引擎会自动限制到属性范围(0-100)，超出部分不通知
       - expects_reply: 这句话是否需要对方回应(true/false)
       - patience: 如果等回应，最多等几秒。不等回应写0
       - main_thread: 更新你的长期目标。完成了标"✓完成"。有新目标时改写。null=维持当前不变
+      - remember: 这个动作是否值得记入你的长期记忆。日常小事(false)，重要事件(true)
 
   # ── Interact Narrative ──
   interact_context:
@@ -197,6 +206,7 @@ output_schemas:
         expects_reply: {type: boolean}
         patience: {type: number}
         main_thread: {type: string}
+        remember: {type: boolean}
 
   interact_output:
     type: json_object
