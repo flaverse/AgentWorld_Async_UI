@@ -43,6 +43,10 @@ def _make_trace(agent_name, target_name, target_id, action_text,
     if result:
         trace["result_narrative"] = result.narrative
         trace["result_caller_deltas"] = result.caller_deltas
+        if result.llm2_prompt:
+            trace["llm2_prompt"] = result.llm2_prompt
+        if result.llm2_output:
+            trace["llm2_output"] = result.llm2_output
     if llm1_output:
         trace["llm1_output"] = llm1_output
     if llm1_prompt:

@@ -1,0 +1,580 @@
+world:
+  name: 老友记 — Central Perk
+  time_scale: 60
+  start_time: "10:00"
+  simulation:
+    currency: coins
+    poll_interval: 0.3
+    stale_timeout: 30
+    speech_window: 30
+    memory_prompt_count: 5
+    intent_ttl: 30
+    default_patience: 5
+    kl:
+      state_thresholds:
+      - 30
+      - 60
+      - 80
+      coin_epsilon: 5
+    drive:
+      currency: coins
+      attributes:
+        thirst:
+          min: 0
+          max: 100
+          decay: 0.02
+          description: 想喝咖啡的欲望。100=不喝咖啡无法正常社交。0=咖啡因完全够。
+        hunger:
+          min: 0
+          max: 100
+          decay: 0.018
+          description: 饥饿。100=饿到抢Joey的披萨。0=完全不饿。（Joey从不分享食物）
+        social:
+          min: 0
+          max: 100
+          decay: 0.025
+          description: 社交需求。在Central Perk找人聊八卦是生存本能。100=必须找人吐槽。
+        energy:
+          min: 0
+          max: 100
+          decay: -0.008
+          description: 精力。0=在沙发上睡着了谁也叫不醒。100=能连赶三场约会。
+        fun:
+          min: 0
+          max: 100
+          decay: 0.02
+          description: 娱乐需求。100=必须玩点什么否则要发疯。0=被Joey的演技已经笑够了。
+        mood:
+          min: 0
+          max: 100
+          decay: 0.0
+          description: 心情。0=分手模式——躺在沙发上吃一整天冰淇淋。100=WE WERE ON A BREAK!
+    validation:
+      delta_max: 30
+    text:
+      kl_entered: '{channel}: {name} 路过'
+      kl_left: '{channel}: {name} 走开了'
+      kl_changed: '{channel}: {name} 变了'
+      kl_stale: 有人靠在沙发上睡着了
+      kl_coin: 小费 {sign}{delta} 美元
+      kl_state_cross: '{attr} {arrow}突破{t}'
+zones:
+- id: central_perk
+  name: Central Perk 咖啡厅
+  width: 40
+  height: 30
+- id: monicas_apt
+  name: Monica 的公寓
+  width: 30
+  height: 25
+- id: street
+  name: 格林威治村街道
+  width: 40
+  height: 30
+entities:
+# ── Gates ──
+- id: apartment_door_a
+  name: 公寓大门
+  zone: central_perk
+  pos:
+  - 22
+  - 18
+  visual:
+    visible_radius: 15
+    properties:
+      look: 一扇紫色大门，挂着黄色相框
+  interaction:
+    interaction_radius: 3
+    properties:
+      description: 上楼就是Monica的公寓。敲敲门——如果不介意Chandler的冷笑话。 【可穿越 → monicas_apt】
+    gate:
+      to_zone: monicas_apt
+      to_pos:
+      - 14
+      - 12
+  description: 紫色大门，挂着黄色相框。通向Monica的公寓。
+- id: apartment_door_b
+  name: 公寓大门
+  zone: monicas_apt
+  pos:
+  - 14
+  - 12
+  visual:
+    visible_radius: 10
+    properties:
+      look: 从内侧看大门——墙角鞋柜上摆着Monica的清洁用品
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 打开门就是Central Perk的喧嚣。下楼喝咖啡？ 【可穿越 → central_perk】
+    gate:
+      to_zone: central_perk
+      to_pos:
+      - 22
+      - 18
+  description: Monica公寓的大门。楼道灯永远在闪。
+- id: street_door_a
+  name: 下楼
+  zone: monicas_apt
+  pos:
+  - 8
+  - 18
+  visual:
+    visible_radius: 8
+    properties:
+      look: 楼梯通向街道
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 推开楼下大门就是格林威治村的街道。街灯亮着，热狗摊冒着热气。 【可穿越 → street】
+    gate:
+      to_zone: street
+      to_pos:
+      - 18
+      - 16
+  description: 楼梯通向街道。楼下就是格林威治村。
+- id: street_door_b
+  name: 公寓楼门
+  zone: street
+  pos:
+  - 18
+  - 16
+  visual:
+    visible_radius: 15
+    properties:
+      look: 格林威治村一栋老式公寓楼的入口
+  interaction:
+    interaction_radius: 3
+    properties:
+      description: Monica和Chandler的公寓楼。按对讲机叫人——如果有人在的话。 【可穿越 → monicas_apt】
+    gate:
+      to_zone: monicas_apt
+      to_pos:
+      - 8
+      - 18
+  description: 老式公寓楼入口。格林威治村典型建筑。
+
+# ── Items: Central Perk ──
+- id: orange_couch
+  name: 橘色沙发
+  zone: central_perk
+  pos:
+  - 20
+  - 14
+  visual:
+    visible_radius: 20
+    sprite: null
+    properties:
+      look: 橘色天鹅绒大沙发，中央就这张
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 橘色天鹅绒大沙发。Gunther说没人能霸占——但这六个人已经霸了十年。
+    hidden:
+      lore: 六个朋友永远坐这里。换座位等于叛变。
+      feel: 坐上去就陷进去，整个人被橘色吞没。不想起来。
+  description: 橘色大沙发。Central Perk的圣地。
+
+- id: coffee_counter
+  name: 咖啡吧台
+  zone: central_perk
+  pos:
+  - 15
+  - 8
+  visual:
+    visible_radius: 15
+    sprite: null
+    properties:
+      look: 木制吧台，Gunther永远在擦蒸汽嘴
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: Central Perk的咖啡吧台。Gunther站了十年——因为他永远在看Rachel。
+    hidden:
+      menu: 拿铁$3.50，卡布奇诺$3.75，不加奶$2.50。但Gunther有时会送一块小饼干——只是给Rachel。
+  description: 木制吧台。Gunther在这里擦杯子，顺便偷看Rachel。
+
+- id: espresso_machine
+  name: 意式咖啡机
+  zone: central_perk
+  pos:
+  - 15
+  - 12
+  visual:
+    visible_radius: 8
+    sprite: null
+    properties:
+      look: 老旧意式咖啡机，打奶泡时会发出濒死大象的叫声
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 一台脾气不好的老咖啡机。Rachel第一天使用它时把牛奶喷到了自己脸上。
+    hidden:
+      quirk: 蒸汽嘴有点堵，要用特殊的角度拧一下才出泡。只有Gunther知道秘诀。
+      sound: 嘶——噗——噗嗤——GUNTHER!（那是机器的声音，不是在叫Gunther）
+  description: 老旧咖啡机。打奶泡声音像濒死大象。
+
+- id: guitar_stool
+  name: 高脚凳
+  zone: central_perk
+  pos:
+  - 25
+  - 12
+  visual:
+    visible_radius: 10
+    sprite: null
+    properties:
+      look: 一张木制高脚凳，Phoebe弹Smelly Cat的固定位
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: Phoebe的专属位置。凳面上有一道吉他擦痕——十年了。偶尔有客人想坐，Gunther会过来警告。
+    hidden:
+      songs: Smelly Cat、Smelly Cat 加长版、Smelly Cat 圣诞节版。还有几首关于她妈妈转世成了猫的歌。
+  description: 木制高脚凳。Phoebe的专属宝座。
+
+# ── Items: Monica Apartment ──
+- id: monicas_kitchen
+  name: 厨房
+  zone: monicas_apt
+  pos:
+  - 18
+  - 8
+  visual:
+    visible_radius: 12
+    sprite: null
+    properties:
+      look: 一尘不染的超大厨房——连冰箱里的鸡蛋都按日期排好
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: Monica的厨房。11级洁净度——她每天晚上会用牙刷擦每一条缝隙。Joey偷吃从来逃不过她的眼睛。
+    hidden:
+      organization: 调料按字母顺序排。锅按直径排。抹布按颜色排。冰箱里有11个贴上标签的保鲜盒。
+      rules: 用完必须放回原位，否则Monica会控制不住自己（她的原话是'没事的放松点'——然后凌晨四点爬起来重新整理）。
+  description: 一尘不染的厨房。鸡蛋都按日期排好。
+
+- id: foosball_table
+  name: 桌游足球
+  zone: monicas_apt
+  pos:
+  - 8
+  - 10
+  visual:
+    visible_radius: 10
+    sprite: null
+    properties:
+      look: 一张木质足球桌游台，球员头都被拧歪了
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 足球桌游台。Monica和Chandler的主场。她从不让他赢——即使他是她老公。
+    hidden:
+      rivalry: Monica赢球记录——Chandler至今不敢追问具体数字。他说'我选择不记比分'。
+      joey: Joey试图把披萨放在桌游台上被Monica终身禁赛。
+  description: 足球桌游台。Monica和Chandler的战场。
+
+- id: recliner_chairs
+  name: 皮躺椅
+  zone: monicas_apt
+  pos:
+  - 8
+  - 16
+  visual:
+    visible_radius: 12
+    sprite: null
+    properties:
+      look: Joey和Chandler的两张棕色皮躺椅，能放平
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: Joey和Chandler的皮躺椅。遥控器永远在Joey那边。Chandler想拿的话必须过Joey的第一道防线——'我在看着呢'。
+    hidden:
+      joey_declaration: Joey曾对Rachel宣言——'这两张椅子绝不能换。它们是家。是家啊！'
+      smell: 轻微披萨味和啤酒味——这是这些椅子该有的味道。
+  description: 两张棕色皮躺椅。Joey和Chandler的领地。
+
+- id: tv_set
+  name: 电视
+  zone: monicas_apt
+  pos:
+  - 6
+  - 18
+  visual:
+    visible_radius: 8
+    sprite: null
+    properties:
+      look: 老式电视，天线缠了铝箔
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 老式电视。Baywatch和Discovery Channel永远是争夺对象。有时天线得用手扶着才能出画面。
+    hidden:
+      schedule: Joey的Baywatch时间是不容侵犯的。Ross的Discovery Channel纪录片只有没人时能看。
+      fix: 拍一拍侧面有时能修好。Chandler说是他的独门技术支持——拍的角度要对。
+  description: 老式电视。天线缠了铝箔。
+
+# ── Items: Street ──
+- id: street_lamp
+  name: 路灯
+  zone: street
+  pos:
+  - 20
+  - 10
+  visual:
+    visible_radius: 15
+    sprite: null
+    properties:
+      look: 格林威治村老式煤气路灯，夜晚发出橘黄色暖光
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 老式煤气路灯。晚上的橘黄色暖光下，Rachel和Ross在下面吵过架——也和好过。
+    hidden:
+      mood: 温暖的灯光催生告白。或者吵架。主要是吵架。
+  description: 格林威治村的老式煤气路灯。
+
+- id: hotdog_cart
+  name: 热狗摊
+  zone: street
+  pos:
+  - 22
+  - 14
+  visual:
+    visible_radius: 12
+    sprite: null
+    properties:
+      look: 一辆冒着热气的热狗车，顶棚上画着黄色伞
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 纽约街头热狗摊。Joey的"第二厨房"。摊主知道六个人的全部八卦——他在同一条街上摆了七年。
+    hidden:
+      menu: 热狗$2.50，加酸菜加$0.50。Joey每次点三根。
+      gossip: 摊主比Central Perk知道更多八卦——毕竟路人都在这里停下来等红绿灯。
+  description: 纽约街头热狗摊。Joey加餐的地方。
+
+# ── NPCs ──
+- id: rachel
+  name: Rachel
+  zone: central_perk
+  pos:
+  - 22
+  - 14
+  visual:
+    visible_radius: 20
+    sprite: null
+    properties:
+      look: 金发碧眼的时尚女人，Central Perk的服务员围裙上沾了咖啡渍
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 120
+      hunger: 40
+      thirst: 75
+      social: 70
+      energy: 55
+      fun: 50
+      mood: 60
+    properties:
+      description: 刚逃婚来纽约的富家女。正在Central Perk端咖啡攒房租。可以聊聊时尚或者人生的狗血转折。
+  agent:
+    autonomous: true
+    speed: 1.0
+    view_radius: 20
+    hearing_radius: 16
+    interaction_radius: 3
+    personality: Rachel Green，刚刚逃婚的富家千金。这辈子第一次自己挣钱——穿上Central Perk的围裙端咖啡。她正在学怎么靠自己活。Monica是她高中闺蜜，收留了她。Ross暗恋她十年——她知道又假装不知道。
+  description: 金发碧眼，穿Central Perk围裙。刚逃婚的富家女。
+
+- id: ross
+  name: Ross
+  zone: central_perk
+  pos:
+  - 24
+  - 14
+  visual:
+    visible_radius: 20
+    sprite: null
+    properties:
+      look: 戴眼镜的古生物学教授，总是带着一副'你们都误会了恐龙'的表情
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 500
+      hunger: 35
+      thirst: 40
+      social: 60
+      energy: 65
+      fun: 30
+      mood: 45
+    properties:
+      description: 哥伦比亚大学古生物学教授。刚离婚，灵魂破碎。收藏化石、讲恐龙趣事——并困惑为什么大家不感兴趣。
+  agent:
+    autonomous: true
+    speed: 0.9
+    view_radius: 18
+    hearing_radius: 15
+    interaction_radius: 3
+    personality: Ross Geller，古生物学教授。刚被前妻Carol抛弃——因为她是Lesbian。十年前高中时就暗恋Rachel但一直不敢说。知识渊博但不合时宜——会在一杯咖啡的时间解释恐龙灭绝的三种假说。情绪化，一激动就发出独特的'呜——'声。
+  description: 戴眼镜的古生物学教授。暗恋Rachel十年。
+
+- id: monica
+  name: Monica
+  zone: central_perk
+  pos:
+  - 18
+  - 10
+  visual:
+    visible_radius: 20
+    sprite: null
+    properties:
+      look: 黑发女人，穿着整洁，手里永远在整理什么——抹布、碗、甚至空气
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 400
+      hunger: 30
+      thirst: 35
+      social: 55
+      energy: 75
+      fun: 40
+      mood: 55
+    properties:
+      description: 强迫症级别MAX的专业厨师。她的公寓是她的宫殿——一条面包屑掉在地上能引发小型地震。
+  agent:
+    autonomous: true
+    speed: 1.1
+    view_radius: 18
+    hearing_radius: 15
+    interaction_radius: 3
+    personality: Monica Geller，Ross的妹妹。强迫症大厨。极度好胜——连桌游足球都不让孩子赢。把公寓管理得比军事基地还严。但内心深处是六个人里最会照顾人的——她记得所有朋友的过敏原、生日、和前男/女友的名字。
+  description: 黑发，永远在整理东西。强迫症大厨。
+
+- id: chandler
+  name: Chandler
+  zone: central_perk
+  pos:
+  - 26
+  - 14
+  visual:
+    visible_radius: 20
+    sprite: null
+    properties:
+      look: 高瘦男人，嘴角永远挂着一丝即将说冷笑话的弧度
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 600
+      hunger: 35
+      thirst: 40
+      social: 45
+      energy: 50
+      fun: 60
+      mood: 50
+    properties:
+      description: '做"数据处理"。没人知道那是什么。用冷笑话防御一切真诚对话。'
+  agent:
+    autonomous: true
+    speed: 1.0
+    view_radius: 18
+    hearing_radius: 15
+    interaction_radius: 3
+    personality: Chandler Bing。做数据重构——没人知道是干嘛的，包括他自己。童年创伤——父母在他九岁感恩节离婚——导致他每次认真时就发抖然后讲个笑话。最好的朋友是Joey（替他付了多年房租）。和Monica秘密恋爱中。
+  description: 高瘦，嘴角永远准备说冷笑话。用幽默防御真诚。
+
+- id: joey
+  name: Joey
+  zone: central_perk
+  pos:
+  - 28
+  - 14
+  visual:
+    visible_radius: 20
+    sprite: null
+    properties:
+      look: 帅得不像话的意大利男人，三流演员，手里永远拿着吃的
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 80
+      hunger: 85
+      thirst: 60
+      social: 80
+      energy: 70
+      fun: 75
+      mood: 75
+    properties:
+      description: 演员。或者说'待业中'。思维方式简单——女人和食物，没有更复杂的。但一旦牵涉到朋友，会毫不犹豫把最后一口披萨分出去——等一下，不对，最后一个不会分。
+  agent:
+    autonomous: true
+    speed: 0.8
+    view_radius: 16
+    hearing_radius: 14
+    interaction_radius: 3
+    personality: Joey Tribbiani。意大利裔。白天试镜（大部分被拒），晚上吃披萨。对女人的开场白永远是'How YOU doin?'——成功率大概千分之三。记忆力像金鱼，但记食谱过目不忘。这辈子最接近成功的一次是演Dr. Drake Ramoray——后来剧组把他写死了因为他惹毛了编剧。
+  description: 意大利帅哥。永远在吃。How YOU doin'?
+
+- id: phoebe
+  name: Phoebe
+  zone: central_perk
+  pos:
+  - 25
+  - 16
+  visual:
+    visible_radius: 20
+    sprite: null
+    properties:
+      look: 金色卷发，穿着波西米亚风格长裙，手里握着吉他
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 60
+      hunger: 40
+      thirst: 35
+      social: 55
+      energy: 65
+      fun: 70
+      mood: 80
+    properties:
+      description: 按摩师、民谣歌手、世界观独一无二——她的猫是妈妈的灵魂转世。可以听她弹Smelly Cat或者听她讲一个你永远分不清真假的故事。
+  agent:
+    autonomous: true
+    speed: 1.1
+    view_radius: 20
+    hearing_radius: 16
+    interaction_radius: 3
+    personality: Phoebe Buffay。按摩师兼民谣歌手。十四岁起独自在街头活下来——所以她看世界的角度不太一样。她相信猫是她妈妈的灵魂、圣诞树会被杀死、自己会通灵。但奇怪的是——她说的事每次都有一部分可能是真的。整个团伙里最诚实、最直接的人。
+  description: 金色卷发，波西米亚裙。弹Smelly Cat的按摩师。
+
+- id: gunther
+  name: Gunther
+  zone: central_perk
+  pos:
+  - 15
+  - 8
+  visual:
+    visible_radius: 15
+    sprite: null
+    properties:
+      look: 漂白金发，永远站在吧台后擦同一个杯子
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 300
+      hunger: 25
+      thirst: 15
+      social: 10
+      energy: 50
+      fun: 15
+      mood: 40
+    properties:
+      description: Central Perk经理。暗恋Rachel七年。全咖啡厅都看出来了——除了Rachel。可以点咖啡，但不要试图抢他擦的那个杯子。
+  agent:
+    autonomous: true
+    speed: 0.6
+    view_radius: 16
+    hearing_radius: 14
+    interaction_radius: 3
+    personality: Gunther。Central Perk的经理。漂白的头发、围裙、和七年如一日的暗恋。他话不多但全听到了——站在吧台后面听了十年，知道六个人的一切秘密。最恨Ross（情敌，毫不掩饰），最疼Rachel（给她点心不收费）。如果Rachel需要他，他会毫不犹豫卖了整个Central Perk。
+  description: 漂白金发，永远在吧台后。暗恋Rachel七年——全咖啡厅都知道。

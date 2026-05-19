@@ -14,6 +14,8 @@ class ActionResult:
     target_id: str = ""
     caller_deltas: dict = field(default_factory=dict)
     narrative: str = ""
+    llm2_prompt: str = ""
+    llm2_output: str = ""
 
 
 class InteractionSystem:
@@ -91,7 +93,7 @@ class InteractionSystem:
         # ④ NPC→Item: interact_narrative LLM
         narrative = story or f"{agent.name}对{target.name}做了交互"
         action_text = decision.get("action", "")
-        narrative = await self._resolve_npc_item(agent, target, action_text, story, narrative)
+        narrative, llm2_prompt, llm2_output = await self._resolve_npc_item(agent, target, action_text, story, narrative, world)
 
         # ⑤ Gate transfer
         self._handle_gate_transfer(agent, target_inter, world)
@@ -100,6 +102,8 @@ class InteractionSystem:
             target_id=target.id,
             caller_deltas=self_deltas,
             narrative=narrative,
+            llm2_prompt=llm2_prompt,
+            llm2_output=llm2_output,
         )
 
     def _write_agent_layers(self, agent, agent_layer, decision, dialogue, visual):
@@ -116,12 +120,15 @@ class InteractionSystem:
             if mem:
                 agent_layer.memory.record(mem)
 
-    async def _resolve_npc_item(self, agent, target, action_text, story, fallback_narrative):
-        """NPC→Item: call LLM for narrative + deltas. Returns narrative string."""
+    async def _resolve_npc_item(self, agent, target, action_text, story, fallback_narrative, world=None):
+        """NPC→Item: call LLM for narrative + deltas.
+        Returns (narrative, llm2_prompt, llm2_output).
+        """
         narrative = fallback_narrative
+        llm2_prompt, llm2_output = "", ""
         target_inter = target.get("interaction")
         if not self.llm or not self.assembler:
-            return narrative
+            return narrative, llm2_prompt, llm2_output
         try:
             agent_inter = agent.get("interaction").private_attrs if agent.has("interaction") else {}
             context = {
@@ -136,11 +143,12 @@ class InteractionSystem:
                 "target_context": "",
                 "target_id": target.id,
             }
-            prompt = self.assembler.assemble("interact_narrative", context)
+            llm2_prompt = self.assembler.assemble("interact_narrative", context)
             system = self.assembler.get_system_prompt("interact_narrative")
             schema = self.assembler.get_output_schema("interact_narrative")
-            raw = await self.llm.chat(system=system, messages=[{"role":"user","content":prompt}],
-                                      response_format=schema)
+            raw = await self.llm.chat(system=system, messages=[{"role":"user","content":llm2_prompt}],
+                                       response_format=schema)
+            llm2_output = raw
             from agent.brain import extract_json
             data = json.loads(extract_json(raw))
             narrative = data.get("narrative", narrative)
@@ -156,7 +164,7 @@ class InteractionSystem:
             print(f"  [interact ERR] {agent.name}→{target.name}: {e}", file=sys.stderr, flush=True)
         if agent.has("agent") and narrative:
             agent.get("agent").memory.record(narrative)
-        return narrative
+        return narrative, llm2_prompt, llm2_output
 
     def _handle_gate_transfer(self, agent, target_inter, world):
         """If target interaction defines a gate, transfer the agent to the target zone."""

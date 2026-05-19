@@ -161,8 +161,8 @@ slots:
     template: |
       ## 规则
       写一段50-150字的叙事。计算对{caller_name}({caller_id})和{target_name}({target_id})的属性影响。
-      属性有: thirst hunger social energy fun mood coins。控制在[-20,+20]。
-      只输出JSON。如果对象只读，不要输出target_changes。
+      属性有: thirst hunger social energy fun mood coins。控制在[-20,+20]。只输出JSON。
+      如果交互改变了对象的状态或外观，在 target_changes 中用属性路径写回。
 
   interact_output_format:
     condition: caller_name
@@ -175,7 +175,8 @@ slots:
         },
         "target_changes": {"visual.properties.look": "新的外观描述"}
       }
-      只输出JSON。不要标记。如果对象只读，不要输出target_changes。
+      target_changes 用点分隔路径如 "visual.properties.look"。如果没有改变对象状态，留空 {}。
+      只输出JSON。不要标记。
 
 # ═══════════════════════════════════════
 output_schemas:

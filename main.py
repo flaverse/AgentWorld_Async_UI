@@ -28,9 +28,10 @@ from loop import run_agent, LoopConfig
 #  Config loading
 # ═══════════════════════════════════════════════════
 
-def load_config():
+def load_config(world_path: str | None = None):
     """Load world, prompt, and LLM configs. Returns structured dict."""
-    with open(os.path.join(base_dir, "config/world.yaml")) as f:
+    w_path = world_path or os.path.join(base_dir, "config/world.yaml")
+    with open(w_path) as f:
         wc = yaml.safe_load(f)
     with open(os.path.join(base_dir, "config/llm.yaml")) as f:
         lc = yaml.safe_load(f)
@@ -209,7 +210,7 @@ def report(collector: TraceCollector, agents: list, sim: dict,
 
 async def cmd_test(args):
     """Run concurrent test: all agents from config."""
-    cfg = load_config()
+    cfg = load_config(args.world or None)
     sim = cfg["world"]["world"].get("simulation", {})
     world, brain, systems = spawn_world(cfg)
     agents = get_autonomous_agents(world)
@@ -248,7 +249,7 @@ async def cmd_test(args):
 
 async def cmd_demo(args):
     """Run single-agent demo."""
-    cfg = load_config()
+    cfg = load_config(args.world or None)
     sim = cfg["world"]["world"].get("simulation", {})
     world, brain, systems = spawn_world(cfg)
     agents = get_autonomous_agents(world)
@@ -274,10 +275,10 @@ async def cmd_demo(args):
 #  Config validation
 # ═══════════════════════════════════════════════════
 
-def cmd_validate_config():
+def cmd_validate_config(args):
     """Validate world.yaml + prompts.yaml schema without running agents."""
     errors = []
-    cfg = load_config()
+    cfg = load_config(args.world or None)
 
     # 1. Check world has required top-level keys
     world = cfg["world"]
@@ -345,13 +346,15 @@ def parse_args():
                         help="SQLite database path for persistence")
     parser.add_argument("--validate-config", action="store_true",
                         help="Validate world.yaml + prompts.yaml without running")
+    parser.add_argument("--world", type=str, default="",
+                        help="Path to world YAML (default: config/world.yaml)")
     return parser.parse_args()
 
 
 async def main():
     args = parse_args()
     if args.validate_config:
-        cmd_validate_config()
+        cmd_validate_config(args)
         return
     if args.demo:
         await cmd_demo(args)

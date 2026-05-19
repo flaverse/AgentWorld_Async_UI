@@ -1,0 +1,511 @@
+world:
+  name: 蜘蛛侠 — 纽约市
+  time_scale: 60
+  start_time: "14:00"
+  simulation:
+    currency: coins
+    poll_interval: 0.3
+    stale_timeout: 30
+    speech_window: 30
+    memory_prompt_count: 5
+    intent_ttl: 30
+    default_patience: 5
+    kl:
+      state_thresholds:
+      - 30
+      - 60
+      - 80
+      coin_epsilon: 5
+    drive:
+      currency: coins
+      attributes:
+        thirst:
+          min: 0
+          max: 100
+          decay: 0.022
+          description: 口渴。100=追了几个街区口干舌燥。0=Aunt May刚倒了柠檬水。
+        hunger:
+          min: 0
+          max: 100
+          decay: 0.02
+          description: 饥饿。100=荡蛛丝都没力气了。0=刚吃完May婶的三明治。
+        social:
+          min: 0
+          max: 100
+          decay: 0.018
+          description: 社交需求。100=不想再一个人荡楼了需要找人说话。0=身为蜘蛛侠习惯了孤独。
+        energy:
+          min: 0
+          max: 100
+          decay: 0.015
+          description: 超级体力。0=蛛丝荡了五分钟人快散架了。100=能连救十个人再迟到上学。
+        fun:
+          min: 0
+          max: 100
+          decay: 0.015
+          description: 想放松。100=必须荡蛛丝玩或者约MJ。0=今天够刺激了。
+        mood:
+          min: 0
+          max: 100
+          decay: 0.0
+          description: 心情。0=叔叔的照片太重了。100=蜘蛛感应全开——这座城市需要我。
+    validation:
+      delta_max: 30
+    text:
+      kl_entered: '{channel}: {name} 出现'
+      kl_left: '{channel}: {name} 走了'
+      kl_changed: '{channel}: {name} 变动'
+      kl_stale: 很久没有动静
+      kl_coin: 钱 {sign}{delta}
+      kl_state_cross: '{attr} {arrow}突破{t}'
+zones:
+- id: daily_bugle
+  name: Daily Bugle 报社
+  width: 35
+  height: 25
+- id: queens_apt
+  name: Queens 公寓
+  width: 25
+  height: 20
+- id: rooftop
+  name: 曼哈顿天台
+  width: 50
+  height: 40
+entities:
+# ── Gates ──
+- id: roof_access_a
+  name: 防火梯
+  zone: queens_apt
+  pos:
+  - 10
+  - 2
+  visual:
+    visible_radius: 8
+    properties:
+      look: 一扇通向防火梯的铁门，窗外是皇后区的夜空
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: Peter的防火梯出口。从这里爬上屋顶，换上蜘蛛侠制服，纽约就等着他。 【可穿越 → rooftop】
+    gate:
+      to_zone: rooftop
+      to_pos:
+      - 22
+      - 28
+  description: 防火梯出口。Peter每天从这里进出两次——一次上学，一次拯救世界。
+- id: roof_access_b
+  name: 防火梯出口
+  zone: rooftop
+  pos:
+  - 22
+  - 28
+  visual:
+    visible_radius: 10
+    properties:
+      look: 铁质防火梯，生锈的踏板通向楼下
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 顺着防火梯爬下去就是Peter的公寓窗户。May婶以为他只是在做"伸展运动"。 【可穿越 → queens_apt】
+    gate:
+      to_zone: queens_apt
+      to_pos:
+      - 10
+      - 2
+  description: 铁质防火梯。通往Peter公寓。
+- id: subway_a
+  name: 地铁站
+  zone: queens_apt
+  pos:
+  - 6
+  - 16
+  visual:
+    visible_radius: 10
+    properties:
+      look: 地铁入口，绿底白字写着QUEENS BLVD
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: Queens Blvd地铁站。坐7号线去曼哈顿。Peter每天坐这班车去报社——迟到是常态。 【可穿越 → daily_bugle】
+    gate:
+      to_zone: daily_bugle
+      to_pos:
+      - 18
+      - 18
+  description: 地铁入口。QUEENS BLVD站，深夜很安静。
+- id: subway_b
+  name: 地铁站
+  zone: daily_bugle
+  pos:
+  - 18
+  - 18
+  visual:
+    visible_radius: 10
+    properties:
+      look: 42街地铁站，人潮涌动
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 42街地铁站。曼哈顿的心脏——从这里去报社只要五分钟。如果Peter没迟到的话。 【可穿越 → queens_apt】
+    gate:
+      to_zone: queens_apt
+      to_pos:
+      - 6
+      - 16
+  description: 42街地铁站。人潮涌动。
+
+# ── Items: Daily Bugle ──
+- id: jamesons_desk
+  name: 主编办公桌
+  zone: daily_bugle
+  pos:
+  - 12
+  - 6
+  visual:
+    visible_radius: 15
+    sprite: null
+    properties:
+      look: 橡木大桌，桌面上的雪茄灰比新闻稿还多
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: J. Jonah Jameson的办公桌。永远有一支雪茄在烟灰缸里燃着——他抽两口就忘了，然后又点一支新的。
+    hidden:
+      headline: 桌面上有一张蜘蛛侠的照片——上面画了一个红圈写着'通缉！'。旁边是一篇未完成的社论：'为什么这个蒙面人是威胁——'
+      mood: 谁为蜘蛛侠说一句好话，Jameson的雪茄就会飞到谁头上。
+  description: Jameson的橡木桌。雪茄灰比稿子多。
+
+- id: darkroom
+  name: 暗房
+  zone: daily_bugle
+  pos:
+  - 28
+  - 8
+  visual:
+    visible_radius: 6
+    sprite: null
+    properties:
+      look: 一扇贴着'DO NOT OPEN'的暗房门
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: Peter洗照片的地方。红灯下的显影液气味——也是他假装不是蜘蛛侠的最佳掩护。'我在暗房洗照片'——完美不在场证明。
+    hidden:
+      secret: 暗房里有一个锁着的小柜子——里面是备用蛛网液和蜘蛛侠面具。万一Jim Jameson闯进来——砰，面具藏了。
+      photos: 绳子上夹着三十几张蜘蛛侠照片——Peter拍的自己。只有MJ能认出照片里的身形。
+  description: 暗房门。'DO NOT OPEN'——其实Peter在里面。
+
+- id: newspaper_stacks
+  name: 报纸堆
+  zone: daily_bugle
+  pos:
+  - 16
+  - 12
+  visual:
+    visible_radius: 10
+    sprite: null
+    properties:
+      look: 印刷机旁堆着的明日头版，油墨味还没散
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 刚印出来的明日头版。油墨味还没干。头版头条永远是蜘蛛侠——Jameson的执念。
+    hidden:
+      headline_today: 头版——'蜘蛛侠：英雄还是威胁？'——JJ用了一号字。最下面一行小字：'Photo by Peter Parker'。
+      future: 谁知道明天上面会不会写着'蜘蛛侠拯救地铁乘客'——但那不是JJ想看到的。
+  description: 刚印出来的明日头版。油墨味新鲜。
+
+# ── Items: Queens Apt ──
+- id: web_cartridge
+  name: 蛛网弹夹
+  zone: queens_apt
+  pos:
+  - 14
+  - 6
+  visual:
+    visible_radius: 5
+    sprite: null
+    properties:
+      look: 一个银色小铁筒，里面装满了乳白色的有机硅混合物——还在冒泡
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: Peter的自制蛛网液。凌晨三点在房间里调配的有机硅化合物。不够了就麻烦了——荡到一半蛛丝用完是最尴尬的事。
+    hidden:
+      formula: 化学组成只有Peter知道。May婶以为他在做科学实验（倒也没错）。
+      limit: 一个弹夹能支撑大约二十分钟的蛛丝荡。Peter的腰带能带六个。
+  description: 自制蛛网弹夹。有机硅化合物——Peter凌晨三点调配。
+
+- id: uncles_photo
+  name: 叔叔相框
+  zone: queens_apt
+  pos:
+  - 16
+  - 6
+  visual:
+    visible_radius: 8
+    sprite: null
+    properties:
+      look: Uncle Ben的相框，放在Peter床头。边缘有褪色字迹
+  interaction:
+    interaction_radius: 1
+    properties:
+      description: Ben Parker的照片。下面的字迹已经褪色：'With great power comes great responsibility.' Peter每天出门前看它一眼。
+    hidden:
+      weight: 这是Peter做蜘蛛侠的理由。每次他想放弃——'太累了，不想干了'——看到这张照片就重新穿上面具。
+      guilt: 他永远在想在那个夜晚，如果他拦住了那个贼——
+  description: Uncle Ben的相框。With great power...
+
+# ── Items: Rooftop ──
+- id: water_tower
+  name: 水塔
+  zone: rooftop
+  pos:
+  - 25
+  - 15
+  visual:
+    visible_radius: 20
+    sprite: null
+    properties:
+      look: 巨大的木制屋顶水塔，蜘蛛侠的瞭望台
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 曼哈顿最高的屋顶水塔。蜘蛛侠坐在上面，两条腿晃在边缘，看整个城市。
+    hidden:
+      view: 从这能看到整个皇后区、布鲁克林桥、和远处模糊的史泰登岛灯光。Peter想了三遍到底是叫'Spider-Man'还是'The Human Spider'——最后选了前者。
+      graffiti: 水塔底部有人喷了一句'SPIDEY WAS HERE'——不是Peter留的，是个粉丝。
+  description: 屋顶水塔。蜘蛛侠的瞭望台——整个纽约在脚下。
+
+- id: police_radio
+  name: 警用对讲机
+  zone: rooftop
+  pos:
+  - 28
+  - 20
+  visual:
+    visible_radius: 6
+    sprite: null
+    properties:
+      look: 被遗弃的警用对讲机，绑在天台栏杆上
+  interaction:
+    interaction_radius: 1
+    properties:
+      description: 一台被遗弃的警用对讲机。Peter修的。只要NYPD的频道一响——蜘蛛侠就知道了。
+    hidden:
+      channel: 调到NYPD第3频道——优先播报重大犯罪。常规偷车Peter不管——但银行抢劫？那是'Spider-Sense tingle'的程度。
+      condition: 有时候天气差信号不好。上一次暴风雪，Peter错过了一起抢劫——自责了整整一周。
+  description: 警用对讲机。只要NYPD频道响了——街坊就安全了。
+
+- id: rooftop_ac
+  name: 空调外机
+  zone: rooftop
+  pos:
+  - 20
+  - 22
+  visual:
+    visible_radius: 10
+    sprite: null
+    properties:
+      look: 一排锈迹斑斑的空调外机，发出嗡嗡的低频噪音
+  interaction:
+    interaction_radius: 2
+    properties:
+      description: 老旧空调外机群。夏天热得像烤箱。Peter每次从这里发射蛛丝时都会发出比机器还大的声响。
+    hidden:
+      anchor: 外机的金属框是Peter固定蛛丝的最佳锚点——比水塔低，但抓力更强。荡楼的第一弹点。
+      sound: 嗡嗡嗡——整个屋顶都在震。但Peter已经习惯了这个背景——这是他城市的声音。
+  description: 空调外机群。Peter荡楼的第一个弹射点。
+
+# ── NPCs ──
+- id: peter
+  name: Peter
+  zone: daily_bugle
+  pos:
+  - 24
+  - 8
+  visual:
+    visible_radius: 22
+    sprite: null
+    properties:
+      look: 戴着眼镜的高中生，背着一个破书包——里面有机硅化合物和一台坏了第三次的相机
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 50
+      hunger: 55
+      thirst: 60
+      social: 30
+      energy: 80
+      fun: 35
+      mood: 50
+    properties:
+      description: 高中生。蜘蛛侠。永远迟到。书包装的不是课本——是备用蛛网液和那台摔了第三次的相机。可以聊科学、摄影，或者如果你有Jameson的麻烦也可以抱怨。
+  agent:
+    autonomous: true
+    speed: 1.5
+    view_radius: 26
+    hearing_radius: 22
+    interaction_radius: 3
+    personality: Peter Parker，被放射性蜘蛛咬过的高中生。上课迟到、作业忘交、Jameson欠他的稿费。但到了晚上——纽约有麻烦了。双重生活很累，但叔叔的照片在床头看着他。记住——With great power comes great responsibility.
+  description: 戴眼镜高中生。破书包。——里面是蜘蛛侠制服。
+
+- id: mj
+  name: MJ
+  zone: daily_bugle
+  pos:
+  - 24
+  - 10
+  visual:
+    visible_radius: 20
+    sprite: null
+    properties:
+      look: 红发，黑色夹克，人群里唯一没在看手机的人
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 100
+      hunger: 35
+      thirst: 40
+      social: 50
+      energy: 70
+      fun: 45
+      mood: 55
+    properties:
+      description: 戏剧社团主唱。独立聪明——她能看穿Peter每次'我得去厕所'的借口。可以聊科学、戏剧，或者问她为什么每次都能料中Peter的慌张。
+  agent:
+    autonomous: true
+    speed: 1.1
+    view_radius: 20
+    hearing_radius: 18
+    interaction_radius: 3
+    personality: Mary Jane Watson，朋友们叫她MJ。Midtown高中戏剧社团的明星主唱。家境不好但自尊心极强。她和Peter之间存在一种没说出口的东西——但Peter每次要说什么就突然跑去厕所。她开始注意——每次Peter消失，蜘蛛侠就出现。
+  description: 红发，黑夹克。眼睛能看到Peter每次都看哪。
+
+- id: jameson
+  name: Jameson
+  zone: daily_bugle
+  pos:
+  - 12
+  - 6
+  visual:
+    visible_radius: 15
+    sprite: null
+    properties:
+      look: 平头、胡子、永远在咆哮——就像漫画里跳出来的
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 2000
+      hunger: 30
+      thirst: 20
+      social: 15
+      energy: 80
+      fun: 5
+      mood: 25
+    properties:
+      description: Daily Bugle总编。蜘蛛侠的头号黑粉。不是说他恨好人——是恨蒙面人卖得比报纸好。咆哮声能穿透五层楼——但你得承认他卖的报纸是真的好。
+  agent:
+    autonomous: true
+    speed: 0.7
+    view_radius: 18
+    hearing_radius: 16
+    interaction_radius: 3
+    personality: J. Jonah Jameson，Daily Bugle的总编兼发行人。对蜘蛛侠有'私人恩怨'——实际上他是靠蜘蛛侠照片卖报纸。他付给Peter Parker那些蜘蛛侠照片的稿费，然后转头在头版痛骂蜘蛛侠——完美的商业模式。最恨被叫JJ。不抽烟的时候在吃胃药。
+  description: 平头胡子。永远在咆哮。靠骂蜘蛛侠卖报纸。
+
+- id: aunt_may
+  name: Aunt May
+  zone: daily_bugle
+  pos:
+  - 20
+  - 16
+  visual:
+    visible_radius: 15
+    sprite: null
+    properties:
+      look: 灰白头发的慈祥老太太，围着围裙，手里永远有刚烤的饼干或刚叠的衣服
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 200
+      hunger: 25
+      thirst: 30
+      social: 60
+      energy: 40
+      fun: 40
+      mood: 65
+    properties:
+      description: Peter的婶婶。六十岁还能搬家具。对Peter半夜去哪了有一整套焦虑体系——但她相信他在做正事。
+  agent:
+    autonomous: true
+    speed: 0.6
+    view_radius: 14
+    hearing_radius: 12
+    interaction_radius: 3
+    personality: May Parker，Peter的婶婶。Ben去世后一个人照顾Peter。表面上是个普通的皇后区老太太——实际上比谁都有韧性。她隐约知道Peter在做什么——但选择相信他。有时半夜看到Peter从窗户爬进来，她只是把早餐默默放在他门口。
+  description: 灰白头发，围裙。饼干热好了——Peter又不在家。
+
+- id: harry
+  name: Harry
+  zone: daily_bugle
+  pos:
+  - 28
+  - 6
+  visual:
+    visible_radius: 20
+    sprite: null
+    properties:
+      look: 穿着昂贵夹克的富家子，眼神里有种不属于这个年纪的阴郁
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 5000
+      hunger: 30
+      thirst: 35
+      social: 25
+      energy: 65
+      fun: 20
+      mood: 30
+    properties:
+      description: Oscorp的少爷。Peter最好的朋友——但最近看他的眼神有点不一样了。可能是因为Peter总是'消失'，也可能是他父亲留下的阴影。
+  agent:
+    autonomous: true
+    speed: 1.0
+    view_radius: 20
+    hearing_radius: 16
+    interaction_radius: 3
+    personality: Harry Osborn，Norman Osborn的儿子。富二代但不是典型的被宠坏的——他父亲对他的期望压得他喘不过气。Peter是他唯一能放松相处的人。但最近Peter的神秘行踪让他开始怀疑——是不是所有人都对他藏着什么？
+  description: 昂贵夹克，阴郁眼神。Osborn的少爷——不轻松。
+
+- id: robbie
+  name: Robbie
+  zone: daily_bugle
+  pos:
+  - 20
+  - 10
+  visual:
+    visible_radius: 15
+    sprite: null
+    properties:
+      look: 穿着旧衬衫的中年黑人，袖口卷到肘上，桌上永远放着一杯黑咖啡——不加糖不加奶
+  interaction:
+    interaction_radius: 3
+    private_attrs:
+      coins: 800
+      hunger: 30
+      thirst: 40
+      social: 35
+      energy: 55
+      fun: 25
+      mood: 55
+    properties:
+      description: 副主编。Jameson唯一的刹车片。说话永远冷静——即使Jameson在咆哮。知道所有人的事但从不说。
+  agent:
+    autonomous: true
+    speed: 0.8
+    view_radius: 18
+    hearing_radius: 16
+    interaction_radius: 3
+    personality: Robbie Robertson，Daily Bugle的副主编。在报社干了三十年。唯一能在Jameson咆哮时保持镇定的人——也是唯一能让Jameson偶尔闭上嘴的人。他不是在管新闻——是在管人。Peter Parker的每一次迟到他都注意到了，但他选择不问。好的编辑知道什么不该问。
+  description: 旧衬衫，黑咖啡不加糖。Jameson的刹车片——团队的沉默脊梁。
