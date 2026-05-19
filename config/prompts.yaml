@@ -123,6 +123,7 @@ slots:
       {
         "thinking": "简短推理",
         "action": "做什么 (自由文本，含位置和意图)" 或 null,
+        "target_name": "你交互对象的名字 (从视觉/听觉/可交互列表中精确抄写)" 或 null,
         "story": "简短叙事 (50-100字, 涉及他人时)" 或 null,
         "dialogue": "你说了什么" 或 null,
         "visual": "你的表情/动作描述" 或 null,
@@ -133,6 +134,7 @@ slots:
         "main_thread": "你接下来的长期目标" 或 null
       }
       - action: 你的完整意图(去哪+做什么)。null=歇一会。引擎自己会找目标实体
+      - target_name: 你想跟谁或什么东西交互——从周围实体描述中精确抄写名字。没有明确对象时写null
       - story: 简短叙事。可包含"✓完成"标记。自己处理简单事务时可留空
       - dialogue: 你直接说了什么(原话)。null=沉默
       - visual: 你的神态、表情、肢体动作。给观察者看的
@@ -186,6 +188,7 @@ output_schemas:
       properties:
         thinking: {type: string}
         action: {type: string}
+        target_name: {type: string}
         story: {type: string}
         dialogue: {type: string}
         visual: {type: string}
@@ -224,5 +227,3 @@ sensory_prompts:
 text_labels:
   empty_memory: "无"
   memory_entry: "[+{rel}s] {text}"
-  intent_prefix: "INTENT: "
-  intent_done: "DONE: "

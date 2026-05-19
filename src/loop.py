@@ -1,6 +1,6 @@
 """Agent loop — phase-based pipeline. All config injected via LoopConfig.
 
-Phase order: sense → KL gate → intent → decide → act
+Phase order: sense → KL gate → decide → act
 Each phase may skip the remainder via continue.
 """
 import time
@@ -87,42 +87,11 @@ def _build_state_text(al) -> str:
     latest = al.memory.latest()
     if latest:
         raw = latest.get("text", "")
-        for pfx in ("DONE:", "INTENT:"):
-            if raw.startswith(pfx):
-                raw = raw[len(pfx):].strip()
-                break
         if raw and not raw.startswith('"') and '说：' not in raw:
             parts.append(f"片刻之前你{raw}")
     if al._last_target_name:
         parts.append(f"你上一轮在和{al._last_target_name}交谈")
     return "；".join(parts) if parts else ""
-
-
-async def _handle_intent(agent, al, world, interaction, labels, cfg,
-                   drives, coins, kl_text, trace_fn) -> bool:
-    """Execute stale intent if fresh. Returns True if intent was consumed."""
-    latest_mem = al.memory.latest()
-    intent_prefix = labels.get("intent_prefix", "INTENT:")
-    if not (latest_mem and latest_mem.get("text", "").startswith(intent_prefix)):
-        return False
-
-    intent_action = latest_mem["text"][len(intent_prefix):].strip()
-
-    intent_target = interaction.find_entity_at(
-        agent.zone, agent.pos, intent_action, world.entities, exclude_id=agent.id)
-    if not intent_target or not interaction.can_interact(agent, intent_target):
-        return False
-
-    result = await interaction.interact(agent, intent_target, {}, world)
-    agent.last_action_time = world.clock.now()
-    al.memory.annotate_latest(labels.get("intent_done", "DONE: ") + intent_action)
-
-    if trace_fn:
-        trace_fn(_make_trace(agent.name, intent_target.name, intent_target.id,
-                             intent_action, agent.zone, agent.pos, drives, coins,
-                             kl_text, world.clock.now(),
-                             result=result, note="from_intent"))
-    return True
 
 
 # ── main loop ──
@@ -170,16 +139,6 @@ async def run_agent(agent, world, brain, assembler, systems,
                 continue
 
             # ═══════════════════════════════════════════
-            #  PHASE 2b: INTENT
-            # ═══════════════════════════════════════════
-            if await _handle_intent(agent, al, world, interaction, labels, cfg,
-                                    drives, coins, kl_text, trace_fn):
-                snapshot_p(al, sensory, drives, cfg.currency, cfg.text,
-                           cfg.thresholds, cfg.coin_epsilon)
-                await asyncio.sleep(cfg.poll_interval)
-                continue
-
-            # ═══════════════════════════════════════════
             #  PHASE 3: DECIDE
             # ═══════════════════════════════════════════
             if director and director.is_controlled(agent.id):
@@ -209,10 +168,11 @@ async def run_agent(agent, world, brain, assembler, systems,
             # ═══════════════════════════════════════════
             #  PHASE 4: ACT
             # ═══════════════════════════════════════════
+            target_name = decision.get("target_name")
             action_text = decision.get("action")
-            if action_text:
-                target = interaction.find_entity_at(
-                    agent.zone, agent.pos, action_text, world.entities,
+            if target_name and action_text:
+                target = interaction.find_entity_by_name(
+                    agent.zone, target_name, world.entities,
                     exclude_id=agent.id)
                 if target and interaction.can_interact(agent, target):
                     result = await interaction.interact(
@@ -231,9 +191,16 @@ async def run_agent(agent, world, brain, assembler, systems,
                     agent.last_action_time = world.clock.now()
                     systems["sensory"].update(agent, world.entities, world,
                                                speech_window=cfg.speech_window)
-                    al.memory.record(
-                        f"{labels.get('intent_prefix', 'INTENT:')}{action_text}",
-                        ts=time.time())
+            elif action_text and not target_name:
+                # No target specified — try action-only move
+                target = interaction.find_entity_at(
+                    agent.zone, agent.pos, action_text, world.entities,
+                    exclude_id=agent.id)
+                if target and not interaction.can_interact(agent, target):
+                    agent.move_to(list(target.pos))
+                    agent.last_action_time = world.clock.now()
+                    systems["sensory"].update(agent, world.entities, world,
+                                               speech_window=cfg.speech_window)
 
             snapshot_p(al, sensory, drives, cfg.currency, cfg.text,
                        cfg.thresholds, cfg.coin_epsilon)

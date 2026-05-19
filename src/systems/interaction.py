@@ -33,8 +33,21 @@ class InteractionSystem:
         target_r = target.get("interaction").interaction_radius
         return agent.distance_to(target) <= min(agent_r, target_r)
 
+    def find_entity_by_name(self, zone: str, name: str,
+                             all_entities: dict, exclude_id: str = "") -> object | None:
+        """Exact name match — no fuzzy, no guessing. Returns entity or None."""
+        for e in all_entities.values():
+            if e.zone != zone or not e.has("interaction"):
+                continue
+            if e.id == exclude_id:
+                continue
+            if e.name == name:
+                return e
+        return None
+
     def find_entity_at(self, zone: str, pos: list[int], action: str,
                        all_entities: dict, exclude_id: str = "") -> object | None:
+        """Deprecated — use find_entity_by_name with LLM-supplied target_name."""
         candidates = []
         for e in all_entities.values():
             if e.zone != zone or not e.has("interaction"):
@@ -49,11 +62,6 @@ class InteractionSystem:
         for d, e in candidates:
             if e.name in action:
                 return e
-        for d, e in candidates:
-            desc = getattr(e, 'describe', '') or ''
-            for word in [e.name, *desc.split('.')[0].split(' ')]:
-                if len(word) >= 2 and word in action:
-                    return e
         return None
 
     # ═══════════ core: interact() ═══════════

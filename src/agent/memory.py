@@ -42,7 +42,3 @@ class AgentMemory:
 
     def latest(self) -> dict | None:
         return self.entries[-1] if self.entries else None
-
-    def annotate_latest(self, text: str) -> None:
-        if self.entries:
-            self.entries[-1]["text"] = text
