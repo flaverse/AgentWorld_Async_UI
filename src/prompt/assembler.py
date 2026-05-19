@@ -43,3 +43,7 @@ class PromptAssembler:
         tpl = self.loader.get_template(template_name)
         schema_name = tpl.get("output_schema", "")
         return self.loader.get_output_schema(schema_name)
+
+    def get_temperature(self, template_name: str) -> float:
+        tpl = self.loader.get_template(template_name)
+        return tpl.get("temperature", 0.7)

@@ -34,11 +34,15 @@ class AgentMemory:
         if not entries:
             return labels["empty_memory"]
         lines = []
+        ref_ts = entries[0]["ts"]
         for e in entries:
-            ts = e["ts"]
-            rel = int(ts - self.entries[0]["ts"]) if self.entries else 0
+            rel = int(e["ts"] - ref_ts)
             lines.append(labels["memory_entry"].format(rel=rel, text=e['text']))
         return "\n".join(lines)
 
     def latest(self) -> dict | None:
         return self.entries[-1] if self.entries else None
+
+    def annotate_latest(self, text: str) -> None:
+        if self.entries:
+            self.entries[-1]["text"] = text

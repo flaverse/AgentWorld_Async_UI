@@ -7,4 +7,4 @@ class Layer:
     observable_radius: int = 5
 
     def observe(self, distance: int) -> dict:
-        return {"_distance": distance, **self.properties.copy()}
+        return {"_distance": distance, **self.properties}

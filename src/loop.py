@@ -88,10 +88,6 @@ async def _handle_intent(agent, al, world, interaction, labels, cfg,
         return False
 
     intent_action = latest_mem["text"][len(intent_prefix):].strip()
-    mem_age = time.time() - latest_mem["ts"]
-    if mem_age >= cfg.intent_ttl:
-        latest_mem["text"] = labels.get("intent_stale", "STALE: ") + intent_action
-        return False
 
     intent_target = interaction.find_entity_at(
         agent.zone, agent.pos, intent_action, world.entities, exclude_id=agent.id)
@@ -100,7 +96,7 @@ async def _handle_intent(agent, al, world, interaction, labels, cfg,
 
     result = await interaction.interact(agent, intent_target, {}, world)
     agent.last_action_time = world.clock.now()
-    latest_mem["text"] = labels.get("intent_done", "DONE: ") + intent_action
+    al.memory.annotate_latest(labels.get("intent_done", "DONE: ") + intent_action)
 
     if trace_fn:
         trace_fn(_make_trace(agent.name, intent_target.name, intent_target.id,
@@ -123,6 +119,7 @@ async def run_agent(agent, world, brain, assembler, systems,
     interaction = systems["interaction"]
     labels = cfg.labels
 
+    prompt1 = None  # scoped for trace_fn access across Phase 3→4
     while time.time() < end:
         try:
             # ═══════════════════════════════════════════
@@ -203,13 +200,12 @@ async def run_agent(agent, world, brain, assembler, systems,
                         agent, target, decision, world)
                     agent.last_action_time = world.clock.now()
                     if trace_fn:
-                        prompt = prompt1 if 'prompt1' in dir() else None
                         trace_fn(_make_trace(
                             name, target.name, target.id, action_text,
                             agent.zone, agent.pos, drives, coins,
                             kl_text, world.clock.now(),
                             llm1_output=decision, result=result,
-                            llm1_prompt=prompt))
+                            llm1_prompt=prompt1))
                 elif target and not interaction.can_interact(agent, target):
                     agent.move_to(list(target.pos))
                     agent.last_action_time = world.clock.now()
@@ -224,6 +220,6 @@ async def run_agent(agent, world, brain, assembler, systems,
             await asyncio.sleep(0)
 
         except Exception as e:
-            import sys
-            print(f"  [{name}] error: {e}", file=sys.stderr, flush=True)
+            from core.error_collector import errors
+            errors.log_exception(f"loop.{name}", e)
             await asyncio.sleep(3)

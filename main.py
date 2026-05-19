@@ -112,7 +112,7 @@ async def run_concurrent(agents, world, brain, assembler, systems,
     tasks = [run_agent(a, world, brain, assembler, systems,
                        runtime, trace_fn=trace_fn, cfg=cfg)
              for a in agents]
-    await asyncio.gather(*tasks)
+    await asyncio.gather(*tasks, return_exceptions=True)
 
 
 # ═══════════════════════════════════════════════════

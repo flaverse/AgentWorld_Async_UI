@@ -119,11 +119,17 @@ class World:
             parts = path.split(".")
             target = entity
             for p in parts[:-1]:
-                target = target.get(p) if hasattr(target, 'get') else getattr(target, p)
-            if hasattr(target, '__setitem__'):
-                target[parts[-1]] = value
+                if hasattr(target, 'get'):
+                    target = target.get(p)
+                else:
+                    target = getattr(target, p, None)
+                if target is None:
+                    break
             else:
-                setattr(target, parts[-1], value)
+                if hasattr(target, '__setitem__'):
+                    target[parts[-1]] = value
+                else:
+                    setattr(target, parts[-1], value)
 
     def spawn_entity(self, entity_def: dict) -> Entity:
         """Create and spawn an entity from a dict at runtime. Same format as world.yaml."""

@@ -54,9 +54,6 @@ class InteractionSystem:
             for word in [e.name, *desc.split('.')[0].split(' ')]:
                 if len(word) >= 2 and word in action:
                     return e
-        best = candidates[0]
-        if best[0] <= best[1].get("interaction").interaction_radius + 3:
-            return best[1]
         return None
 
     # ═══════════ core: interact() ═══════════
@@ -146,11 +143,12 @@ class InteractionSystem:
             llm2_prompt = self.assembler.assemble("interact_narrative", context)
             system = self.assembler.get_system_prompt("interact_narrative")
             schema = self.assembler.get_output_schema("interact_narrative")
+            temp = self.assembler.get_temperature("interact_narrative")
             raw = await self.llm.chat(system=system, messages=[{"role":"user","content":llm2_prompt}],
-                                       response_format=schema)
+                                       temperature=temp, response_format=schema)
             llm2_output = raw
-            from agent.brain import extract_json
-            data = json.loads(extract_json(raw))
+            from agent.brain import _parse_llm_json
+            data = _parse_llm_json(raw, "interact_narrative")
             narrative = data.get("narrative", narrative)
             deltas = data.get("deltas", {})
             extra = deltas.get(agent.id, {})
@@ -160,8 +158,9 @@ class InteractionSystem:
             if target_changes and target_inter and not target_inter.readonly:
                 world.update_entity(target.id, target_changes)
         except Exception as e:
-            import sys
-            print(f"  [interact ERR] {agent.name}→{target.name}: {e}", file=sys.stderr, flush=True)
+            from core.error_collector import errors
+            errors.log_exception("interaction._resolve_npc_item", e,
+                                 f"{agent.name}→{target.name}")
         if agent.has("agent") and narrative:
             agent.get("agent").memory.record(narrative)
         return narrative, llm2_prompt, llm2_output

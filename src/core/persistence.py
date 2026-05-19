@@ -27,15 +27,6 @@ class WorldDB:
                 drives    TEXT,
                 PRIMARY KEY (run_id, tick, entity_id)
             );
-            CREATE TABLE IF NOT EXISTS interactions (
-                run_id    TEXT,
-                tick      REAL,
-                agent     TEXT,
-                target    TEXT,
-                action    TEXT,
-                narrative TEXT,
-                deltas    TEXT
-            );
         """)
 
     def start_run(self, world_name: str = "") -> str:
