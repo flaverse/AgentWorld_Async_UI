@@ -82,7 +82,6 @@ def build_loop_config(sim: dict, labels: dict) -> LoopConfig:
         text=sim.get("text", {}),
         labels=labels,
         default_patience=sim.get("default_patience", 5),
-        speech_window=sim.get("speech_window", 30),
         memory_prompt_count=sim.get("memory_prompt_count", 5),
     )
 

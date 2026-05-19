@@ -6,7 +6,6 @@ world:
     currency: coins
     poll_interval: 0.3
     stale_timeout: 30
-    speech_window: 30
     memory_prompt_count: 5
     default_patience: 5
     kl:

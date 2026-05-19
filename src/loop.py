@@ -20,7 +20,6 @@ class LoopConfig:
     text: dict = field(default_factory=dict)
     labels: dict = field(default_factory=dict)
     default_patience: int = 5
-    speech_window: int = 30
     memory_prompt_count: int = 5
 
 
@@ -55,6 +54,12 @@ def _make_trace(agent_name, target_name, target_id, action_text,
     return trace
 
 
+def _speech_window(cfg) -> int:
+    """Read speech window from YAML sensory_prompts, not engine code."""
+    sp = cfg.labels.get("sensory_prompts", {})
+    return sp.get("auditory", {}).get("window_seconds", 30)
+
+
 def _build_sensory_text(sensory, labels: dict) -> str:
     """Render all sensory channels from YAML sensory_prompts template."""
     sp = labels.get("sensory_prompts", {})
@@ -86,11 +91,9 @@ def _build_state_text(al) -> str:
     parts = []
     latest = al.memory.latest()
     if latest:
-        raw = latest.get("text", "")
-        if raw and not raw.startswith('"') and '说：' not in raw:
-            parts.append(f"片刻之前你{raw}")
+        parts.append(latest.get("text", ""))
     if al._last_target_name:
-        parts.append(f"你上一轮在和{al._last_target_name}交谈")
+        parts.append(f"上一轮交互对象: {al._last_target_name}")
     return "；".join(parts) if parts else ""
 
 
@@ -123,8 +126,17 @@ async def run_agent(agent, world, brain, assembler, systems,
             elapsed = max(world.clock.now() - agent.last_action_time, 0)
             systems["decay"].tick(agent, elapsed)
             systems["sensory"].update(agent, world.entities, world,
-                                       speech_window=cfg.speech_window)
+                                       speech_window=_speech_window(cfg))
             sensory = al.sensory
+
+            # Controlled agent: execute external order or sleep
+            if director and director.is_controlled(agent.id):
+                decision = director.pending(agent.id)
+                if decision:
+                    pass  # go to Phase 4 to execute
+                else:
+                    await asyncio.sleep(cfg.poll_interval)
+                    continue
 
             # ═══════════════════════════════════════════
             #  PHASE 2: KL GATE
@@ -141,29 +153,20 @@ async def run_agent(agent, world, brain, assembler, systems,
             # ═══════════════════════════════════════════
             #  PHASE 3: DECIDE
             # ═══════════════════════════════════════════
-            if director and director.is_controlled(agent.id):
-                decision = director.pending(agent.id)
-                if not decision:
-                    snapshot_p(al, sensory, drives, cfg.currency, cfg.text,
-                               cfg.thresholds, cfg.coin_epsilon)
-                    await asyncio.sleep(cfg.poll_interval)
-                    continue
-                # decision found: skip ctx, skip LLM, go to Phase 4
-            else:
-                # Write-pending lock: skip one cycle after interacting
-                if al._write_pending:
-                    al._write_pending = False
-                    snapshot_p(al, sensory, drives, cfg.currency, cfg.text,
-                               cfg.thresholds, cfg.coin_epsilon)
-                    await asyncio.sleep(cfg.poll_interval)
-                    continue
+            # Write-pending lock: skip one cycle after interacting
+            if al._write_pending:
+                al._write_pending = False
+                snapshot_p(al, sensory, drives, cfg.currency, cfg.text,
+                           cfg.thresholds, cfg.coin_epsilon)
+                await asyncio.sleep(cfg.poll_interval)
+                continue
 
-                ctx = _build_decision_ctx(agent, al, world, sensory, labels, cfg, kl_text)
-                prompt1 = assembler.assemble("agent_decision", ctx) if trace_fn else None
+            ctx = _build_decision_ctx(agent, al, world, sensory, labels, cfg, kl_text)
+            prompt1 = assembler.assemble("agent_decision", ctx) if trace_fn else None
 
-                decision = await brain.decide(ctx)
-                if decision.get("main_thread"):
-                    al.main_thread = decision["main_thread"]
+            decision = await brain.decide(ctx)
+            if decision.get("main_thread"):
+                al.main_thread = decision["main_thread"]
 
             # ═══════════════════════════════════════════
             #  PHASE 4: ACT
@@ -190,7 +193,7 @@ async def run_agent(agent, world, brain, assembler, systems,
                     agent.move_to(list(target.pos))
                     agent.last_action_time = world.clock.now()
                     systems["sensory"].update(agent, world.entities, world,
-                                               speech_window=cfg.speech_window)
+                                               speech_window=_speech_window(cfg))
             elif action_text and not target_name:
                 # No target specified — try action-only move
                 target = interaction.find_entity_at(
@@ -200,7 +203,7 @@ async def run_agent(agent, world, brain, assembler, systems,
                     agent.move_to(list(target.pos))
                     agent.last_action_time = world.clock.now()
                     systems["sensory"].update(agent, world.entities, world,
-                                               speech_window=cfg.speech_window)
+                                               speech_window=_speech_window(cfg))
 
             snapshot_p(al, sensory, drives, cfg.currency, cfg.text,
                        cfg.thresholds, cfg.coin_epsilon)

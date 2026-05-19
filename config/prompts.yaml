@@ -217,6 +217,7 @@ sensory_prompts:
     detail: "  {detail}"
   auditory:
     header: "## 听觉"
+    window_seconds: 30
     state: "{name}"
     content: '"{current_speech}"'
   interaction:

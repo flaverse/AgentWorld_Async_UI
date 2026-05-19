@@ -6,7 +6,6 @@ world:
     currency: coins
     poll_interval: 0.3
     stale_timeout: 30
-    speech_window: 30
     memory_prompt_count: 5
     default_patience: 5
     kl:
@@ -30,12 +29,12 @@ world:
         social:
           min: 0
           max: 100
-          decay: 0.02
+          decay: 0.015
           description: 社交需求。100=极度渴望与人交流。0=只想独处。
         energy:
           min: 0
           max: 100
-          decay: -0.008
+          decay: -0.01
           description: 体力。0=精疲力竭需休息。100=精力充沛。
         fun:
           min: 0
