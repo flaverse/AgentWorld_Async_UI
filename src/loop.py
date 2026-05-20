@@ -104,7 +104,10 @@ def _build_state_text(al) -> str:
     if latest:
         parts.append(latest.get("text", ""))
     if al._last_target_name:
-        parts.append(f"上一轮交互对象: {al._last_target_name}")
+        line = f"上一轮你与{al._last_target_name}交谈"
+        if al._last_expects_reply:
+            line += "，你当时期待对方回应"
+        parts.append(line)
     return "；".join(parts) if parts else ""
 
 
@@ -194,6 +197,7 @@ async def run_agent(agent, world, brain, assembler, systems,
                         agent, target, decision, world)
                     agent.last_action_time = world.clock.now()
                     al._last_target_name = target.name
+                    al._last_expects_reply = bool(decision.get("expects_reply"))
                     if trace_fn:
                         trace_fn(_make_trace(
                             name, target.name, target.id, action_text,

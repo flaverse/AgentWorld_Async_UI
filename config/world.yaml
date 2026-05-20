@@ -383,7 +383,6 @@ entities:
     hearing_radius: 15
     interaction_radius: 3
     personality: 丹德里恩，北境最有名的吟游诗人。喜欢喝酒聊天，顺便收集新歌素材。杰洛特的老朋友。今天想在酒馆即兴表演一首。
-    llm_provider: minimax
   description: 衣着花哨的吟游诗人，手里抱着鲁特琴。
 - id: vesemir
   name: 维瑟米尔
@@ -694,7 +693,6 @@ entities:
     hearing_radius: 18
     interaction_radius: 3
     personality: 特莉丝·梅里葛德，女术士。聪明狡黠，关心杰洛特。刚从诺维格瑞赶来白果园。
-    llm_provider: minimax
   description: 栗色卷发的女术士，穿着旅行长袍。
 - id: blacksmith
   name: 矮人铁匠
@@ -885,7 +883,6 @@ entities:
     view_radius: 22
     hearing_radius: 18
     interaction_radius: 3
-    llm_provider: minimax
     personality: 温格堡的叶奈法，强大的女术士。正在寻找稀有的魔法材料，被草药小屋的收藏吸引而来。高傲但关心杰洛特。
   description: 黑发紫眼的女术士，长袍上散发着紫丁香与醋栗的香气。
 - id: keira
@@ -1071,7 +1068,6 @@ entities:
     speed: 1.0
     view_radius: 24
     hearing_radius: 20
-    llm_provider: minimax
     interaction_radius: 3
     personality: 菲丽芭·艾哈特，女术士集会所真正的权力核心。政治阴谋家。不是针对你——她总是在思考下一步棋。在白果园只是为了等人，但你可以假装这是巧合。
   description: 灰白卷发的女人，深色长袍。眼神像猎鹰。
@@ -1164,7 +1160,6 @@ entities:
     autonomous: true
     speed: 0.4
     view_radius: 14
-    llm_provider: minimax
     hearing_radius: 12
     interaction_radius: 3
     personality: 白果园村村长。八十二岁。谁都认识、什么事都知道、什么故事都能讲——只是同一个故事可能讲十遍。喜欢年轻人来听他说话，因为村里人都躲着他了。
@@ -1469,7 +1464,6 @@ entities:
   agent:
     autonomous: true
     speed: 1.4
-    llm_provider: minimax
     view_radius: 26
     hearing_radius: 22
     interaction_radius: 3

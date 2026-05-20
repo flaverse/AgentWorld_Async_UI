@@ -29,4 +29,5 @@ class AgentLayer(Layer):
 
     # ── Conversation state (factual — LLM decides what to do with it) ──
     _last_target_name: str = ""
+    _last_expects_reply: bool = False
     _pending_narrative: str = ""   # NPC→Item narrative queues here, LLM #1 decides
