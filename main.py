@@ -59,11 +59,18 @@ def load_config(world_path: str | None = None):
             wc.get("world", {}).get("simulation", {}))
     with open(os.path.join(base_dir, "config/llm.yaml")) as f:
         lc = yaml.safe_load(f)
+    cc_cfg = lc.get("concurrency", {})
+    from llm.concurrency import ConcurrencyGate
+    concurrency_gate = ConcurrencyGate(
+        initial=cc_cfg.get("initial", 8),
+        success_window=cc_cfg.get("success_window_sec", 30),
+    )
     loader = PromptLoader(os.path.join(base_dir, "config/prompts.yaml"))
     assembler = PromptAssembler(loader)
     labels = loader.data.get("text_labels", {})
     labels["sensory_prompts"] = loader.data.get("sensory_prompts", {})
-    return {"world": wc, "llm": lc, "assembler": assembler, "labels": labels}
+    return {"world": wc, "llm": lc, "assembler": assembler, "labels": labels,
+            "concurrency_gate": concurrency_gate}
 
 
 # ═══════════════════════════════════════════════════
@@ -74,7 +81,7 @@ def spawn_world(cfg: dict):
     """Create World, Brain, and Systems from loaded config.
     Returns (world, brain, systems_dict).
     """
-    llm = LLMClient(cfg["llm"])
+    llm = LLMClient(cfg["llm"], concurrency_gate=cfg.get("concurrency_gate"))
     brain = Brain(llm, cfg["assembler"])
     systems = {
         "sensory": SensorySystem(),

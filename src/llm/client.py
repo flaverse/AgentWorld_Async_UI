@@ -25,7 +25,7 @@ def _retry(fn, max_retries: int, name: str) -> str:
 
 
 class LLMClient:
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, concurrency_gate=None):
         self.model = config.get("model", "gpt-4o")
         self.max_retries = config.get("max_retries", 2)
 
@@ -42,6 +42,9 @@ class LLMClient:
 
         if not self.api_key:
             raise RuntimeError("No API key found. Set env var or check openclaw config.")
+
+        self._gate = concurrency_gate
+        self._hit_429 = False
 
     def _resolve_env_var(self, val: str) -> str:
         if val.startswith("${") and val.endswith("}"):
@@ -100,14 +103,27 @@ class LLMClient:
                    temperature: float = 0.7,
                    response_format: dict = None) -> str:
         loop = asyncio.get_running_loop()
-        if self.provider == "minimax":
-            return await loop.run_in_executor(
-                _executor, self._call_anthropic, system, messages,
-                temperature, response_format)
-        else:
-            return await loop.run_in_executor(
-                _executor, self._call_openai, system, messages,
-                temperature, response_format)
+        if self._gate:
+            await loop.run_in_executor(_executor, self._gate.acquire)
+        self._hit_429 = False
+        try:
+            if self.provider == "minimax":
+                result = await loop.run_in_executor(
+                    _executor, self._call_anthropic, system, messages,
+                    temperature, response_format)
+            else:
+                result = await loop.run_in_executor(
+                    _executor, self._call_openai, system, messages,
+                    temperature, response_format)
+            if self._gate:
+                if self._hit_429:
+                    self._gate.report_429()
+                else:
+                    self._gate.report_ok()
+            return result
+        finally:
+            if self._gate:
+                self._gate.release()
 
     def _call_anthropic(self, system: str, messages: list[dict],
                         temperature: float, response_format: dict = None) -> str:
@@ -146,6 +162,7 @@ class LLMClient:
                 return "\n".join(parts).strip()
             if resp.status_code != 429:
                 raise RuntimeError(f"API {resp.status_code}: {resp.text[:300]}")
+            self._hit_429 = True
             raise RuntimeError("rate limit")
 
         return _retry(call, self.max_retries, "anthropic")
@@ -163,7 +180,15 @@ class LLMClient:
             }
             if response_format:
                 kwargs["response_format"] = response_format
-            resp = client.chat.completions.create(**kwargs)
-            return resp.choices[0].message.content or ""
+            try:
+                resp = client.chat.completions.create(**kwargs)
+                return resp.choices[0].message.content or ""
+            except openai.RateLimitError:
+                self._hit_429 = True
+                raise
+            except openai.APIStatusError as e:
+                if e.status_code == 429:
+                    self._hit_429 = True
+                raise
 
         return _retry(call, self.max_retries, "openai")

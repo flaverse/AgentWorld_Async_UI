@@ -3,3 +3,6 @@ model: "deepseek-chat"
 api_key: ""
 base_url: "https://api.deepseek.com"
 max_retries: 2
+concurrency:
+  initial: 8
+  success_window_sec: 30
