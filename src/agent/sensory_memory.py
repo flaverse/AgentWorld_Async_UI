@@ -25,7 +25,7 @@ class SensoryMemory:
         if not ch:
             return ""
         lines = [cfg.get("header", layer_name)]
-        slot_keys = [k for k in cfg if k != "header"]
+        slot_keys = [k for k in cfg if k != "header" and isinstance(cfg.get(k), str)]
         for r in ch.values():
             ctx = {**r.data, "name": r.name, "distance": r.distance}
             for key in slot_keys:
