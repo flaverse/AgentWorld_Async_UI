@@ -12,6 +12,7 @@ class AgentLayer(Layer):
     personality: str = ""
     main_thread: str = ""
     template: str = ""   # override agent_decision template per-agent (YAML configurable)
+    llm_provider: str = ""  # provider key for multi-LLM routing (YAML configurable)
 
     # Runtime modules
     drives: object = None

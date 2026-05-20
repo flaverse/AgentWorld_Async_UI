@@ -59,18 +59,30 @@ def load_config(world_path: str | None = None):
             wc.get("world", {}).get("simulation", {}))
     with open(os.path.join(base_dir, "config/llm.yaml")) as f:
         lc = yaml.safe_load(f)
-    cc_cfg = lc.get("concurrency", {})
+    # Build multi-provider LLM clients + per-provider concurrency gates
     from llm.concurrency import ConcurrencyGate
-    concurrency_gate = ConcurrencyGate(
-        initial=cc_cfg.get("initial", 8),
-        success_window=cc_cfg.get("success_window_sec", 30),
-    )
+    providers_cfg = lc.get("providers", {"deepseek": lc})
+    llm_clients: dict[str, object] = {}
+    concurrency_gates: dict[str, object] = {}
+    default_provider = lc.get("default_provider", list(providers_cfg.keys())[0])
+    for pname, pcfg in providers_cfg.items():
+        pcfg["provider"] = pname
+        cc_cfg = pcfg.pop("concurrency", {})
+        gate = ConcurrencyGate(
+            initial=cc_cfg.get("initial", 8),
+            success_window=cc_cfg.get("success_window_sec", 30),
+        )
+        from llm.client import LLMClient
+        llm_clients[pname] = LLMClient(pcfg, concurrency_gate=gate)
+        concurrency_gates[pname] = gate
     loader = PromptLoader(os.path.join(base_dir, "config/prompts.yaml"))
     assembler = PromptAssembler(loader)
     labels = loader.data.get("text_labels", {})
     labels["sensory_prompts"] = loader.data.get("sensory_prompts", {})
-    return {"world": wc, "llm": lc, "assembler": assembler, "labels": labels,
-            "concurrency_gate": concurrency_gate}
+    return {"world": wc, "llm_clients": llm_clients, "llm_config": lc,
+            "assembler": assembler, "labels": labels,
+            "default_provider": default_provider,
+            "concurrency_gates": concurrency_gates}
 
 
 # ═══════════════════════════════════════════════════
@@ -81,11 +93,12 @@ def spawn_world(cfg: dict):
     """Create World, Brain, and Systems from loaded config.
     Returns (world, brain, systems_dict).
     """
-    llm = LLMClient(cfg["llm"], concurrency_gate=cfg.get("concurrency_gate"))
-    brain = Brain(llm, cfg["assembler"])
+    clients = cfg["llm_clients"]
+    default_llm = clients.get(cfg["default_provider"], list(clients.values())[0])
+    brain = Brain(clients, cfg["assembler"], cfg["default_provider"])
     systems = {
         "sensory": SensorySystem(),
-        "interaction": InteractionSystem(llm, cfg["assembler"]),
+        "interaction": InteractionSystem(default_llm, cfg["assembler"]),
         "decay": DecaySystem(),
     }
     return World(cfg["world"], systems), brain, systems
@@ -299,7 +312,8 @@ async def cmd_test(args):
             pass
 
     elapsed = time.time() - t_start
-    tracer.set_meta({"gate_stats": cfg["concurrency_gate"].stats()})
+    gate_stats = {pname: gate.stats() for pname, gate in cfg["concurrency_gates"].items()}
+    tracer.set_meta({"gate_stats": gate_stats})
     report(tracer, agents, sim, elapsed, args.validate, args.output)
     if db:
         db.end_run(run_id)

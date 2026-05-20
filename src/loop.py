@@ -181,7 +181,8 @@ async def run_agent(agent, world, brain, assembler, systems,
             ctx = _build_decision_ctx(agent, al, world, sensory, labels, cfg, kl_text)
             prompt1 = assembler.assemble("agent_decision", ctx) if trace_fn else None
 
-            decision = await brain.decide(ctx, template_name=al.template or "agent_decision")
+            decision = await brain.decide(ctx, template_name=al.template or "agent_decision",
+                                           provider=al.llm_provider)
             if decision.get("main_thread"):
                 al.main_thread = decision["main_thread"]
 

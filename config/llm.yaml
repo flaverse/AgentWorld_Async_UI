@@ -1,8 +1,18 @@
-provider: "deepseek"
-model: "deepseek-chat"
-api_key: ""
-base_url: "https://api.deepseek.com"
-max_retries: 2
-concurrency:
-  initial: 8
-  success_window_sec: 30
+default_provider: "deepseek"
+providers:
+  deepseek:
+    model: "deepseek-chat"
+    api_key: ""
+    base_url: "https://api.deepseek.com"
+    max_retries: 2
+    concurrency:
+      initial: 8
+      success_window_sec: 30
+  minimax:
+    model: "MiniMax-M1-40k"
+    api_key: ""
+    base_url: "https://api.minimaxi.com/anthropic"
+    max_retries: 2
+    concurrency:
+      initial: 4
+      success_window_sec: 15

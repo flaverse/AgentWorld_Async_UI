@@ -47,16 +47,23 @@ def extract_json(text: str) -> str:
 
 
 class Brain:
-    def __init__(self, llm_client, assembler):
-        self.llm = llm_client
+    def __init__(self, llm_clients: dict, assembler, default_provider: str = "deepseek"):
+        self.llm_clients = llm_clients
+        self.default_provider = default_provider
         self.assembler = assembler
 
-    async def decide(self, context: dict, template_name: str = "agent_decision") -> dict:
+    def _get_llm(self, provider: str = ""):
+        key = provider or self.default_provider
+        return self.llm_clients.get(key, list(self.llm_clients.values())[0])
+
+    async def decide(self, context: dict, template_name: str = "agent_decision",
+                     provider: str = "") -> dict:
+        llm = self._get_llm(provider)
         prompt = self.assembler.assemble(template_name, context)
         system = self.assembler.get_system_prompt(template_name)
         schema = self.assembler.get_output_schema(template_name)
         temp = self.assembler.get_temperature(template_name)
-        raw = await self.llm.chat(
+        raw = await llm.chat(
             system=system,
             messages=[{"role": "user", "content": prompt}],
             temperature=temp,

@@ -100,20 +100,23 @@ def target_changes_rate(traces: list[dict]) -> dict:
     source="AW built-in"
 )
 def concurrency_gate(traces: list[dict], meta: dict = None) -> dict:
-    gs = (meta or {}).get("gate_stats", {})
-    if not gs:
+    gs_all = (meta or {}).get("gate_stats", {})
+    if not gs_all:
         return {"summary": "no gate stats in trace"}
-    limit = gs.get("limit", 0)
-    total_429s = gs.get("total_429s", 0)
-    acquired = gs.get("total_acquired", 0)
-    initial = gs.get("initial", 0)
-    hit_ratio = round(100 * total_429s / max(acquired, 1), 1)
-    diagnosis = "API 限流是主瓶颈" if total_429s > acquired * 0.3 else "KL 阈值粒度是主瓶颈" if acquired < 100 else "平衡"
+    # Multi-provider: aggregate
+    total_429s = sum(g.get("total_429s", 0) for g in gs_all.values())
+    total_acquired = sum(g.get("total_acquired", 0) for g in gs_all.values())
+    per_provider = {}
+    for pname, g in gs_all.items():
+        acquired = g.get("total_acquired", 0)
+        hit_ratio = round(100 * g.get("total_429s", 0) / max(acquired, 1), 1)
+        per_provider[pname] = f"limit={g.get('limit')} 429s={g.get('total_429s')}/{acquired} ({hit_ratio}%)"
+    global_ratio = round(100 * total_429s / max(total_acquired, 1), 1)
+    diagnosis = "API 限流是主瓶颈" if total_429s > total_acquired * 0.3 else "API 延迟是主瓶颈"
     return {
-        "initial_limit": initial,
-        "final_limit": limit,
         "total_429s": total_429s,
-        "total_acquired": acquired,
-        "429_ratio_pct": hit_ratio,
-        "summary": f"limit={limit}, {total_429s}×429 / {acquired} calls ({hit_ratio}%) → {diagnosis}",
+        "total_acquired": total_acquired,
+        "global_429_pct": global_ratio,
+        "per_provider": per_provider,
+        "summary": f"acquired={total_acquired}, 429s={total_429s} ({global_ratio}%) → {diagnosis}",
     }
