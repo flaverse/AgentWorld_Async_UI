@@ -91,3 +91,29 @@ def target_changes_rate(traces: list[dict]) -> dict:
         "summary": f"{written}/{total} item interactions mutated world ({rate}%)",
         "samples": samples,
     }
+
+
+@register_metric(
+    name="concurrency_gate",
+    category="world",
+    description="Adaptive concurrency limit, 429 error count, and total LLM calls acquired.",
+    source="AW built-in"
+)
+def concurrency_gate(traces: list[dict], meta: dict = None) -> dict:
+    gs = (meta or {}).get("gate_stats", {})
+    if not gs:
+        return {"summary": "no gate stats in trace"}
+    limit = gs.get("limit", 0)
+    total_429s = gs.get("total_429s", 0)
+    acquired = gs.get("total_acquired", 0)
+    initial = gs.get("initial", 0)
+    hit_ratio = round(100 * total_429s / max(acquired, 1), 1)
+    diagnosis = "API 限流是主瓶颈" if total_429s > acquired * 0.3 else "KL 阈值粒度是主瓶颈" if acquired < 100 else "平衡"
+    return {
+        "initial_limit": initial,
+        "final_limit": limit,
+        "total_429s": total_429s,
+        "total_acquired": acquired,
+        "429_ratio_pct": hit_ratio,
+        "summary": f"limit={limit}, {total_429s}×429 / {acquired} calls ({hit_ratio}%) → {diagnosis}",
+    }

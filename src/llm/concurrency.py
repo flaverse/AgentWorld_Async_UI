@@ -51,3 +51,12 @@ class ConcurrencyGate:
             now = time.time()
             if now - self._last_429_at > self._window and self._limit < self._initial:
                 self._limit += 1
+
+    def stats(self) -> dict:
+        with self._lock:
+            return {
+                "limit": self._limit,
+                "initial": self._initial,
+                "total_429s": self.total_429s,
+                "total_acquired": self.total_acquired,
+            }

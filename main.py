@@ -155,6 +155,10 @@ class TraceCollector:
     def __init__(self):
         self.start_time = time.time()
         self._traces: dict[str, list] = defaultdict(list)
+        self._meta: dict = {}
+
+    def set_meta(self, meta: dict):
+        self._meta = meta
 
     def callback(self):
         """Return a trace_fn suitable for run_agent()."""
@@ -168,6 +172,8 @@ class TraceCollector:
     def merged(self) -> list[dict]:
         traces = [t for per_agent in self._traces.values() for t in per_agent]
         traces.sort(key=lambda t: t.get("ts", 0))
+        if self._meta:
+            traces.insert(0, {"_meta": self._meta, "agent": "_meta", "ts": 0})
         return traces
 
     def save(self, path: str):
@@ -293,6 +299,7 @@ async def cmd_test(args):
             pass
 
     elapsed = time.time() - t_start
+    tracer.set_meta({"gate_stats": cfg["concurrency_gate"].stats()})
     report(tracer, agents, sim, elapsed, args.validate, args.output)
     if db:
         db.end_run(run_id)
