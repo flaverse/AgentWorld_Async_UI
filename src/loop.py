@@ -54,12 +54,6 @@ def _make_trace(agent_name, target_name, target_id, action_text,
     return trace
 
 
-def _speech_window(cfg) -> int:
-    """Read speech window from YAML sensory_prompts, not engine code."""
-    sp = cfg.labels.get("sensory_prompts", {})
-    return sp.get("auditory", {}).get("window_seconds", 30)
-
-
 def _build_sensory_text(sensory, labels: dict) -> str:
     """Render all sensory channels from YAML sensory_prompts template."""
     sp = labels.get("sensory_prompts", {})
@@ -142,8 +136,7 @@ async def run_agent(agent, world, brain, assembler, systems,
             # ═══════════════════════════════════════════
             elapsed = max(world.clock.now() - agent.last_action_time, 0)
             systems["decay"].tick(agent, elapsed)
-            systems["sensory"].update(agent, world.entities, world,
-                                       speech_window=_speech_window(cfg))
+            systems["sensory"].update(agent, world.entities, world)
             sensory = al.sensory
 
             # Controlled agent: execute external order or sleep
