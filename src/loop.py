@@ -136,7 +136,8 @@ async def run_agent(agent, world, brain, assembler, systems,
             # ═══════════════════════════════════════════
             elapsed = max(world.clock.now() - agent.last_action_time, 0)
             systems["decay"].tick(agent, elapsed)
-            systems["sensory"].update(agent, world.entities, world)
+            systems["sensory"].update(agent, world.entities, world,
+                                       channel_configs=labels.get("sensory_prompts"))
             sensory = al.sensory
 
             # Controlled agent: execute external order or sleep
@@ -204,7 +205,7 @@ async def run_agent(agent, world, brain, assembler, systems,
                     agent.move_to(list(target.pos))
                     agent.last_action_time = world.clock.now()
                     systems["sensory"].update(agent, world.entities, world,
-                                               speech_window=_speech_window(cfg))
+                                               channel_configs=labels.get("sensory_prompts"))
             elif action_text and not target_name:
                 # No target specified — try action-only move
                 target = interaction.find_entity_at(
@@ -214,7 +215,7 @@ async def run_agent(agent, world, brain, assembler, systems,
                     agent.move_to(list(target.pos))
                     agent.last_action_time = world.clock.now()
                     systems["sensory"].update(agent, world.entities, world,
-                                               speech_window=_speech_window(cfg))
+                                               channel_configs=labels.get("sensory_prompts"))
 
             snapshot_p(al, sensory, drives, cfg.currency, cfg.text,
                        cfg.thresholds, cfg.coin_epsilon)

@@ -6,7 +6,8 @@ from agent.sensory_memory import SensorRecord
 
 
 class SensorySystem:
-    def update(self, observer, all_entities: dict, world=None) -> None:
+    def update(self, observer, all_entities: dict, world=None,
+               channel_configs: dict = None) -> None:
         if not observer.has("agent"):
             return
 
@@ -35,10 +36,13 @@ class SensorySystem:
                 if d > getattr(layer, "observable_radius", 5):
                     continue
 
-                # Auditory: include if speech present (LLM judges relevance from timestamp in content)
-                if layer_name == "auditory":
-                    speech = layer.properties.get("current_speech", "")
-                    if not speech:
+                # Duck-type: if layer exposes content_ts, filter by window_seconds + skip empty content
+                content_ts = getattr(layer, "content_ts", None)
+                if content_ts is not None:
+                    window = (channel_configs or {}).get(layer_name, {}).get("window_seconds")
+                    if content_ts and window and time.time() - content_ts > window:
+                        continue
+                    if not layer.properties.get("current_speech", ""):
                         continue
 
                 if layer_name not in sensory.channels:
@@ -49,6 +53,9 @@ class SensorySystem:
                 current[layer_name].add(eid)
                 is_new = eid not in sensory.channels[layer_name]
                 data = layer.observe(d)
+
+                if content_ts is not None and content_ts > 0:
+                    data["speech_age"] = f"{int(time.time() - content_ts)}s前"
 
                 sensory.channels[layer_name][eid] = SensorRecord(
                     entity_id=eid, name=entity.name,
