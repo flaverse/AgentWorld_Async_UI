@@ -272,10 +272,12 @@ async def cmd_test(args):
     setup_agent_drives(agents, sim, sim.get("currency", "coins"))
     loop_cfg = build_loop_config(sim, cfg["labels"])
 
-    # ── DecisionClock: infrastructure ready for future activation ──
-    # from core.clock import DecisionClock
-    # clock = DecisionClock(decision_tick=0.5)
-    # ... (decay scaling, stale_timeout, poll_interval — activate after validation)
+    # ── DecisionClock: activate speech_window ──
+    from core.clock import DecisionClock
+    clock = DecisionClock(decision_tick=0.5)
+    sp = cfg["labels"].get("sensory_prompts", {})
+    if "auditory" in sp:
+        sp["auditory"]["window_seconds"] = int(clock.speech_window)
 
     # ── Director + Gateway (external agent access) ──
     director = Director(world)
@@ -322,7 +324,9 @@ async def cmd_test(args):
     elapsed = time.time() - t_start
     gate_stats = {pname: gate.stats() for pname, gate in cfg["concurrency_gates"].items()}
     tracer.set_meta({"gate_stats": gate_stats,
-                     "telemetry": cfg["telemetry"].stats()})
+                     "telemetry": cfg["telemetry"].stats(),
+                     "clock": {"decision_tick": round(clock.decision_tick, 2),
+                               "scale": round(clock.scale, 3)}})
     report(tracer, agents, sim, elapsed, args.validate, args.output)
     if db:
         db.end_run(run_id)
