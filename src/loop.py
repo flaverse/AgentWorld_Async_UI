@@ -137,7 +137,7 @@ async def run_agent(agent, world, brain, assembler, systems,
             # ═══════════════════════════════════════════
             #  PHASE 1: SENSE
             # ═══════════════════════════════════════════
-            elapsed = max(world.clock.now() - agent.last_action_time, 0)
+            elapsed = cfg.poll_interval  # decision_tick — drives decay per cycle, not per wall second
             systems["decay"].tick(agent, elapsed)
             systems["sensory"].update(agent, world.entities, world,
                                        channel_configs=labels.get("sensory_prompts"))

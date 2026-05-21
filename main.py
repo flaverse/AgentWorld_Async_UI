@@ -61,6 +61,8 @@ def load_config(world_path: str | None = None):
         lc = yaml.safe_load(f)
     # Build multi-provider LLM clients + per-provider concurrency gates
     from llm.concurrency import ConcurrencyGate
+    from telemetry.collector import TelemetryCollector
+    telemetry = TelemetryCollector()
     providers_cfg = lc.get("providers", {"deepseek": lc})
     llm_clients: dict[str, object] = {}
     concurrency_gates: dict[str, object] = {}
@@ -73,7 +75,7 @@ def load_config(world_path: str | None = None):
             success_window=cc_cfg.get("success_window_sec", 30),
         )
         from llm.client import LLMClient
-        llm_clients[pname] = LLMClient(pcfg, concurrency_gate=gate)
+        llm_clients[pname] = LLMClient(pcfg, concurrency_gate=gate, telemetry=telemetry)
         concurrency_gates[pname] = gate
     loader = PromptLoader(os.path.join(base_dir, "config/prompts.yaml"))
     assembler = PromptAssembler(loader)
@@ -82,7 +84,8 @@ def load_config(world_path: str | None = None):
     return {"world": wc, "llm_clients": llm_clients, "llm_config": lc,
             "assembler": assembler, "labels": labels,
             "default_provider": default_provider,
-            "concurrency_gates": concurrency_gates}
+            "concurrency_gates": concurrency_gates,
+            "telemetry": telemetry}
 
 
 # ═══════════════════════════════════════════════════
@@ -269,13 +272,49 @@ async def cmd_test(args):
     setup_agent_drives(agents, sim, sim.get("currency", "coins"))
     loop_cfg = build_loop_config(sim, cfg["labels"])
 
+    # ── WorldClock: calibrate from observed API latency ──
+    from core.clock import WorldClock
+    telemetry = cfg["telemetry"]
+    max_cc = max((g.limit for g in cfg["concurrency_gates"].values()), default=1)
+    reference = sim.get("reference_decision_tick", 5.0)
+    # Before warmup, use reference tick; after warmup, use measured median
+    if telemetry.warmed_up:
+        measured_tick = telemetry.median_latency * len(agents) / max(max_cc, 1)
+        decision_tick = max(reference / len(agents), measured_tick)
+    else:
+        decision_tick = reference / len(agents) * max(max_cc, 1)
+    clock = WorldClock(
+        decision_tick=decision_tick,
+        reference_tick=reference,
+        max_concurrency=max_cc,
+    )
+    # Scale all drive decay rates to match actual decision pace
+    for e in agents:
+        drv = e.get("agent").drives
+        if drv:
+            for name in drv.attrs:
+                base = sim.get("drive", {}).get("attributes", {}).get(name, {}).get("decay", 0)
+                drv.attrs[name] = drv.attrs.get(name, 50)
+            drv.attr_cfg = {
+                k: {**v, "decay": clock.decay_per_tick(v.get("decay", 0))}
+                for k, v in sim.get("drive", {}).get("attributes", {}).items()
+            }
+    # Update loop config with clock-derived params
+    loop_cfg.thresholds = [int(clock.kl_threshold_spacing * i) for i in range(1, 4)]
+    loop_cfg.stale_timeout = clock.stale_timeout
+    loop_cfg.poll_interval = clock.poll_interval
+    # Update sensory config with clock-derived speech window
+    sp = cfg["labels"].get("sensory_prompts", {})
+    if "auditory" in sp:
+        sp["auditory"]["window_seconds"] = int(clock.speech_window)
+
     # ── Director + Gateway (external agent access) ──
     director = Director(world)
     gateway = WorldGateway(world, director)
     api_task = None
     if args.api_port:
         from gateway.api import create_app
-        app = create_app(gateway, poll_interval=sim.get("poll_interval", 0.3))
+        app = create_app(gateway, poll_interval=clock.poll_interval)
         import uvicorn
         api_config = uvicorn.Config(app, host="0.0.0.0", port=args.api_port, log_level="warning")
         api_server = uvicorn.Server(api_config)
@@ -313,7 +352,12 @@ async def cmd_test(args):
 
     elapsed = time.time() - t_start
     gate_stats = {pname: gate.stats() for pname, gate in cfg["concurrency_gates"].items()}
-    tracer.set_meta({"gate_stats": gate_stats})
+    tracer.set_meta({"gate_stats": gate_stats,
+                     "telemetry": telemetry.stats(),
+                     "clock": {"decision_tick": round(clock.decision_tick, 2),
+                               "reference_tick": clock.reference_tick,
+                               "max_concurrency": clock.max_concurrency,
+                               "scale": round(clock.scale, 3)}})
     report(tracer, agents, sim, elapsed, args.validate, args.output)
     if db:
         db.end_run(run_id)

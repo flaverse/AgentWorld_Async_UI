@@ -226,7 +226,7 @@ sensory_prompts:
     detail: "  {detail}"
   auditory:
     header: "## 听觉"
-    window_seconds: 120
+    window_seconds: 300
     state: "{name} ({speech_age})"
     content: '"{current_speech}"'
   interaction:

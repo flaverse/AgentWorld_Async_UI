@@ -25,7 +25,7 @@ def _retry(fn, max_retries: int, name: str) -> str:
 
 
 class LLMClient:
-    def __init__(self, config: dict, concurrency_gate=None):
+    def __init__(self, config: dict, concurrency_gate=None, telemetry=None):
         self.model = config.get("model", "gpt-4o")
         self.max_retries = config.get("max_retries", 2)
 
@@ -45,6 +45,7 @@ class LLMClient:
 
         self._gate = concurrency_gate
         self._hit_429 = False
+        self._telemetry = telemetry
 
     def _resolve_env_var(self, val: str) -> str:
         if val.startswith("${") and val.endswith("}"):
@@ -107,6 +108,7 @@ class LLMClient:
             await loop.run_in_executor(_executor, self._gate.acquire)
         self._hit_429 = False
         try:
+            _t0 = time.time()
             if self.provider == "minimax":
                 result = await loop.run_in_executor(
                     _executor, self._call_anthropic, system, messages,
@@ -115,6 +117,9 @@ class LLMClient:
                 result = await loop.run_in_executor(
                     _executor, self._call_openai, system, messages,
                     temperature, response_format)
+            _dt_ms = (time.time() - _t0) * 1000
+            if self._telemetry and not self._hit_429:
+                self._telemetry.record(self.provider, "chat", _dt_ms)
             if self._gate:
                 if self._hit_429:
                     self._gate.report_429()

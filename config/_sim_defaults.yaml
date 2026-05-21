@@ -1,9 +1,9 @@
 # Shared simulation defaults — inherited by all world configs.
-# Each world.yaml overrides only what differs (description strings per attribute).
+# Time parameters are declared as multiples of reference_decision_tick (5s).
+# At runtime, WorldClock scales them to actual API latency.
 simulation:
   currency: coins
-  poll_interval: 0.3
-  stale_timeout: 30
+  reference_decision_tick: 5.0     # DeepSeek 8-concurrent baseline (seconds per decision)
   memory_prompt_count: 5
   default_patience: 5
   kl:
