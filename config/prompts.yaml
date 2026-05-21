@@ -25,6 +25,7 @@ templates:
       - sensory_section
       - gate_highlight
       - recent_memory
+      - conversation_context
       - avoid_repetition
       - idle_guidance
       - action_guidance
@@ -96,6 +97,12 @@ slots:
     template: |
       ## 最近经历
       {memory_text}
+
+  conversation_context:
+    condition: conversation_text
+    template: |
+      ## 最近对话
+      {conversation_text}
 
   avoid_repetition:
     condition: memory_text

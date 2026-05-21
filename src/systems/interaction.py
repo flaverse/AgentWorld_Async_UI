@@ -122,6 +122,10 @@ class InteractionSystem:
             aud = agent.get("auditory")
             aud.properties["current_speech"] = dialogue
             aud.properties["speech_ts"] = time.time()
+            if agent_layer:
+                agent_layer._conversation_buffer.append({"speaker": agent.name, "text": dialogue, "ts": time.time()})
+                if len(agent_layer._conversation_buffer) > 8:
+                    agent_layer._conversation_buffer.pop(0)
         if visual and agent.has("visual"):
             agent.get("visual").properties["expression"] = visual
             agent.get("visual").properties["expression_ts"] = time.time()

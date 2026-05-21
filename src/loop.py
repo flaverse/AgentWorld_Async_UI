@@ -75,6 +75,7 @@ def _build_decision_ctx(agent, al, world, sensory, labels, cfg, kl_text) -> dict
         "memory_text": al.memory.to_prompt_text(cfg.memory_prompt_count, labels),
         "kl_text": kl_text,
         "state_description": _build_state_text(al),
+        "conversation_text": _build_conversation_text(al),
         "item_narrative": al._pending_narrative,
         "gate_text": _build_gate_text(agent, world),
     }
@@ -109,6 +110,20 @@ def _build_state_text(al) -> str:
             line += "，你当时期待对方回应"
         parts.append(line)
     return "；".join(parts) if parts else ""
+
+
+def _build_conversation_text(al) -> str:
+    """Render recent conversation as bare facts — who said what.
+    Engine reports dialogue, LLM judges relevance.
+    """
+    buf = al._conversation_buffer[-5:]  # most recent 5 utterances
+    if not buf:
+        return ""
+    lines = []
+    for e in buf:
+        ts = int(time.time() - e["ts"])
+        lines.append(f"[{ts}s前] {e['speaker']}: {e['text']}")
+    return "\n".join(lines)
 
 
 # ── main loop ──

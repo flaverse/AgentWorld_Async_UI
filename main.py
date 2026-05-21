@@ -405,7 +405,8 @@ def cmd_validate_config(args):
                  "zone_name", "sensory_text", "memory_text", "messages_text",
                  "interactable_text", "visible_text", "hearing_text", "round",
                  "caller_name", "caller_id", "target_name", "target_id",
-                 "gate_text", "item_narrative", "state_description"}
+                  "gate_text", "item_narrative", "state_description",
+                  "conversation_text"}
     for slot_name, slot in all_slots.items():
         cond = slot.get("condition", "")
         if cond and cond not in known_ctx:

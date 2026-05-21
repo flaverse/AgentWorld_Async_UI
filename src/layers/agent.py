@@ -31,3 +31,4 @@ class AgentLayer(Layer):
     _last_target_name: str = ""
     _last_expects_reply: bool = False
     _pending_narrative: str = ""   # NPC→Item narrative queues here, LLM #1 decides
+    _conversation_buffer: list = field(default_factory=list)  # recent dialogue exchange [{speaker, text, ts}]

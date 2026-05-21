@@ -65,6 +65,15 @@ class SensorySystem:
                                 else sensory.channels[layer_name][eid].first_seen),
                 )
 
+                # Conversation buffer — record as what was heard, without judging importance
+                if content_ts is not None and is_new and observer.has("agent"):
+                    speech = layer.properties.get("current_speech", "")
+                    if speech:
+                        al_buf = observer.get("agent")._conversation_buffer
+                        al_buf.append({"speaker": entity.name, "text": speech, "ts": time.time()})
+                        if len(al_buf) > 8:
+                            al_buf.pop(0)
+
         # Cleanup: remove entities that left range
         for layer_name, ch in list(sensory.channels.items()):
             current_ids = current.get(layer_name, set())
