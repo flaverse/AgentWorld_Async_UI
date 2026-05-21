@@ -1,4 +1,4 @@
-from core.clock import WorldClock
+from core.clock import SimClock
 from core.spatial_grid import SpatialGrid
 from core.lifecycle import EntityLifecycle
 from entity.entity import Entity
@@ -16,7 +16,7 @@ class World:
     def __init__(self, world_config: dict, systems: dict):
         self.config = world_config.get("world", {})
         time_scale = self.config.get("time_scale", 60)
-        self.clock = WorldClock(
+        self.clock = SimClock(
             self.config.get("start_time", "08:00"),
             time_scale,
         )

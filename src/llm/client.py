@@ -119,7 +119,10 @@ class LLMClient:
                     temperature, response_format)
             _dt_ms = (time.time() - _t0) * 1000
             if self._telemetry and not self._hit_429:
-                self._telemetry.record(self.provider, "chat", _dt_ms)
+                try:
+                    self._telemetry.record(self.provider, "chat", _dt_ms)
+                except Exception:
+                    pass
             if self._gate:
                 if self._hit_429:
                     self._gate.report_429()

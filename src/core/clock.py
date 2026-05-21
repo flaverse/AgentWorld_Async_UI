@@ -2,7 +2,7 @@ import time
 from dataclasses import dataclass
 
 
-class WorldClock:
+class SimClock:
     """Simulation-time clock — tracks world time progression."""
     def __init__(self, start_time_str: str, time_scale: int):
         self.time_scale = time_scale
@@ -21,11 +21,9 @@ class WorldClock:
 
 @dataclass
 class DecisionClock:
-    """Decision-tick clock — calibrates world pace from observed API latency.
-    All time parameters derive from a single measured quantity: decision_tick.
-    """
-    decision_tick: float           # measured: median LLM latency × agents / concurrency
-    reference_tick: float = 5.0    # DeepSeek 8-concurrent × 25-agent baseline
+    """Decision-tick clock — calibrates world pace from observed API latency."""
+    decision_tick: float
+    reference_tick: float = 5.0
     max_concurrency: int = 1
 
     @property
