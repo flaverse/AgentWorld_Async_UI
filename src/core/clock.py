@@ -40,7 +40,7 @@ class DecisionClock:
 
     @property
     def speech_window(self) -> float:
-        return 4 * self.decision_tick
+        return 10 * self.decision_tick
 
     def decay_per_tick(self, base_rate: float) -> float:
         return base_rate * self.decision_tick / self.reference_tick

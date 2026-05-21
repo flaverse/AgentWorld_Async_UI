@@ -272,12 +272,26 @@ async def cmd_test(args):
     setup_agent_drives(agents, sim, sim.get("currency", "coins"))
     loop_cfg = build_loop_config(sim, cfg["labels"])
 
-    # ── DecisionClock: activate speech_window ──
+    # ── DecisionClock: activate speech_window, calibrated from API latency ──
     from core.clock import DecisionClock
-    clock = DecisionClock(decision_tick=0.5)
+    telemetry = cfg["telemetry"]
+    max_cc = max((g.limit for g in cfg["concurrency_gates"].values()), default=1)
+    if telemetry.warmed_up:
+        measured_tick = telemetry.median_latency * len(agents) / max(max_cc, 1)
+        decision_tick = max(2.0, measured_tick)
+    else:
+        # No warmup: estimate from assumed latency × agent density
+        decision_tick = max(2.0, 4.0 * len(agents) / max(max_cc, 1))
+    clock = DecisionClock(
+        decision_tick=decision_tick,
+        reference_tick=sim.get("reference_decision_tick", 5.0),
+        max_concurrency=max_cc,
+    )
     sp = cfg["labels"].get("sensory_prompts", {})
     if "auditory" in sp:
         sp["auditory"]["window_seconds"] = int(clock.speech_window)
+    print(f"  DecisionClock: tick={clock.decision_tick:.1f}s "
+          f"speech_window={int(clock.speech_window)}s scale={clock.scale:.2f}", flush=True)
 
     # ── Director + Gateway (external agent access) ──
     director = Director(world)
