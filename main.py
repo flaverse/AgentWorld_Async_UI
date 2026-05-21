@@ -272,41 +272,10 @@ async def cmd_test(args):
     setup_agent_drives(agents, sim, sim.get("currency", "coins"))
     loop_cfg = build_loop_config(sim, cfg["labels"])
 
-    # ── WorldClock: calibrate from observed API latency ──
-    from core.clock import DecisionClock
-    telemetry = cfg["telemetry"]
-    max_cc = max((g.limit for g in cfg["concurrency_gates"].values()), default=1)
-    reference = sim.get("reference_decision_tick", 5.0)
-    # Before warmup, use measured median latency (defaults to 1.5s if no data)
-    if telemetry.warmed_up:
-        measured_tick = telemetry.median_latency * len(agents) / max(max_cc, 1)
-        decision_tick = max(0.5, measured_tick)
-    else:
-        # No warmup: use a tight initial tick for fast first decisions
-        decision_tick = 0.5
-    clock = DecisionClock(
-        decision_tick=decision_tick,
-        reference_tick=reference,
-        max_concurrency=max_cc,
-    )
-    # Scale all drive decay rates to match actual decision pace
-    for e in agents:
-        drv = e.get("agent").drives
-        if drv:
-            for name in drv.attrs:
-                base = sim.get("drive", {}).get("attributes", {}).get(name, {}).get("decay", 0)
-                drv.attrs[name] = drv.attrs.get(name, 50)
-            drv.attr_cfg = {
-                k: {**v, "decay": clock.decay_per_tick(v.get("decay", 0))}
-                for k, v in sim.get("drive", {}).get("attributes", {}).items()
-            }
-    # Update loop config with clock-derived params
-    loop_cfg.stale_timeout = clock.stale_timeout
-    loop_cfg.poll_interval = clock.poll_interval
-    # Update sensory config with clock-derived speech window
-    sp = cfg["labels"].get("sensory_prompts", {})
-    if "auditory" in sp:
-        sp["auditory"]["window_seconds"] = int(clock.speech_window)
+    # ── DecisionClock: infrastructure ready for future activation ──
+    # from core.clock import DecisionClock
+    # clock = DecisionClock(decision_tick=0.5)
+    # ... (decay scaling, stale_timeout, poll_interval — activate after validation)
 
     # ── Director + Gateway (external agent access) ──
     director = Director(world)
@@ -314,7 +283,7 @@ async def cmd_test(args):
     api_task = None
     if args.api_port:
         from gateway.api import create_app
-        app = create_app(gateway, poll_interval=clock.poll_interval)
+        app = create_app(gateway, poll_interval=sim.get("poll_interval", 0.3))
         import uvicorn
         api_config = uvicorn.Config(app, host="0.0.0.0", port=args.api_port, log_level="warning")
         api_server = uvicorn.Server(api_config)
@@ -353,11 +322,7 @@ async def cmd_test(args):
     elapsed = time.time() - t_start
     gate_stats = {pname: gate.stats() for pname, gate in cfg["concurrency_gates"].items()}
     tracer.set_meta({"gate_stats": gate_stats,
-                     "telemetry": telemetry.stats(),
-                     "clock": {"decision_tick": round(clock.decision_tick, 2),
-                               "reference_tick": clock.reference_tick,
-                               "max_concurrency": clock.max_concurrency,
-                               "scale": round(clock.scale, 3)}})
+                     "telemetry": cfg["telemetry"].stats()})
     report(tracer, agents, sim, elapsed, args.validate, args.output)
     if db:
         db.end_run(run_id)
