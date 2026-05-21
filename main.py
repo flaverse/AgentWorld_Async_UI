@@ -273,17 +273,18 @@ async def cmd_test(args):
     loop_cfg = build_loop_config(sim, cfg["labels"])
 
     # ── WorldClock: calibrate from observed API latency ──
-    from core.clock import WorldClock
+    from core.clock import DecisionClock
     telemetry = cfg["telemetry"]
     max_cc = max((g.limit for g in cfg["concurrency_gates"].values()), default=1)
     reference = sim.get("reference_decision_tick", 5.0)
-    # Before warmup, use reference tick; after warmup, use measured median
+    # Before warmup, use measured median latency (defaults to 1.5s if no data)
     if telemetry.warmed_up:
         measured_tick = telemetry.median_latency * len(agents) / max(max_cc, 1)
-        decision_tick = max(reference / len(agents), measured_tick)
+        decision_tick = max(0.5, measured_tick)
     else:
-        decision_tick = reference / len(agents) * max(max_cc, 1)
-    clock = WorldClock(
+        # No warmup: use a tight initial tick for fast first decisions
+        decision_tick = 0.5
+    clock = DecisionClock(
         decision_tick=decision_tick,
         reference_tick=reference,
         max_concurrency=max_cc,
@@ -300,7 +301,6 @@ async def cmd_test(args):
                 for k, v in sim.get("drive", {}).get("attributes", {}).items()
             }
     # Update loop config with clock-derived params
-    loop_cfg.thresholds = [int(clock.kl_threshold_spacing * i) for i in range(1, 4)]
     loop_cfg.stale_timeout = clock.stale_timeout
     loop_cfg.poll_interval = clock.poll_interval
     # Update sensory config with clock-derived speech window
