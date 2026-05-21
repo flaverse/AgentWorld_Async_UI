@@ -1,4 +1,4 @@
-default_provider: deepseek
+default_provider: minimax
 providers:
   deepseek:
     api_key: ''
