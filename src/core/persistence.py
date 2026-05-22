@@ -16,17 +16,7 @@ class WorldDB:
                 ended     REAL,
                 world_name TEXT
             );
-            CREATE TABLE IF NOT EXISTS snapshots (
-                run_id    TEXT,
-                tick      INTEGER,
-                entity_id TEXT,
-                name      TEXT,
-                zone      TEXT,
-                pos_x     INT,
-                pos_y     INT,
-                drives    TEXT,
-                PRIMARY KEY (run_id, tick, entity_id)
-            );
+            -- snapshots table reserved for future per-tick state capture
         """)
 
     def start_run(self, world_name: str = "") -> str:

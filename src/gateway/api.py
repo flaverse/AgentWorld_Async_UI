@@ -1,11 +1,10 @@
 """REST + WebSocket API for external agent access.
 Zero engine coupling — pure HTTP ↔ WorldGateway adapter.
 """
-import asyncio, json
+import asyncio
 
 from fastapi import FastAPI, WebSocket, HTTPException, Query
 from pydantic import BaseModel
-from typing import Optional
 
 
 class JoinRequest(BaseModel):

@@ -72,16 +72,6 @@ class Brain:
         return _parse_llm_json(raw, "brain.decide")
 
 
-async def call_template(assembler, llm, template_name: str, ctx: dict) -> dict:
-    prompt = assembler.assemble(template_name, ctx)
-    system = assembler.get_system_prompt(template_name)
-    schema = assembler.get_output_schema(template_name)
-    temp = assembler.get_temperature(template_name)
-    raw = await llm.chat(system=system, messages=[{"role":"user","content":prompt}],
-                          temperature=temp, response_format=schema)
-    return _parse_llm_json(raw, template_name)
-
-
 def _parse_llm_json(raw: str, source: str) -> dict:
     json_str = extract_json(raw)
     try:

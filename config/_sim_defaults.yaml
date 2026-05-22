@@ -13,7 +13,6 @@ simulation:
     - 80
     coin_epsilon: 5
   drive:
-    currency: coins
     attributes:
       thirst:
         min: 0

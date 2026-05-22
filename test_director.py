@@ -63,9 +63,7 @@ loop_cfg = LoopConfig(
     currency=currency,
     text=sim.get("text", {}),
     labels=labels,
-    intent_ttl=sim.get("intent_ttl", 30),
     default_patience=sim.get("default_patience", 5),
-    speech_window=sim.get("speech_window", 30),
     memory_prompt_count=sim.get("memory_prompt_count", 5),
 )
 

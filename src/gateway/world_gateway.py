@@ -2,7 +2,7 @@
 Zero cognitive code — pure lifecycle + access control.
 """
 
-import os, secrets
+import secrets
 
 from core.session import SessionManager
 

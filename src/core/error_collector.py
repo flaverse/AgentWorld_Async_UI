@@ -6,7 +6,6 @@ Usage:
     from core.error_collector import errors
     errors.log_exception("brain.decide", e)
     errors.log_llm_parse_failure("brain", raw_text)
-    errors.log_task_failure("interaction.submit", exception)
 """
 
 from dataclasses import dataclass, field

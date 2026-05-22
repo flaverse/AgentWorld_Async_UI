@@ -4,16 +4,13 @@ Principle 5 (Systems总控): Grid is a World-owned data structure.
 Systems read from it but do not modify it.
 Entity/Layers have zero awareness of the grid.
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass
 class SpatialGrid:
     """Fixed-size cell spatial hash for integer grid coordinates."""
     cell_size: int = 5
-    cols: int = 0
-    rows: int = 0
-    cells: list = field(default_factory=list)  # 2D: cells[row][col] = set of entity_ids
 
     def __init__(self, width: int, height: int, cell_size: int = 5):
         self.cell_size = cell_size
