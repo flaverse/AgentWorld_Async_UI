@@ -91,6 +91,8 @@ class InteractionSystem:
 
         if agent_layer:
             agent_layer._write_pending = True
+            if decision.get("expects_reply"):
+                agent_layer._reply_deadline = time.time() + decision.get("patience", 5)
 
         # ③ NPC→NPC: done
         if target.has("agent"):

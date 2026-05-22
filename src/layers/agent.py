@@ -32,3 +32,4 @@ class AgentLayer(Layer):
     _last_expects_reply: bool = False
     _pending_narrative: str = ""   # NPC→Item narrative queues here, LLM #1 decides
     _conversation_buffer: list = field(default_factory=list)  # recent dialogue exchange [{speaker, text, ts}]
+    _reply_deadline: float = 0.0  # when to give up waiting for a reply (time.time() + patience)

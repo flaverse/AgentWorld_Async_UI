@@ -182,9 +182,23 @@ async def run_agent(agent, world, brain, assembler, systems,
             # ═══════════════════════════════════════════
             #  PHASE 3: DECIDE
             # ═══════════════════════════════════════════
-            # Write-pending lock: skip one cycle after interacting
+            # Write-pending: wait for conversation loop to close
             if al._write_pending:
+                if al._last_expects_reply and al._last_target_name:
+                    # Check if expected interlocutor has spoken
+                    heard_reply = False
+                    for rec in sensory.channels.get("auditory", {}).values():
+                        if rec.name == al._last_target_name:
+                            heard_reply = True
+                            break
+                    if not heard_reply and time.time() < al._reply_deadline:
+                        # Still waiting — keep write_pending, skip this cycle
+                        await asyncio.sleep(cfg.poll_interval)
+                        continue
+                # Loop closed or timed out: clear flags
                 al._write_pending = False
+                al._last_expects_reply = False
+                al._reply_deadline = 0.0
                 snapshot_p(al, sensory, drives, cfg.currency, cfg.text,
                            cfg.thresholds, cfg.coin_epsilon)
                 await asyncio.sleep(cfg.poll_interval)
