@@ -55,6 +55,16 @@ async def cmd_test(args):
         api_task = asyncio.create_task(api_server.serve())
         print(f"  Gateway API: http://0.0.0.0:{args.api_port}")
 
+    # ── Dashboard emitter ──
+    dash_emit = None
+    dash_task = None
+    if getattr(args, 'dashboard_port', 0):
+        from dashboard.emitter import DashboardEmitter
+        from dashboard.server import start_dashboard
+        dash_emitter = DashboardEmitter()
+        dash_emit = dash_emitter.emit
+        dash_task = asyncio.create_task(start_dashboard(dash_emitter, args.dashboard_port))
+
     print(f"\n{'='*60}")
     print(f"  AgentWorld Async — {cfg['world']['world']['name']}")
     print(f"  {len(agents)} agents | {args.runtime}s | Start: {datetime.now().strftime('%H:%M:%S')}")
@@ -73,13 +83,20 @@ async def cmd_test(args):
 
     await run_concurrent(agents, world, brain, cfg["assembler"],
                          systems, args.runtime, loop_cfg,
-                         trace_fn=tracer.callback(), director=director)
+                         trace_fn=tracer.callback(), director=director,
+                         dashboard_emit=dash_emit)
 
     if api_task:
         api_server.should_exit = True
         api_task.cancel()
         try:
             await api_task
+        except (asyncio.CancelledError, Exception):
+            pass
+    if dash_task:
+        dash_task.cancel()
+        try:
+            await dash_task
         except (asyncio.CancelledError, Exception):
             pass
 

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentWorld Live</title>
+<style>
+:root {
+  --bg: #0d1117; --card: #161b22; --border: #30363d;
+  --text: #e6edf3; --dim: #8b949e; --accent: #58a6ff;
+  --cyan: #39d2c0; --gold: #d29922; --purple: #a371f7;
+  --green: #22c55e; --yellow: #eab308; --orange: #f97316; --red: #ef4444;
+  --drive-width: 140px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font: 13px/1.4 'DejaVu Sans Mono', monospace; }
+.header { padding: 16px 20px 8px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: baseline; }
+.header h1 { font-size: 18px; font-weight: 700; }
+.header .clock { font-size: 14px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; padding: 12px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: border-color 0.3s; }
+.card.flash { border-color: var(--accent); }
+.card-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px 6px; border-bottom: 1px solid var(--border); }
+.card-head .name { font-size: 15px; font-weight: 700; }
+.card-head .zone { font-size: 11px; color: var(--dim); }
+.card-head .ts { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.channel { padding: 8px 14px; border-bottom: 1px solid rgba(48,54,61,0.5); position: relative; }
+.channel .label { font-size: 10px; color: var(--dim); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+.ch-action .label { color: var(--accent); }
+.ch-dialogue .label { color: var(--cyan); }
+.ch-dialogue .body { color: var(--cyan); font-style: italic; }
+.ch-drives .label { color: var(--gold); }
+.ch-action .body, .ch-dialogue .body { transition: opacity 0.5s; }
+.body.new { animation: flashIn 0.6s ease-out; }
+@keyframes flashIn { from { opacity: 0.3; color: var(--accent); } to { opacity: 1; } }
+
+.drive-row { display: flex; align-items: center; gap: 6px; margin: 2px 0; font-size: 11px; }
+.drive-name { width: 48px; text-align: right; color: var(--dim); flex-shrink: 0; }
+.drive-bar-outer { width: var(--drive-width); height: 10px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
+.drive-bar-inner { height: 100%; border-radius: 3px; transition: width 0.3s ease; min-width: 1px; }
+.drive-val { width: 28px; text-align: right; color: var(--dim); flex-shrink: 0; }
+.coins-row { display: flex; gap: 6px; font-size: 11px; color: var(--dim); margin-top: 4px; }
+
+.input-toggle { padding: 8px 14px; cursor: pointer; font-size: 11px; color: var(--dim); border-bottom: 1px solid var(--border); user-select: none; }
+.input-toggle:hover { color: var(--text); }
+.input-toggle .arrow { display: inline-block; transition: transform 0.2s; margin-right: 4px; }
+.input-toggle.open .arrow { transform: rotate(90deg); }
+.input-body { display: none; }
+.input-body.open { display: block; }
+.sensory-block { padding: 6px 14px 6px 24px; font-size: 11px; }
+.sensory-block .sensory-label { color: var(--dim); font-size: 10px; margin-bottom: 2px; }
+.sensory-block .sensory-item { color: var(--dim); padding: 1px 0; }
+.sensory-item .s-name { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>AgentWorld Live</h1>
+  <span class="clock" id="clock">⏱ 00:00</span>
+</div>
+<div class="grid" id="grid"></div>
+
+<script>
+const PORT = location.port || '8766';
+const cards = {}; // agent -> DOM card
+const lastTs = {}; // agent -> last ts for flash
+let startTs = null;
+let clockEl = null;
+
+function driveColor(v) {
+  if (v <= 30) return 'var(--green)';
+  if (v <= 60) return 'var(--yellow)';
+  if (v <= 80) return 'var(--orange)';
+  return 'var(--red)';
+}
+
+function ensureCard(agent, zone) {
+  if (cards[agent]) return cards[agent];
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.innerHTML = `
+    <div class="card-head">
+      <span class="name">${agent}</span>
+      <span class="zone">${zone}</span>
+      <span class="ts">⏱ --</span>
+    </div>
+    <div class="channel ch-action"><div class="label">🎯 action</div><div class="body">—</div></div>
+    <div class="channel ch-dialogue"><div class="label">🗣 dialogue</div><div class="body">—</div></div>
+    <div class="channel ch-drives">
+      <div class="label">📊 drives</div>
+      <div class="drives-container">—</div>
+    </div>
+    <div class="input-toggle" onclick="toggleInput(this)">
+      <span class="arrow">▶</span> 输入信息 · <span class="sensory-summary">—</span>
+    </div>
+    <div class="input-body">
+      <div class="sensory-block visual-block"><div class="sensory-label">👁 视觉</div></div>
+      <div class="sensory-block auditory-block"><div class="sensory-label">👂 听觉</div></div>
+    </div>`;
+  document.getElementById('grid').appendChild(el);
+  cards[agent] = el;
+  return el;
+}
+
+function updateDrives(el, drives) {
+  const container = el.querySelector('.drives-container');
+  const names = ['hunger','thirst','social','energy','fun','mood'];
+  let html = '';
+  for (const k of names) {
+    const v = drives[k] != null ? Math.round(drives[k]) : 0;
+    html += `<div class="drive-row">
+      <span class="drive-name">${k}</span>
+      <div class="drive-bar-outer"><div class="drive-bar-inner" style="width:${v}%;background:${driveColor(v)}"></div></div>
+      <span class="drive-val">${v}</span></div>`;
+  }
+  if (drives['coins'] != null) {
+    html += `<div class="coins-row">🪙 coins: ${drives['coins']}</div>`;
+  }
+  container.innerHTML = html;
+}
+
+function updateSensory(el, visual, auditory) {
+  const vBlock = el.querySelector('.visual-block');
+  const aBlock = el.querySelector('.auditory-block');
+  let vhtml = '<div class="sensory-label">👁 视觉</div>';
+  if (visual && visual.length) {
+    for (const e of visual) {
+      vhtml += `<div class="sensory-item"><span class="s-name">${e.name}</span> (${e.distance}格) — ${e.look || ''}</div>`;
+    }
+  } else { vhtml += '<div class="sensory-item" style="color:var(--dim)">—</div>'; }
+  vBlock.innerHTML = vhtml;
+
+  let ahtml = '<div class="sensory-label">👂 听觉</div>';
+  if (auditory && auditory.length) {
+    for (const e of auditory) {
+      ahtml += `<div class="sensory-item"><span class="s-name">${e.name}</span>: "${e.speech || ''}"</div>`;
+    }
+  } else { ahtml += '<div class="sensory-item" style="color:var(--dim)">—</div>'; }
+  aBlock.innerHTML = ahtml;
+
+  const summary = el.querySelector('.sensory-summary');
+  const vc = visual ? visual.length : 0;
+  const ac = auditory ? auditory.length : 0;
+  summary.textContent = `视觉${vc} · 听觉${ac}`;
+}
+
+function toggleInput(toggle) {
+  toggle.classList.toggle('open');
+  toggle.nextElementSibling.classList.toggle('open');
+}
+
+function formatTs(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function handleEvent(evt) {
+  const card = ensureCard(evt.agent, evt.zone || '?');
+  
+  // Update timestamp
+  if (evt.ts != null) {
+    card.querySelector('.ts').textContent = '⏱ ' + evt.ts.toFixed(1) + 's';
+    if (clockEl) clockEl.textContent = '⏱ ' + formatTs(evt.ts);
+  }
+
+  // Flash card border
+  card.classList.add('flash');
+  setTimeout(() => card.classList.remove('flash'), 600);
+
+  // Action
+  if (evt.action_text) {
+    const el = card.querySelector('.ch-action .body');
+    el.textContent = evt.action_text || '—';
+    el.classList.remove('new'); void el.offsetWidth; el.classList.add('new');
+  }
+  // Dialogue
+  if (evt.dialogue !== undefined) {
+    const el = card.querySelector('.ch-dialogue .body');
+    el.textContent = evt.dialogue ? `"${evt.dialogue}"` : '—';
+    el.classList.remove('new'); void el.offsetWidth; el.classList.add('new');
+  }
+  // Drives
+  if (evt.drives) {
+    updateDrives(card, evt.drives);
+  }
+  // Sensory
+  if (evt.visual || evt.auditory) {
+    updateSensory(card, evt.visual, evt.auditory);
+  }
+}
+
+// WebSocket
+function connect() {
+  const ws = new WebSocket(`ws://${location.hostname}:${PORT}/ws`);
+  ws.onopen = () => console.log('Dashboard connected');
+  ws.onmessage = (msg) => {
+    try {
+      const evt = JSON.parse(msg.data);
+      if (evt.agent === '_meta') return;
+      handleEvent(evt);
+    } catch(e) { console.error('parse error', e); }
+  };
+  ws.onclose = () => setTimeout(connect, 2000);
+}
+
+clockEl = document.getElementById('clock');
+connect();
+</script>
+</body>
+</html>

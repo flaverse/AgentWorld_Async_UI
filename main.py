@@ -33,6 +33,8 @@ def parse_args():
                         help="Run evaluation report from existing trace JSON")
     parser.add_argument("--api-port", type=int, default=0,
                         help="Start Gateway API on given port (0=disabled)")
+    parser.add_argument("--dashboard", type=int, default=0,
+                        help="Start Live Dashboard on given port (0=disabled)", dest="dashboard_port")
     return parser.parse_args()
 
 

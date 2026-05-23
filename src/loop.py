@@ -179,7 +179,7 @@ def _build_drive_boundaries_text(attr_cfg: dict) -> str:
 
 async def run_agent(agent, world, brain, assembler, systems,
                     runtime: float, *, trace_fn=None, cfg: LoopConfig = None,
-                    director=None):
+                    director=None, dashboard_emit=None):
     if cfg is None:
         cfg = LoopConfig()
     name = agent.name
@@ -206,6 +206,15 @@ async def run_agent(agent, world, brain, assembler, systems,
             systems["sensory"].update(agent, world.entities, world,
                                        channel_configs=labels.get("sensory_prompts"))
             sensory = al.sensory
+            if dashboard_emit:
+                vis = sensory.channels.get("visual", {})
+                aud = sensory.channels.get("auditory", {})
+                dashboard_emit({"agent": name, "zone": agent.zone,
+                                "phase": "sensory",
+                                "visual": [{"name": r.name, "distance": r.distance, "look": r.data.get("look", "")}
+                                           for r in vis.values()],
+                                "auditory": [{"name": r.name, "speech": r.data.get("current_speech", "")}
+                                            for r in aud.values()]})
 
             # Controlled agent: execute external order or sleep
             if director and director.is_controlled(agent.id):
@@ -249,6 +258,13 @@ async def run_agent(agent, world, brain, assembler, systems,
 
             decision = await brain.decide(ctx, template_name=al.template or "agent_decision",
                                            provider=al.llm_provider, slot_mask=al.slot_mask)
+            if dashboard_emit:
+                dashboard_emit({"agent": name, "zone": agent.zone,
+                                "phase": "decision",
+                                "intent": decision.get("intent", ""),
+                                "thinking": decision.get("thinking", ""),
+                                "main_thread": decision.get("main_thread", ""),
+                                "internal": decision.get("internal", "")})
             if decision.get("main_thread"):
                 al.main_thread = decision["main_thread"]
 
@@ -271,6 +287,18 @@ async def run_agent(agent, world, brain, assembler, systems,
                     al._last_intent_target = target.name
                     al._last_action_ts = time.time()
                     al._last_action_drives = {k: round(float(v), 1) for k, v in drives.attrs.items()}
+                    if dashboard_emit:
+                        dashboard_emit({"agent": name, "zone": agent.zone,
+                                        "phase": "action",
+                                        "action_text": action_text,
+                                        "dialogue": decision.get("dialogue", ""),
+                                        "story": decision.get("story", ""),
+                                        "target_name": target_name,
+                                        "drives": {k: round(float(v), 1) for k, v in drives.attrs.items()},
+                                        "coins": coins,
+                                        "intent": decision.get("intent", ""),
+                                        "main_thread": decision.get("main_thread", ""),
+                                        "thread_completed": decision.get("thread_completed", False)})
                     if trace_fn:
                         trace_fn(_make_trace(
                             name, target.name, target.id, action_text,
