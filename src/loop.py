@@ -6,7 +6,7 @@ Each phase may skip the remainder via continue.
 import time
 import asyncio
 from dataclasses import dataclass, field
-from core.kl_divergence import total_kl, snapshot_p
+from core.delta_gate import total_delta, snapshot_p
 
 
 @dataclass
@@ -26,9 +26,10 @@ class LoopConfig:
 # ── helpers ──
 
 def _make_trace(agent_name, target_name, target_id, action_text,
-                zone, pos, drives, coins, kl_text, sim_time,
+                zone, pos, drives, coins, delta_text, sim_time,
                 *, llm1_output=None, llm1_prompt=None, result=None,
-                note=None) -> dict:
+                note=None, thread_completed: bool = False,
+                intent: str = "") -> dict:
     """Build a trace dict for a single agent action.
     llm1_output and llm1_prompt omitted for intent-executed actions.
     """
@@ -36,7 +37,9 @@ def _make_trace(agent_name, target_name, target_id, action_text,
         "agent": agent_name, "target": target_name, "target_id": target_id,
         "action_text": action_text, "zone": zone, "pos": list(pos),
         "drives": {k: round(float(v), 1) for k, v in drives.attrs.items()},
-        "coins": coins, "kl_text": kl_text, "sim_time": sim_time,
+        "coins": coins, "delta_text": delta_text, "sim_time": sim_time,
+        "thread_completed": thread_completed,
+        "intent": intent,
     }
     if result:
         trace["result_narrative"] = result.narrative
@@ -61,7 +64,7 @@ def _build_sensory_text(sensory, labels: dict) -> str:
     return "\n\n".join(parts)
 
 
-def _build_decision_ctx(agent, al, world, sensory, labels, cfg, kl_text) -> dict:
+def _build_decision_ctx(agent, al, world, sensory, labels, cfg, delta_text) -> dict:
     """Construct the LLM decision context dict."""
     ctx = {
         "main_thread": al.main_thread,
@@ -73,7 +76,7 @@ def _build_decision_ctx(agent, al, world, sensory, labels, cfg, kl_text) -> dict
         "pos_x": agent.pos[0], "pos_y": agent.pos[1],
         "sensory_text": _build_sensory_text(sensory, labels),
         "memory_text": al.memory.to_prompt_text(cfg.memory_prompt_count, labels),
-        "kl_text": kl_text,
+        "delta_text": delta_text,
         "state_description": _build_state_text(al),
         "conversation_text": _build_conversation_text(al),
         "item_narrative": al._pending_narrative,
@@ -126,6 +129,52 @@ def _build_conversation_text(al) -> str:
     return "\n".join(lines)
 
 
+def _build_traits_text(al, loader) -> str:
+    """Render trait templates selected for this agent."""
+    all_traits = loader.data.get("traits", {})
+    parts = []
+    for t in al.traits:
+        if t in all_traits:
+            parts.append(all_traits[t]["template"])
+    return "\n\n".join(parts)
+
+
+def _build_intent_context(al) -> dict:
+    """Build intent feedback ctx — engine reports facts, LLM judges outcome."""
+    if not al._last_intent:
+        return {}
+    since = [e for e in al._conversation_buffer if e["ts"] > al._last_action_ts]
+    conv_lines = [f"- {e['speaker']}: {e['text']}" for e in since[-5:] if e.get("text")]
+    drives_now = al.drives.attrs
+    old = al._last_action_drives
+    delta_lines = []
+    for k in sorted(set(old) | set(drives_now)):
+        d = round(float(drives_now.get(k, 0)) - float(old.get(k, 0)), 1)
+        if d != 0:
+            dir_sym = "↑" if d > 0 else "↓"
+            delta_lines.append(f"- {k} {dir_sym}{abs(d)}")
+    return {
+        "last_intent": al._last_intent,
+        "last_target": al._last_intent_target,
+        "conversation_since_last_action": "\n".join(conv_lines) or "（无新对话）",
+        "drive_delta_since_last_action": "\n".join(delta_lines) or "（无变化）",
+    }
+
+
+def _build_drive_boundaries_text(attr_cfg: dict) -> str:
+    """Render drive boundary values only (0 and 100) as factual reference."""
+    lines = []
+    for attr, cfg in sorted(attr_cfg.items()):
+        desc = cfg.get("description", "")
+        lo = desc.split("0=", 1)[-1].split("。")[0].split("，")[0] if "0=" in desc else ""
+        hi = desc.split("100=", 1)[-1].split("。")[0].split("，")[0] if "100=" in desc else ""
+        parts = [f"{attr}: {lo}"] if lo else [attr]
+        if hi:
+            parts.append(f"100={hi}")
+        lines.append(" → ".join(parts) if len(parts) > 1 else parts[0])
+    return "\n".join(lines)
+
+
 # ── main loop ──
 
 async def run_agent(agent, world, brain, assembler, systems,
@@ -172,10 +221,10 @@ async def run_agent(agent, world, brain, assembler, systems,
             # ═══════════════════════════════════════════
             drives = al.drives
             coins = round(float(agent.get("interaction").private_attrs.get(cfg.currency, 0)))
-            kl_text = total_kl(al, sensory, drives, cfg.currency, cfg.text,
-                                cfg.thresholds, cfg.coin_epsilon, cfg.stale_timeout)
+            delta_text = total_delta(al, sensory, drives, cfg.currency, cfg.text,
+                                 cfg.thresholds, cfg.coin_epsilon, cfg.stale_timeout)
 
-            if not kl_text:
+            if not delta_text:
                 await asyncio.sleep(cfg.poll_interval)
                 continue
 
@@ -191,11 +240,15 @@ async def run_agent(agent, world, brain, assembler, systems,
                 await asyncio.sleep(cfg.poll_interval)
                 continue
 
-            ctx = _build_decision_ctx(agent, al, world, sensory, labels, cfg, kl_text)
+            ctx = _build_decision_ctx(agent, al, world, sensory, labels, cfg, delta_text)
+            # Inject slot-group-controlled context (not in base builder)
+            ctx["traits_text"] = _build_traits_text(al, assembler.loader)
+            ctx["drive_boundaries"] = _build_drive_boundaries_text(al.drives.attr_cfg)
+            ctx.update(_build_intent_context(al))
             prompt1 = assembler.assemble("agent_decision", ctx) if trace_fn else None
 
             decision = await brain.decide(ctx, template_name=al.template or "agent_decision",
-                                           provider=al.llm_provider)
+                                           provider=al.llm_provider, slot_mask=al.slot_mask)
             if decision.get("main_thread"):
                 al.main_thread = decision["main_thread"]
 
@@ -214,13 +267,19 @@ async def run_agent(agent, world, brain, assembler, systems,
                     agent.last_action_time = world.clock.now()
                     al._last_target_name = target.name
                     al._last_expects_reply = bool(decision.get("expects_reply"))
+                    al._last_intent = decision.get("intent", "")
+                    al._last_intent_target = target.name
+                    al._last_action_ts = time.time()
+                    al._last_action_drives = {k: round(float(v), 1) for k, v in drives.attrs.items()}
                     if trace_fn:
                         trace_fn(_make_trace(
                             name, target.name, target.id, action_text,
                             agent.zone, agent.pos, drives, coins,
-                            kl_text, world.clock.now(),
+                            delta_text, world.clock.now(),
                             llm1_output=decision, result=result,
-                            llm1_prompt=prompt1))
+                            llm1_prompt=prompt1,
+                            thread_completed=decision.get("thread_completed", False),
+                            intent=decision.get("intent", "")))
                 elif target and not interaction.can_interact(agent, target):
                     agent.move_to(list(target.pos))
                     agent.last_action_time = world.clock.now()

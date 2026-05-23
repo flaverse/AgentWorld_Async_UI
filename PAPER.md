@@ -85,30 +85,34 @@ def assemble(self, template_name, ctx):
 
 The assembler is the *only* cognitive code path in the system. It is slot-agnostic: iterating template slots, checking conditions, formatting templates. Any slot semantics are defined entirely in YAML.
 
-### 3.2 The 12-Slot Cognitive Architecture
+### 3.2 The 14-Slot, 3-Layer Architecture
 
-Our current deployment uses 12 slots forming a priority-ordered attention funnel:
+Our architecture uses 14 slots organized in 3 independent layers. NPC-layer slots are per-agent configurable via a group-matrix:
 
 ```
-Slot Order       | Condition       | Cognitive Directive
-─────────────────┼─────────────────┼──────────────────────
-main_thread      | main_thread     | Persist a goal; update it
-persona          | name            | Remember your identity
-world_rules      | (always)        | Obey world constraints
-kl_divergence    | kl_text         | Attend to what changed
-drive_state      | drives_table    | Satisfy your needs
-spatial_context  | zone_name       | Know your location
-sensory_section  | sensory_text    | Perceive surroundings
-recent_memory    | memory_text     | Recall your history
-avoid_repetition | memory_text     | Do not repeat yourself
-idle_guidance    | memory_text     | Rest is a valid choice
-action_guidance  | (always)        | Act freely; engine finds targets
-output_format    | (always)        | Output JSON in this schema
+Layer   | Slot Order        | Condition         | Cognitive Directive
+────────┼───────────────────┼───────────────────┼─────────────────────
+contract| action_scope      | (always)          | Action semantics + engine rules
+        | output_contract   | (always)          | JSON schema + field descriptions
+────────┼───────────────────┼───────────────────┼─────────────────────
+world   | spatial_context   | zone_name         | Know your location
+        | sensory_section   | sensory_text      | Perceive surroundings (3 channels)
+        | gate_highlight    | gate_text         | Nearby traversal points
+        | delta_gate        | delta_text        | Attend to what changed
+────────┼───────────────────┼───────────────────┼─────────────────────
+npc     | persona           | name              | Identity + background
+        | main_thread       | main_thread       | Long-term goal
+        | drive_values      | drives_table      | Numeric drive state
+        | drive_context     | drive_boundaries  | Boundary values (0/100 only)
+        | recent_memory     | memory_text       | Recall your history
+        | conversation_ctx  | conversation_text | Recent dialogue
+        | behavioral_traits | traits_text        | Per-agent tendencies (trait matrix)
+        | intent_context    | last_intent        | Prior intent + conversation symmetry
 ```
 
-Each slot maps to a GA equivalent: `main_thread` replaces the planning module (~200 lines of Python), `recent_memory` replaces memory retrieval (~200 lines), `avoid_repetition` + `idle_guidance` handle self-regulation (no GA equivalent), `sensory_section` replaces the location tree (~100 lines).
+**Per-agent trait system.** Behavior inclinations (persistence, novelty-seeking, conversational patience, etc.) are declarative YAML templates assigned per-agent via a traits matrix. The `behavioral_traits` slot renders only when traits are assigned. Phoebe with `traits: []` operates purely on persona; Gunther with `traits: [persistent, goal_directed]` receives persistence bias.
 
-**Configuring cognitive architecture.** Changing slot order changes agent behavior. Moving `recent_memory` before `main_thread` produces memory-driven rather than goal-driven agents—an experiment requiring code restructuring in GA.
+**Slot group matrix for ablation.** A `slot_groups.yaml` file defines reusable groups (full, pure-instinct, blank-slate, etc.) as 0/1 row vectors. Each world references a world-group; each NPC references an npc-group. Ablation experiments require only YAML configuration changes—zero Python modification.
 
 ### 3.3 The P/Q/KL Attention Gate
 
@@ -161,11 +165,11 @@ while running:
         sensory.update(observer, entities)
     
     Phase 2 — KL GATE:
-        kl_text = total_kl(P_channels, Q_channels)
-        if kl_text == "": sleep; continue
+        delta_text = total_delta(P_channels, Q_channels)
+        if delta_text == "": sleep; continue
     
     Phase 3 — DECIDE:
-        ctx = {main_thread, persona, drives, sensory, memory, kl_text}
+        ctx = {main_thread, persona, drives, sensory, memory, delta_text}
         prompt = assembler.assemble("agent_decision", ctx)  # 45 lines
         decision = brain.decide(ctx)                        # LLM #1
     
@@ -250,17 +254,18 @@ The world is YAML-defined. Entities declare layers and properties. A complete do
 
 **Discussion.** Full JSON produced ~300-character entries unreadable to the LLM for rapid pattern detection. Both human-readable formats (spliced text and natural story) achieved equivalent repetition reduction. We adopt natural language as the philosophically cleaner approach—the LLM reads its own narrative, not an engine-constructed string.
 
-### 5.6 Ablation: Idle Guidance
+### 5.6 Ablation: Per-Agent Traits vs Uniform Rules
 
-**Table 5: Effect of `idle_guidance` slot on stuck-listener behavior (60s, 25 agents)**
+**Table 5: Effect of per-agent traits on agent behavior (7 agents, 180s, Friends world)**
 
-| Agent | Without idle_guidance | With idle_guidance |
-|-------|----------------------|-------------------|
-| Lambert (witcher) | 15+ adjacent "sit at table" | 0 |
-| Dandelion (bard) | 20+ adjacent "greet Dijkstra" | 0 |
-| Quartermaster (supply) | 20+ adjacent "listen to conversation" | 0 |
+| Agent | Traits | Actions | Thread Completions | Adjacent Repetition |
+|-------|--------|---------|-------------------|-------------------|
+| Monica | `[persistent, satisficing, socially_reciprocal]` | 32 | 5 | 2.2% |
+| Gunther | `[persistent, goal_directed]` | 25 | 0 | 25.0% |
+| Phoebe | `[]` (pure persona) | 26 | 2 | 0% |
+| Rachel | `[novelty_seeking]` | 29 | 0 | 3.6% |
 
-**Discussion.** These agents were "background listeners"—close enough to active social groups to trigger KL via visual expression changes, but with no new content to contribute. The LLM repeatedly output "join the table" or "stand nearby" because it had no concept of "just listen." The `idle_guidance` slot teaches the LLM that `action: null` is valid. Adding one YAML entry (8 lines) eliminated all stuck-listener behavior with zero code changes.
+**Discussion.** The per-agent trait system replaces the former global `world_rules`, `avoid_repetition`, and `idle_guidance` slots. Instead of imposing uniform behavioral rules on all agents, each NPC receives a custom set of tendency templates. Persistence makes Monica chase Chandler for 33 rounds (in-character). Without conversational patience, Gunther repeats jealousy 7 times. Phoebe, assigned zero traits, operates purely on persona — and remains the most spontaneous agent. This validates that behavioral bias should be per-character, not per-world.
 
 ### 5.7 Qualitative: Emergent Social Structure
 
@@ -303,8 +308,8 @@ The v1→v7 evolution empirically demonstrates a consistent principle: **every d
 
 | Deleted Mechanism | How LLM Filled the Gap |
 |------------------|----------------------|
-| Duplication filter | `avoid_repetition` slot + natural language memory |
-| Observing state machine | KL gate: no change → no action (natural waiting) |
+| Duplication filter | Per-agent `conversational_patience` trait + memory |
+| Observing state machine | Delta gate: no change → no action (natural waiting) |
 | Action registry | Natural language actions + engine fuzzy matching |
 | Hardcoded sensory rendering | YAML `sensory_prompts` template-driven channels |
 | Inbox messaging system | Layer write-then-poll blackboard communication |
@@ -325,7 +330,7 @@ This pattern suggests a design heuristic for LLM agent systems: **when consideri
 
 5. **LLM-specific scope.** The SVA pattern is evaluated only with LLMs as the reasoner. Generalization to other reasoner types (symbolic planners, RL policies) is theoretical at this stage.
 
-6. **Slot discovery is manual.** The 12-slot configuration was arrived at through iterative engineering. There is no principled method for determining the optimal number or content of slots for a given domain.
+6. **Slot discovery is manual.** The 14-slot, 3-layer configuration was arrived at through iterative engineering. There is no principled method for determining the optimal number or content of slots for a given domain.
 
 7. **No human evaluation.** Narrative quality, social plausibility, and goal coherence are assessed by the authors. A human study comparing agent behavior to human expectations would strengthen claims of "natural social behavior."
 
@@ -343,11 +348,11 @@ This pattern suggests a design heuristic for LLM agent systems: **when consideri
 
 5. **Formal connection to active inference.** The P/Q/KL gate is a discrete symbolic implementation of the free energy principle. A formal mapping between SVA and active inference could ground the architecture in a well-established theoretical framework.
 
-6. **Declarative priors for controlled social simulation.** The SVA's most distinctive capability—and the one we believe will attract the most interest from the social simulation community—is its ability to conduct *controlled experiments on priors at arbitrary granularity*. Because each slot is an independently toggleable, conditionally-rendered prompt fragment, a researcher can vary a single prior (world-level moral rules, group-level information access, individual-level cognitive bias) while holding all other configuration constant. This enables experimental designs that are infeasible in imperative agent architectures.
+6. **Declarative priors for controlled social simulation.** The SVA's most distinctive capability is its ability to conduct *controlled experiments on priors at arbitrary granularity*. Because each trait and slot is independently toggleable via the `slot_groups.yaml` matrix, a researcher can vary a single prior (per-agent trait assignment, world-level slot group, or individual cognitive bias) while holding all other configuration constant.
 
-**World-level priors.** Varying the `world_rules` slot between a "high-morality" and a "low-morality" template, with identical agent populations, measures whether moral priors causally affect emergent social structure.
+**World-level priors.** Switching the world-slot-group between `full` and `sensorless` varies whether agents perceive environmental changes—testing whether sensory deprivation affects social structure, while keeping agent personalities identical.
 
-**Individual-level priors.** Adding a `paranoia` slot to exactly one agent out of 25—while all others share identical configuration—tests whether a single cognitive deviant influences group behavior, information flow, or social network topology.
+**Individual-level priors.** Adding a specific trait (e.g., `paranoia`) to exactly one agent—while all others share identical configuration—tests whether a single cognitive deviant influences group behavior.
 
 **Group-level priors.** Varying `sensory_prompts.visual.state` (information transparency) across zones measures how information asymmetry shapes cooperation and exploration.
 
@@ -393,21 +398,24 @@ We presented the **Slot Vector Architecture**, a declarative framework for LLM a
 
 ---
 
-## Appendix A: Full Slot Registry
+## Appendix A: Full Slot Registry (14 Slots, 3 Layers)
 
-| Slot | Condition | Template (abbreviated) |
-|------|-----------|----------------------|
-| `main_thread` | `main_thread` | "Your current goal: {main_thread}. Serve it." |
-| `persona` | `name` | "You are {name}. {personality}" |
-| `world_rules` | (always) | "Rules: conservation, diminishing returns..." |
-| `kl_divergence` | `kl_text` | "Changes: {kl_text}" |
-| `drive_state` | `drives_table` | "State: {drives_table}" |
-| `spatial_context` | `zone_name` | "Location: {zone_name} ({pos_x}, {pos_y})" |
-| `sensory_section` | `sensory_text` | "{sensory_text}" (three-channel template) |
-| `recent_memory` | `memory_text` | "Recent history: {memory_text}" |
-| `avoid_repetition` | `memory_text` | "Check history. Don't repeat." |
-| `idle_guidance` | `memory_text` | "null action is valid. Wait if listening." |
-| `action_guidance` | (always) | "Act freely. Engine finds targets." |
+| Layer | Slot | Condition | Template (abbreviated) |
+|-------|------|-----------|----------------------|
+| contract | `action_scope` | (always) | "action: free text. null = no action." |
+| contract | `output_contract` | (always) | JSON schema + field descriptions |
+| world | `spatial_context` | `zone_name` | "Location: {zone_name} ({pos_x}, {pos_y})" |
+| world | `sensory_section` | `sensory_text` | "{sensory_text}" (three-channel template) |
+| world | `gate_highlight` | `gate_text` | "Traversable: {gate_text}" |
+| world | `delta_gate` | `delta_text` | "Changes: {delta_text}" |
+| npc | `persona` | `name` | "{name}. {personality}" |
+| npc | `main_thread` | `main_thread` | "Goal: {main_thread}. Mark ✓ when done." |
+| npc | `drive_values` | `drives_table` | "State: {drives_table}" |
+| npc | `drive_context` | `drive_boundaries` | "Boundaries: {drive_boundaries}" (0/100 only) |
+| npc | `recent_memory` | `memory_text` | "Memory: {memory_text}" |
+| npc | `conversation_context` | `conversation_text` | "Dialog: {conversation_text}" |
+| npc | `behavioral_traits` | `traits_text` | per-agent tendency templates (from traits matrix) |
+| npc | `intent_context` | `last_intent` | "Prior intent: {last_intent} (attempt {intent_streak})" |
 | `output_format` | (always) | "Output JSON: {thinking, action, story, ...}" |
 
 ## Appendix B: Sensory Prompts Configuration

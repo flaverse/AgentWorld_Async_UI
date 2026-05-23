@@ -2,6 +2,7 @@ world:
   name: 猎魔人世界 - 白果园
   time_scale: 60
   start_time: 08:00
+  world-group: full
   simulation:
     currency: coins
     poll_interval: 0.3
@@ -52,9 +53,13 @@ world:
       kl_entered: '{channel}: {name} 进入'
       kl_left: '{channel}: {name} 离开'
       kl_changed: '{channel}: {name} 变化'
-      kl_stale: 太久没事做了
+      kl_stale: 距上次行动已超过 {stale_timeout}s
       kl_coin: coins {sign}{delta}
       kl_state_cross: '{attr} {arrow}突破{t}'
+
+traits:
+  default: []
+
 zones:
 - id: bar_zone
   name: 狐狸与鹅酒馆

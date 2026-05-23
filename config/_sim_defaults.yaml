@@ -44,6 +44,6 @@ simulation:
     kl_entered: '{channel}: {name} 进入'
     kl_left: '{channel}: {name} 离开'
     kl_changed: '{channel}: {name} 变化'
-    kl_stale: 太久没事做了
-    kl_coin: coins {sign}{delta}
+    kl_stale: '距上次行动已超{stale_timeout}s'
+    kl_coin: 'coins {sign}{delta}'
     kl_state_cross: '{attr} {arrow}突破{t}'

@@ -40,7 +40,7 @@
 
 ## 核心贡献
 
-### 1. Slot Vector Architecture — 0 行认知代码
+### 1. Slot Vector Architecture — 45 行声明式调度引擎（零行领域特定的认知代码）
 
 Generative Agents (Park et al., 2023) 的认知栈（记忆检索、反思、计划、重要度评估）约 730 行 Python。AgentWorld 以 **12 个声明式 YAML slot** 替代全部认知流程：45 行的 Assembler 遍历模板的有序 slot 列表，按 `condition` 激活，按列表位置决定优先级。新增认知能力 = YAML slot 定义 + 模板引用。**Python 零改动。**
 
@@ -227,11 +227,12 @@ python main.py --api-port 8765              # 启动 Gateway API
 
 | Ver | Milestone |
 |-----|-----------|
-| **v11** | 哲学自检 (P0): 删除 INTENT 完整机制 · 精确 `target_name` 匹配 · `speech_window` YAML 化 · `_build_state_text` 零格式化 · Director Phase 0 跳过 · Gateway API + MCP · 评估模块 18 指标 · 4 世界配置 |
-| **v10** | 多世界热切换 · 哲学清理: proximity+3 fallback 删除, Intent STALE 删除 · `action_guidance` 通用化 · error_collector · `call_template` · temperature 生效 |
+| **v12** | 三层 slot 组 (contract/world/npc) · slot_groups 二维矩阵 · per-agent traits 系统 · intent_context 战术反馈 · drive 分拆 values+context · prompt token 减 2/3 · Phoenix 去"必须" · PEP 8 兼容 |
+| **v11** | 哲学自检 (P0): `target_name` 匹配 · `speech_window` YAML 化 · Director Phase 0 · Gateway API · 评估 18 指标 · 4 世界配置 |
+| **v10** | 多世界热切换 · 哲学清理: proximity fallback 删除 · error_collector · temperature 生效 |
 | **v9** | `update_entity()` 盲赋值 · `target_changes` · Director · SessionManager |
 | v8 | Per-attr drive · Gate crossing · Properties fix · -68 行死代码 |
-| v7.1 | `main_thread` · `idle_guidance` · Intent DONE · Inbox 删除 |
+| v7.1 | `main_thread` · Inbox 删除 |
 | v7 | 三通道感官 · P/Q dict copy fix |
 | v6 | Slot vector · Dedup+observing 删除 · -364 行 |
 | v5 | 泛型 Layer.observe() · 校验 · 持久化 |
@@ -249,7 +250,7 @@ MIT
 
 ## Overview
 
-A pure-Python asynchronous multi-agent autonomous world engine. Up to 25 LLM-driven agents socialize, traverse zones, and collaborate across a persistent world. **Hot-swappable between three world configurations** — The Witcher · Friends · Spider-Man — fully YAML-configured; Python contains **zero cognitive decision-making code**. 34 source files, ~1900 lines Python, ~450 lines YAML.
+A pure-Python asynchronous multi-agent autonomous world engine. Up to 25 LLM-driven agents socialize, traverse zones, and collaborate across a persistent world. **Hot-swappable between three world configurations** — The Witcher · Friends · Spider-Man — fully YAML-configured; Python contains **YAML-defined decision logic**. 34 source files, ~1900 lines Python, ~450 lines YAML.
 
 ### Core Thesis
 

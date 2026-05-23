@@ -7,7 +7,8 @@ from ..registry import register_metric
 @register_metric(
     name="conversation_depth",
     category="narrative",
-    description="Distribution of multi-turn conversation chain lengths. Detects if agents sustain dialogue.",
+    description="Distribution of multi-turn conversation chain lengths. Detects if agents sustain dialogue."
+              " Formula: chain = (a1→b1, a2→b2, ...) where a_{k+1}=b_k and Δt<20s.",
     source="Generative Agents 2023"
 )
 def conversation_depth(traces: list[dict]) -> dict:
@@ -53,7 +54,8 @@ def conversation_depth(traces: list[dict]) -> dict:
 @register_metric(
     name="thread_persistence",
     category="narrative",
-    description="Average duration (seconds) an agent maintains the same main_thread before changing it.",
+    description="Average duration (seconds) an agent maintains the same main_thread before changing it."
+              " Formula: mean duration between consecutive thread_text changes, computed per agent.",
     source="AW built-in"
 )
 def thread_persistence(traces: list[dict]) -> dict:
@@ -95,7 +97,7 @@ def thread_persistence(traces: list[dict]) -> dict:
 @register_metric(
     name="main_thread_completion_rate",
     category="narrative",
-    description="Fraction of main_threads that were marked as completed (✓完成 or 完成 in text).",
+    description="Fraction of main_threads where agent explicitly marked thread_completed=true.",
     source="AW built-in"
 )
 def main_thread_completion_rate(traces: list[dict]) -> dict:
@@ -108,9 +110,8 @@ def main_thread_completion_rate(traces: list[dict]) -> dict:
         mt = llm1.get("main_thread")
         if not mt:
             continue
-        text = str(mt)
-        threads_seen.add(text[:80])
-        if "✓完成" in text or " 完成" in text:
+        threads_seen.add(str(mt)[:80])
+        if t.get("thread_completed"):
             completed += 1
 
     return {

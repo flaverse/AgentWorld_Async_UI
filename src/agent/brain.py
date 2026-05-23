@@ -57,9 +57,9 @@ class Brain:
         return self.llm_clients.get(key, list(self.llm_clients.values())[0])
 
     async def decide(self, context: dict, template_name: str = "agent_decision",
-                     provider: str = "") -> dict:
+                     provider: str = "", slot_mask: dict = None) -> dict:
         llm = self._get_llm(provider)
-        prompt = self.assembler.assemble(template_name, context)
+        prompt = self.assembler.assemble(template_name, context, slot_mask=slot_mask)
         system = self.assembler.get_system_prompt(template_name)
         schema = self.assembler.get_output_schema(template_name)
         temp = self.assembler.get_temperature(template_name)

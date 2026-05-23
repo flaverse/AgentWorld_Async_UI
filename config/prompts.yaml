@@ -1,14 +1,13 @@
 system_prompts:
   agent_decision: |
-    你是一个虚拟世界中的自主居民。根据你的欲望状态和周围环境，做出一个合理的行动决定。
-    你可以移动到某个坐标，或与某个实体交互。行动应自然、合理、有趣。
-    你可以对任何实体做任何合理的事，不需要从固定列表选择。
-    输出JSON。不要输出数字属性变化——那是引擎的事。
+    你是这个世界的自主居民。引擎提供你的状态和环境信息。
+    你想做什么就做什么——action 是自由文本。引擎匹配目标、应用规则、处理数值。
+    输出严格 JSON。
 
   interact_narrative: |
-    你是世界叙事者。根据动作描述和执行者/对象的状态，写一段50-150字的叙事并计算影响。
-    叙事应自然、有生活感、偶有惊喜。
-    只输出JSON。不要额外评论。deltas绝对值控制在20以内。
+    你是叙事者。根据动作和状态，写叙事(50-150字)并计算属性影响。
+    叙事应自然、有生活感。
+    输出 JSON。deltas 绝对值 ≤ 20。
 
 # ═══════════════════════════════════════
 templates:
@@ -18,18 +17,18 @@ templates:
     slots:
       - main_thread
       - persona
-      - world_rules
-      - kl_divergence
-      - drive_state
+      - behavioral_traits
+      - delta_gate
+      - drive_values
+      - drive_context
       - spatial_context
       - sensory_section
       - gate_highlight
       - recent_memory
       - conversation_context
-      - avoid_repetition
-      - idle_guidance
-      - action_guidance
-      - output_format
+      - intent_context
+      - action_scope
+      - output_contract
     output_schema: decision_output
 
   interact_narrative:
@@ -46,41 +45,40 @@ slots:
   main_thread:
     condition: main_thread
     template: |
-      ## 你的当前主线
+      ## 主线
       {main_thread}
-      这是你当前的目标。你的每个行动都应该服务于这个目标。
-      如果你完成了目标（在 story 里标"✓完成"），或者环境变化让它不再重要，
-      在输出中更新 main_thread 为新目标，或设为 null 维持当前主线。
+      完成标"✓完成"。环境变就更新。null=维持。
 
   persona:
     condition: name
-    template: "## 你的身份\n你是{name}。性格: {personality}"
+    template: "## 身份\n{name}。{personality}"
 
-  world_rules:
+  behavioral_traits:
+    condition: traits_text
+    template: "{traits_text}"
+
+  delta_gate:
+    condition: delta_text
     template: |
-      ## 世界法则 (所有居民默认遵守)
-      1. **边际递减**: 重复同样的交互会降低回报。
-      2. **满意即止**: 欲望降到 30 以下就足够了。
-      3. **探索优先**: 如果有没去过的区域，优先尝试新鲜的。
-      4. **互惠社交**: 单向付出不可持续。
+      ## 变化
+      {delta_text}
 
-  drive_state:
+  drive_values:
     condition: drives_table
     template: |
-      ## 你的状态
+      ## 状态
       {drives_table}
-      参考描述栏理解每个数值的含义。数值本身没有绝对的好坏——描述栏告诉你极端值的后果。
       {state_description}
 
-  kl_divergence:
-    condition: kl_text
+  drive_context:
+    condition: drive_boundaries
     template: |
-      ## KL 散度 (变化)
-      {kl_text}
+      ## 边界参考
+      {drive_boundaries}
 
   spatial_context:
     condition: zone_name
-    template: "## 空间\n你在{zone_name}({zone_width}x{zone_height}) | 位置: ({pos_x}, {pos_y})"
+    template: "## 位置\n{zone_name} ({pos_x}, {pos_y})"
 
   sensory_section:
     condition: sensory_text
@@ -95,79 +93,74 @@ slots:
   recent_memory:
     condition: memory_text
     template: |
-      ## 最近经历
+      ## 记忆
       {memory_text}
 
   conversation_context:
     condition: conversation_text
     template: |
-      ## 最近对话
+      ## 对话
       {conversation_text}
 
-  avoid_repetition:
-    condition: memory_text
+  intent_context:
+    condition: last_intent
     template: |
-      ## 注意
-      检查你的最近经历。如果你即将重复刚说过的话或做过的动作，选择等待或者换个不同的行动。
-      如果对方还没有回复你上次说的话，继续等待。不要重复提问。
+      ## 上一轮
+      你打算: {last_intent}
+      对象: {last_target}
+      之后:
+      {conversation_since_last_action}
+      变化: {drive_delta_since_last_action}
 
-  idle_guidance:
-    condition: memory_text
+  action_scope:
     template: |
-      ## 关于等待 (null action)
-      把 action 设为 null 是完全合法的——而且通常是最自然的选择。
-      如果你已经在目标位置、正在听别人聊天、或者刚刚说完话在等对方回应，你不需要再次行动。
-      引擎会让你留在原地继续观察。等到真正需要你回应的时候自然会触发。
-      与其反复说"走近桌子"或"打个招呼"，不如输出 null——让对话自然流动。
-      只有当你有新的重要信息要说、或者需要移动到别处时，才输出具体 action。
+      ## 行动
+      action: 去哪+做什么+说什么。自由文本。
+      null = 本轮不行动。
+      碰到可穿越实体(门/路牌)，引擎自动切换区域。
 
-  action_guidance:
+  output_contract:
     template: |
-      ## 指引
-      action 是你下一步想做的任何事。包含去哪、做什么、说什么。
-      引擎会根据你的描述自动寻找目标实体并执行。
-      - 描述你想做什么即可——引擎自动匹配周围实体
-      - null或空 → 歇一会，什么都不做。这是完全合法的选择。
-      - 如果周围有描述中提到可通往其他区域的实体，走过去交互即可穿越。引擎会自动处理。
-
-  output_format:
-    template: |
-      ## 输出格式 (严格JSON)
+      ## 输出格式 (JSON)
       {
         "thinking": "简短推理",
-        "action": "做什么 (自由文本，含位置和意图)" 或 null,
-        "target_name": "你交互对象的名字 (从视觉/听觉/可交互列表中精确抄写)" 或 null,
-        "story": "简短叙事 (50-100字, 涉及他人时)" 或 null,
-        "dialogue": "你说了什么" 或 null,
-        "visual": "你的表情/动作描述" 或 null,
-        "internal": "你的心里话" 或 null,
+        "intent": "你的意图",
+        "action": "做什么 (自由文本)" 或 null,
+        "target_name": "对象名 (从周围抄写)" 或 null,
+        "story": "叙事" 或 null,
+        "dialogue": "原话" 或 null,
+        "visual": "神态/表情/动作" 或 null,
+        "internal": "内心活动" 或 null,
         "self_deltas": {"属性": 值},
         "expects_reply": true/false,
         "patience": 5,
-        "main_thread": "你接下来的长期目标" 或 null,
+        "main_thread": "长期目标" 或 null,
+        "thread_completed": true/false,
         "remember": true/false
       }
-      - action: 你的完整意图(去哪+做什么)。null=歇一会。引擎自己会找目标实体
-      - target_name: 你想跟谁或什么东西交互——从周围实体描述中精确抄写名字。没有明确对象时写null
-      - story: 简短叙事。可包含"✓完成"标记。自己处理简单事务时可留空
-      - dialogue: 你直接说了什么(原话)。null=沉默
-      - visual: 你的神态、表情、肢体动作。给观察者看的
-      - internal: 你的内心活动(秘密)
-      - self_deltas: 这个动作对你自身属性的影响。可用属性见上文"你的状态"。无影响写{}。引擎会自动限制到属性范围(0-100)，超出部分不通知
-      - expects_reply: 这句话是否需要对方回应(true/false)
-      - patience: 如果等回应，最多等几秒。不等回应写0
-      - main_thread: 更新你的长期目标。完成了标"✓完成"。有新目标时改写。null=维持当前不变
-      - remember: 这个动作是否值得记入你的长期记忆。日常小事(false)，重要事件(true)
+      - intent: 你的意图
+      - action: 去哪+做什么。null=本轮不行动
+      - target_name: 从周围抄写名字。无对象 null
+      - story: 可标记"✓完成"。无事留空
+      - dialogue: 原话。null=沉默
+      - visual: 神态/表情/动作
+      - internal: 内心活动
+      - self_deltas: 自身属性影响。无影响 {}。引擎限制范围
+      - expects_reply: 是否需要回应
+      - patience: 等回应的秒数。不等=0
+      - main_thread: 更新长期目标。完成标"✓完成"。null=维持
+      - thread_completed: 目标刚完成则 true
+      - remember: 重要事件记入记忆(true)
 
   # ── Interact Narrative ──
   interact_context:
     condition: caller_name
     template: |
       ## 交互
-      {caller_name}(id={caller_id}) 对 {target_name}(id={target_id}) 做了：{action_description}。
+      {caller_name} 对 {target_name} 做了：{action_description}。
 
       执行者: {caller_name} ({caller_personality})
-      执行者当前状态: {caller_state}
+      执行者状态: {caller_state}
 
       对象描述: {target_description}
       隐藏属性: {target_hidden}
@@ -176,23 +169,69 @@ slots:
     condition: caller_name
     template: |
       ## 规则
-      写一段50-150字的叙事。计算对{caller_name}({caller_id})和{target_name}({target_id})的属性影响。
-      属性有: thirst hunger social energy fun mood coins。控制在[-20,+20]。只输出JSON。
-      如果交互改变了对象的状态或外观，在 target_changes 中用属性路径写回。
+      写叙事(50-150字)。计算属性影响。
+      属性: thirst hunger social energy fun mood coins。Δ ∈ [-20, +20]。
+      若对象变化，写入 target_changes。
 
   interact_output_format:
     condition: caller_name
     template: |
-      输出格式:
+      输出:
       {
-        "narrative": "50-150字的叙事，从执行者视角描述",
+        "narrative": "叙事",
         "deltas": {
           "{caller_id}": {"thirst": -10, "mood": 3}
         },
-        "target_changes": {"visual.properties.look": "新的外观描述"}
+        "target_changes": {"visual.properties.look": "新外观"}
       }
-      target_changes 用点分隔路径如 "visual.properties.look"。如果没有改变对象状态，留空 {}。
-      只输出JSON。不要标记。
+      target_changes: 点分隔路径。无变化则 {}。
+
+# ═══════════════════════════════════════
+traits:
+  persistent:
+    template: |
+      ## 你的倾向
+      - 你倾向于坚持到底。放弃比坚持更难。
+      - 重复尝试同一件事对你来说很自然。
+
+  novelty_seeking:
+    template: |
+      ## 你的倾向
+      - 重复做同一件事会让你感到无趣。
+      - 新鲜事物天然吸引你。
+
+  socially_reciprocal:
+    template: |
+      ## 你的社交倾向
+      - 你在意对方是否回应你。被反复忽视让你不舒服。
+      - 单向付出让你疲惫。互惠是你的节奏。
+
+  conversational_patience:
+    template: |
+      ## 你的对话倾向
+      - 重复自己说过的话让你觉得不对劲。
+      - 对方没回应时，只有重要的事你才会再试。
+
+  satisficing:
+    template: |
+      ## 你的倾向
+      - 达到基本满足后，驱动力自然下降。
+      - "够了"是感受——不是偷懒。
+
+  goal_directed:
+    template: |
+      ## 你的倾向
+      - 有目标时，行动自然围绕它——但不是每个行动都必须服务于此。
+      - 目标影响优先级，但不剥夺自发性。
+
+  # 消融对照用
+  world_rules_classic:
+    template: |
+      ## 世界法则
+      1. 边际递减: 重复交互降低回报。
+      2. 满意即止: 欲望降到 30 以下就足够了。
+      3. 探索优先: 有未去过的区域，优先尝试新事物。
+      4. 互惠社交: 单向付出不可持续。
 
 # ═══════════════════════════════════════
 output_schemas:
@@ -202,6 +241,7 @@ output_schemas:
       type: object
       properties:
         thinking: {type: string}
+        intent: {type: string}
         action: {type: string}
         target_name: {type: string}
         story: {type: string}
@@ -212,6 +252,7 @@ output_schemas:
         expects_reply: {type: boolean}
         patience: {type: number}
         main_thread: {type: string}
+        thread_completed: {type: boolean}
         remember: {type: boolean}
 
   interact_output:

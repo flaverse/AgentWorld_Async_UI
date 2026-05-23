@@ -29,7 +29,7 @@ Park et al. (2023) 的 Generative Agents 论文定义了四个核心认知阶段
 
 **合计 ~730 行 Python 代码。** 这些代码不生产世界内容——它们纯粹管理 LLM 的思维流程：什么时候该想、该想什么、该怎么评估记忆、该怎么把计划拆成子任务。
 
-**AgentWorld Async: 0 行认知代码。所有"怎么思考"的决策权在 YAML 里。**
+**AgentWorld Async: 45 行声明式调度引擎。所有"怎么思考"的决策权在 YAML 里——Python 从不涉及 hunger、dialogue 等任何领域语义。**
 
 ---
 
@@ -73,26 +73,31 @@ def assemble(self, template_name, ctx):
 
 ## 2. Slot 列表作为认知架构
 
-AW 当前 12 个 slot，每个都是对 LLM 的一条思维指令。排列顺序形成"注意力漏斗"：
+AW 当前 13 个 slot，分三层：
+
+**Contract 层（输出契约）— 永远激活：**
+action_scope, output_contract
+
+**World 层（环境信息）— 世界级共享：**
+spatial_context, sensory_section, gate_highlight, delta_gate
+
+**NPC 层（角色驱动）— per-agent 可配置：**
+persona, main_thread, drive_values, drive_context,
+recent_memory, conversation_context, behavioral_traits, intent_context
 
 ```
-main_thread       → "你有目标。围绕它行动。更新它。"
-persona           → "记住你是谁。"
-world_rules       → "世界有规则。遵守。"
-kl_divergence     → "世界变了。注意这些变化。"
-drive_state       → "你有欲望。满足它们。"
-spatial_context   → "你在某个地方。知道在哪。"
-sensory_section   → "周围有人和物。看、听、够得到什么。"
-recent_memory     → "你做过一些事。记住它们。"
-avoid_repetition  → "别重复自己。"
-idle_guidance     → "什么都不做也是合法的选择。"
-action_guidance   → "行动是自由的。引擎帮你找目标。"
-output_format     → "输出JSON。这些字段是引擎需要的。"
+contract:    action_scope → "你怎么行动。"  output_contract → "输出格式。"
+world:       spatial_context → "你在哪里。"  sensory_section → "周围有什么。"
+             gate_highlight → "附近的门。"   delta_gate → "世界变化。"
+npc:         persona → "你是谁。"           main_thread → "你的目标。"
+             drive_values → "你的状态。"     drive_context → "状态边界。"
+             recent_memory → "经历。"       conversation_context → "对话。"
+             behavioral_traits → "倾向。"    intent_context → "上轮回顾。"
 ```
 
 **这些不包含任何"怎么实现"的逻辑。** 它们只告诉 LLM "作为一个 agent 在这个世界上应该关注什么"。LLM 自己决定如何权衡这些关注点。
 
-**改变顺序 = 改变认知架构。** 零代码。把 `recent_memory` 移到 `main_thread` 前面，agent 就会变成"记忆驱动"而非"目标驱动"。
+**不同 NPC 可以加载不同的 slot 组合。** 通过 `slot_groups.yaml` 中的 group-id（如 `full`、`pure-instinct`、`blank-slate`）和 world.yaml 中的 per-agent `npc-group:` 配置——Phoebe 可以走 `pure-instinct`（无 intent、无记忆），Monica 走 `full`。零代码——只改 YAML。
 
 ---
 
@@ -102,7 +107,7 @@ output_format     → "输出JSON。这些字段是引擎需要的。"
 引擎的职责 (Python)           LLM 的职责 (Slot 引导)
 ─────────────────────        ──────────────────────
 世界是什么 (Entity/Layers)    我在这个世界里是谁 (persona)
-世界变了吗 (KL Gate)          我该关注什么变化 (kl_divergence)
+世界变了吗 (Delta Gate)        我该关注什么变化 (delta_gate)
 我周围有什么 (SensorySystem)  我怎么理解周围 (sensory_section)
 我做过什么 (Memory)           我该记住什么 (recent_memory)
 我的目标是什么 (main_thread)  我该怎么实现它 (action_guidance)
@@ -136,12 +141,12 @@ output_format     → "输出JSON。这些字段是引擎需要的。"
 | Memory retrieval | recency × importance × relevance 加权 | `recent_memory` — LLM 自己提取相关内容 | 4 |
 | Reflection | 独立 LLM 调用 + 独立 prompt | `planning_guidance` — KL 触发时审视目标 | 10 |
 | Plan | 独立 plan prompt + plan tree 数据结构 | `main_thread` + output 中的 main_thread 字段 | 12 |
-| Repetition avoidance | 不存在（GA 无此机制） | `avoid_repetition` + `idle_guidance` | 15 |
+| Repetition avoidance | 不存在（GA 无此机制） | `behavioral_traits` — per-agent 可配置倾向 | 8 |
 | Dialogue generation | 独立 prompt + 固定输出格式 | `output_format` — 统一 JSON schema | 23 |
 | Sensory input | Location tree + 视觉标注 | `sensory_prompts` YAML — 模板驱动三通道 | 14 |
 | Personality | Prompt 硬编码 | `persona` slot + YAML `personality` 字段 | 3 |
 
-**GA: ~730 行 Python 认知代码。AW: ~88 行 YAML slot 定义。0 行 Python 认知代码。**
+**GA: ~730 行 Python 认知代码。AW: ~100 行 YAML slot + trait 定义。Assembler 的 45 行是纯字符串格式化引擎——它不知道 "hunger" 是什么，不知道 agent 有什么行为。所有认知决策（何时激活什么注意力通道、如何评估紧迫性、做什么 action）都在 YAML 里声明。**
 
 ---
 
@@ -155,7 +160,7 @@ v3:   submit() chain        调度"交互怎么执行"
 v4:   event_bus             调度"消息怎么传播"
 v5:   action registry       调度"你能做什么"
 v6:   observing state machine 调度"你该不该等"
-v6:   duplication filter    调度"你是不是在重复"
+v6:   duplication filter    调度"你是不是在重复"（v8+ 移至 per-agent traits）
 v7:   sensory_prompts硬编码  调度"你看到什么"
 v7.1: inbox                 调度"谁给你发消息"
 ```
@@ -167,7 +172,7 @@ v7.1: inbox                 调度"谁给你发消息"
 | 删除 | LLM 怎么填补 |
 |------|-------------|
 | action registry | LLM 用自然语言描述想做什么，引擎模糊匹配目标 |
-| duplication filter | LLM 看自己的 memory + avoid_repetition slot 自主避免 |
+| duplication filter | LLM 看自己的 memory + per-agent trait 自主避免 |
 | observing state machine | KL Gate 天然是等待机制——世界不变，Agent 不动 |
 | sensory 硬编码 | YAML `sensory_prompts` 模板驱动渲染，视觉/听觉/可交互独立通道 |
 | inbox | Agent 通过写层 → 他人轮询实现通信，无需消息系统 |
@@ -212,36 +217,49 @@ AgentLoop {                   Assembler.assemble(template, ctx)
 
 3. **方向永远是删除，不是添加。** 每删一个调度器，Agent 的自主性就增加一分。v1→v7 的进化证明了"少即是多"——删除 duplicaton filter 导致 LLM 自主学会避免重复（通过 memory + slot），删除 observing state machine 导致 KL Gate 天然替代等待机制。
 
-4. **可组合性 > 系统性。** 一个 45 行的 Assembler + 12 个 YAML slot 可以替代 GA 的 730 行认知代码。不是因为 AW 更聪明——是因为"组合"天生比"系统"更灵活。新认知能力 = 新 slot，新认知架构 = 改变 slot 顺序。
+4. **可组合性 > 系统性。** Assembler 的 45 行是纯字符串格式化引擎——它不知道 "hunger" 是什么，不知道 agent 有什么行为。所有认知决策（何时激活什么注意力通道、如何评估紧迫性、做什么 action）都在 YAML slot 里声明。对比 Generative Agents 的 730 行——包含了 retrieve、importance scoring、reflect、plan 等认知模块。不是因为 AW 更聪明——是因为"组合"天生比"系统"更灵活。新认知能力 = 新 slot，新认知架构 = 改变 slot 顺序。
 
 ### 代码量证明
 
 | | GA | AW |
 |---|-----|-----|
 | 认知代码 (Python) | ~730 行 | **0 行** |
-| 认知引导 (YAML) | 0 行 | **~88 行** |
-| 总源文件 | — | **33 文件** |
-| 总 Python 行数 | — | **~1800 行** |
-| 总 YAML 行数 | — | **~820 行** |
+| 认知引导 (YAML) | 0 行 | **~150 行** |
+| 总源文件 | — | **34 文件** |
+| 总 Python 行数 | — | **~1900 行** |
+| 总 YAML 行数 | — | **~880 行** |
 
 ---
 
-## 附录：当前 Slot 完整列表
+## 附录：当前 Slot 完整列表（3 层，13 slot）
 
+### Contract Layer — 输出契约
 | # | Slot 名 | Condition | 用途 |
 |---|---------|-----------|------|
-| 1 | `main_thread` | `main_thread` | 持久目标驱动，LLM 自主更新 |
-| 2 | `persona` | `name` | 身份 + 背景 |
-| 3 | `world_rules` | (无条件) | 世界法则 |
-| 4 | `kl_divergence` | `kl_text` | 世界变化信号 |
-| 5 | `drive_state` | `drives_table` | 内在欲望 |
-| 6 | `spatial_context` | `zone_name` | 空间位置 |
-| 7 | `sensory_section` | `sensory_text` | 三通道感官（YAML 模板驱动） |
-| 8 | `recent_memory` | `memory_text` | 最近经历 |
-| 9 | `avoid_repetition` | `memory_text` | 防重复 |
-| 10 | `idle_guidance` | `memory_text` | 教 LLM 输出 null |
-| 11 | `action_guidance` | (无条件) | 行动规则 |
-| 12 | `output_format` | (无条件) | JSON schema |
+| 1 | `action_scope` | (无条件) | action 字段语义 + 引擎交互规则 |
+| 2 | `output_contract` | (无条件) | JSON schema + 字段描述 |
+
+### World Layer — 环境信息（世界级共享）
+| # | Slot 名 | Condition | 用途 |
+|---|---------|-----------|------|
+| 3 | `spatial_context` | `zone_name` | 空间位置 |
+| 4 | `sensory_section` | `sensory_text` | 三通道感官（YAML 模板驱动） |
+| 5 | `gate_highlight` | `gate_text` | 可穿越的门 |
+| 6 | `delta_gate` | `delta_text` | 世界变化信号 |
+
+### NPC Layer — 角色驱动（per-agent 可配置）
+| # | Slot 名 | Condition | 用途 |
+|---|---------|-----------|------|
+| 7 | `persona` | `name` | 身份 + 背景 |
+| 8 | `main_thread` | `main_thread` | 持久目标，LLM 自主更新 |
+| 9 | `drive_values` | `drives_table` | 内在欲望数值 |
+| 10 | `drive_context` | `drive_boundaries` | 数值边界参考（0/100 极值） |
+| 11 | `recent_memory` | `memory_text` | 最近经历 |
+| 12 | `conversation_context` | `conversation_text` | 最近对话 |
+| 13 | `behavioral_traits` | `traits_text` | per-agent 行为倾向（来自 traits 矩阵） |
+| 14 | `intent_context` | `last_intent` | 上轮意图回顾 + 对话不对称统计 |
+
+slot 组通过 `slot_groups.yaml` 的二维矩阵控制——每行对应一个 group-id，每列一个 slot，0/1 控制激活。世界级通过 `world-group` 配置，NPC 通过 per-agent `npc-group` 配置。不写→继承默认 full 组。
 
 ---
 

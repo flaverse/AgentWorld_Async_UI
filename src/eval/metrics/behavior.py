@@ -7,7 +7,8 @@ from ..registry import register_metric
 @register_metric(
     name="action_diversity",
     category="behavior",
-    description="Fraction of unique action texts among all actions. Higher = less repetitive.",
+    description="Fraction of unique action texts among all actions. Higher = less repetitive."
+              " Formula: diversity = |unique(actions)| / |actions|.",
     source="AW built-in"
 )
 def action_diversity(traces: list[dict]) -> dict:
@@ -29,7 +30,8 @@ def action_diversity(traces: list[dict]) -> dict:
 @register_metric(
     name="dialogue_rate",
     category="behavior",
-    description="Fraction of actions with spoken dialogue.",
+    description="Fraction of actions with spoken dialogue."
+              " Formula: |{t∈T: t.llm1_output.dialogue ≠ null}| / |T|.",
     source="AW built-in"
 )
 def dialogue_rate(traces: list[dict]) -> dict:
@@ -53,7 +55,8 @@ def dialogue_rate(traces: list[dict]) -> dict:
 @register_metric(
     name="repetition_rate",
     category="behavior",
-    description="Fraction of consecutive identical actions. Lower = more spontaneous.",
+    description="Fraction of consecutive identical actions. Lower = more spontaneous."
+              " Formula: |{i: action_i = action_{i-1}}| / (|actions| - 1).",
     source="AW built-in"
 )
 def repetition_rate(traces: list[dict]) -> dict:
@@ -85,7 +88,8 @@ def repetition_rate(traces: list[dict]) -> dict:
 @register_metric(
     name="npc_interaction_ratio",
     category="behavior",
-    description="Fraction of actions that are NPC↔NPC vs NPC→Item.",
+    description="Fraction of actions that are NPC↔NPC vs NPC→Item."
+              " Formula: |{t∈T: t.llm2_prompt = null}| / |T|.",
     source="AW built-in"
 )
 def npc_interaction_ratio(traces: list[dict]) -> dict:
@@ -127,7 +131,8 @@ def per_agent_activity(traces: list[dict]) -> dict:
 @register_metric(
     name="null_action_rate",
     category="behavior",
-    description="Fraction of cycles where the agent chose to idle (action=null).",
+    description="Fraction of cycles where the agent chose to idle (action=null)."
+              " Formula: |{t∈T: t.action_text = null}| / |T|.",
     source="AW built-in"
 )
 def null_action_rate(traces: list[dict]) -> dict:

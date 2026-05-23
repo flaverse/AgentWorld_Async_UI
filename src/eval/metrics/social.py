@@ -6,7 +6,8 @@ from ..registry import register_metric
 @register_metric(
     name="degree_centrality",
     category="social",
-    description="Number of unique interaction partners per agent. Mean reflects social density.",
+    description="Number of unique interaction partners per agent. Mean reflects social density."
+              " Formula: mean_degree = (1/|A|) · Σ_{a∈A} |{b: (a,b)∈E ∨ (b,a)∈E}|.",
     source="OASIS 2024"
 )
 def degree_centrality(traces: list[dict]) -> dict:
@@ -33,7 +34,8 @@ def degree_centrality(traces: list[dict]) -> dict:
 @register_metric(
     name="reciprocity_rate",
     category="social",
-    description="Fraction of conversation edges that are bidirectional (A↔B, not just A→B).",
+    description="Fraction of conversation edges that are bidirectional (A↔B, not just A→B)."
+              " Formula: |{(a,b)∈E: (b,a)∈E}| / |{{a,b}: (a,b)∈E}|.",
     source="Social Simulacra 2022"
 )
 def reciprocity_rate(traces: list[dict]) -> dict:
@@ -59,7 +61,8 @@ def reciprocity_rate(traces: list[dict]) -> dict:
 @register_metric(
     name="interaction_density",
     category="social",
-    description="Average actions per agent per second of simulated time.",
+    description="Average actions per agent per second of simulated time."
+              " Formula: density = n_actions / (|agents| · duration_s).",
     source="OASIS 2024"
 )
 def interaction_density(traces: list[dict]) -> dict:

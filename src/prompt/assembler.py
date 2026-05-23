@@ -18,11 +18,13 @@ class PromptAssembler:
     def __init__(self, loader):
         self.loader = loader
 
-    def assemble(self, template_name: str, ctx: dict) -> str:
+    def assemble(self, template_name: str, ctx: dict, slot_mask: dict = None) -> str:
         tpl = self.loader.get_template(template_name)
         all_slots = self.loader.data.get("slots", {})
         parts = []
         for name in tpl.get("slots", []):
+            if slot_mask is not None and not slot_mask.get(name, 1):
+                continue
             slot = all_slots.get(name, {})
             cond = slot.get("condition", "")
             if cond and not bool(ctx.get(cond)):

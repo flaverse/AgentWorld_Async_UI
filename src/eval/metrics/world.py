@@ -7,7 +7,8 @@ from ..registry import register_metric
 @register_metric(
     name="zone_activity",
     category="world",
-    description="Distribution of actions across zones. Detects zone isolation.",
+    description="Distribution of actions across zones. Detects zone isolation."
+              " Formula: Count(t.zone) for t∈T with action_text.",
     source="AW built-in"
 )
 def zone_activity(traces: list[dict]) -> dict:
@@ -24,7 +25,8 @@ def zone_activity(traces: list[dict]) -> dict:
 @register_metric(
     name="gate_usage",
     category="world",
-    description="Number of zone crossings (agent zone changes between consecutive traces).",
+    description="Number of zone crossings (agent zone changes between consecutive traces)."
+              " Formula: Σ_{a∈A} |{i: zone_i(a) ≠ zone_{i-1}(a)}|.",
     source="AW built-in"
 )
 def gate_usage(traces: list[dict]) -> dict:
@@ -55,7 +57,8 @@ def gate_usage(traces: list[dict]) -> dict:
 @register_metric(
     name="target_changes_rate",
     category="world",
-    description="Fraction of NPC→Item interactions that produce non-empty target_changes (world mutation).",
+    description="Fraction of NPC→Item interactions that produce non-empty target_changes (world mutation)."
+              " Formula: |{t∈T: t.target_changes ≠ {} AND t is NPC→Item}| / |NPC→Item actions|.",
     source="AW built-in"
 )
 def target_changes_rate(traces: list[dict]) -> dict:

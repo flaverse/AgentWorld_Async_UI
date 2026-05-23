@@ -2,6 +2,7 @@ world:
   name: 老友记 — Central Perk
   time_scale: 60
   start_time: "10:00"
+  world-group: full
   simulation:
     currency: coins
     poll_interval: 0.3
@@ -30,7 +31,7 @@ world:
           min: 0
           max: 100
           decay: 0.025
-          description: 社交需求。在Central Perk找人聊八卦是生存本能。100=必须找人吐槽。
+          description: 社交需求。在Central Perk找人聊八卦是生存本能。100=极度渴望与人交流。
         energy:
           min: 0
           max: 100
@@ -40,7 +41,7 @@ world:
           min: 0
           max: 100
           decay: 0.02
-          description: 娱乐需求。100=必须玩点什么否则要发疯。0=被Joey的演技已经笑够了。
+          description: 娱乐需求。100=极度渴望做点什么否则要发疯。0=被Joey的演技已经笑够了。
         mood:
           min: 0
           max: 100
@@ -55,6 +56,16 @@ world:
       kl_stale: 有人靠在沙发上睡着了
       kl_coin: 小费 {sign}{delta} 美元
       kl_state_cross: '{attr} {arrow}突破{t}'
+
+traits:
+  default: []
+  monica:  [persistent, satisficing, socially_reciprocal]
+  gunther: [persistent, goal_directed]
+  chandler: [conversational_patience]
+  rachel:  [novelty_seeking]
+  joey:    [novelty_seeking]
+  ross:    [persistent, goal_directed, socially_reciprocal]
+
 zones:
 - id: central_perk
   name: Central Perk 咖啡厅

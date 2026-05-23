@@ -1,0 +1,31 @@
+# ═══════════════════════════════════════════
+# Slot Group Matrix
+# 读法: 行=group-id, 列=slot, 0/1=激活
+# 三层: contract(输出契约) world(环境) npc(角色)
+# ═══════════════════════════════════════════
+
+contract:
+  columns: [action_scope, output_contract]
+  groups:
+    default: [1, 1]
+
+world:
+  columns: [spatial_context, sensory_section, gate_highlight, delta_gate]
+  groups:
+    default: [1, 1, 1, 1]
+    full:    [1, 1, 1, 1]
+    sensorless: [1, 0, 1, 1]
+    blind:      [0, 0, 0, 0]
+
+npc:
+  columns: [persona, drive_values, drive_context,
+            recent_memory, conversation_context,
+            main_thread, behavioral_traits, intent_context]
+  groups:
+    default:            [1, 1, 1, 1, 1, 1, 1, 1]
+    full:                [1, 1, 1, 1, 1, 1, 1, 1]
+    pure-instinct:      [1, 1, 0, 0, 0, 0, 0, 0]
+    no-memory:          [1, 1, 1, 0, 0, 1, 1, 1]
+    no-intent-feedback: [1, 1, 1, 1, 1, 1, 1, 0]
+    goal-driven:        [1, 1, 0, 0, 0, 1, 0, 0]
+    blank-slate:        [1, 0, 0, 0, 0, 0, 0, 0]

@@ -7,7 +7,8 @@ from ..registry import register_metric
 @register_metric(
     name="final_drive_health",
     category="drive",
-    description="Final attribute values per agent and per-drive status (OK / high / extreme). Pure health check.",
+    description="Final attribute values per agent classified as ok(0-50) / high(50-80) / extreme(80+)."
+              " Formula: per-agent classification of last snapshot's drive values against fixed thresholds.",
     source="AW built-in"
 )
 def final_drive_health(traces: list[dict]) -> dict:
@@ -52,7 +53,8 @@ def final_drive_health(traces: list[dict]) -> dict:
 @register_metric(
     name="drive_convergence",
     category="drive",
-    description="Net change in each drive attribute from first to last snapshot. Negative = drives being satisfied.",
+    description="Net change in each drive attribute from first to last snapshot."
+              " Formula: (1/n) · Σ_{a∈A} (drive_k^last(a) - drive_k^first(a)).",
     source="AW built-in"
 )
 def drive_convergence(traces: list[dict]) -> dict:
@@ -95,7 +97,8 @@ def drive_convergence(traces: list[dict]) -> dict:
 @register_metric(
     name="mood_trajectory",
     category="drive",
-    description="Average mood change across all agents from first to last snapshot.",
+    description="Average mood change across all agents from first to last snapshot."
+              " Formula: (1/n) · Σ_{a∈A} (mood_last(a) - mood_first(a)).",
     source="AW built-in"
 )
 def mood_trajectory(traces: list[dict]) -> dict:

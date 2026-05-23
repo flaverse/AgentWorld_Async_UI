@@ -1,4 +1,4 @@
-"""P/Q/KL 分层变化检测。全 channel 通用 dict diff。状态/时差 — 阈值逻辑。
+"""P/Q 分层变化检测。全 channel 通用 dict diff。状态/时差 — 阈值逻辑。
 所有文本从 config 注入。零手工字段比较。
 """
 import time
@@ -15,8 +15,8 @@ def _extract_data(val) -> dict:
     return {}
 
 
-def channel_kl(channel_name: str, p_data: dict, q_data: dict,
-               records: dict, text: dict) -> str:
+def channel_delta(channel_name: str, p_data: dict, q_data: dict,
+                  records: dict, text: dict) -> str:
     """通用 channel diff: 逐 entity 比较 data dict。任何 key 变化 = 信号。"""
     lines = []
     for eid in set(p_data) | set(q_data):
@@ -32,8 +32,8 @@ def channel_kl(channel_name: str, p_data: dict, q_data: dict,
     return " | ".join(lines) if lines else ""
 
 
-def state_kl(p_state: dict, drives, currency_key: str, text: dict,
-             thresholds: list = None, coin_epsilon: int = None) -> str:
+def state_delta(p_state: dict, drives, currency_key: str, text: dict,
+                thresholds: list = None, coin_epsilon: int = None) -> str:
     if thresholds is None: thresholds = [30, 60, 80]
     if coin_epsilon is None: coin_epsilon = 5
     lines = []
@@ -57,36 +57,36 @@ def state_kl(p_state: dict, drives, currency_key: str, text: dict,
     return " | ".join(lines) if lines else ""
 
 
-def stale_kl(p_stale: float, text: dict, stale_timeout: int = None) -> str:
+def stale_check(p_stale: float, text: dict, stale_timeout: int = None) -> str:
     if stale_timeout is None: stale_timeout = 30
     if time.time() - p_stale > stale_timeout:
-        return text["kl_stale"]
+        return text["kl_stale"].format(stale_timeout=stale_timeout)
     return ""
 
 
-def total_kl(agent_layer, sensory, drives, currency_key: str, text: dict,
-             thresholds=None, coin_epsilon=None, stale_timeout=None) -> str:
-    """遍历 sensory.channels 所有层，逐层 channel_kl。每轮用浅拷贝更新 P。"""
+def total_delta(agent_layer, sensory, drives, currency_key: str, text: dict,
+                thresholds=None, coin_epsilon=None, stale_timeout=None) -> str:
+    """遍历 sensory.channels 所有层，逐层 channel_delta。每轮用浅拷贝更新 P。"""
     parts = []
     for ch_name, ch_data in sensory.channels.items():
         if not ch_data:
             continue
-        kl = channel_kl(ch_name,
-                        agent_layer.p_channels.get(ch_name, {}),
-                        ch_data,
-                        {eid: r.name for eid, r in ch_data.items()},
-                        text)
-        if kl:
-            parts.append(kl)
+        delta = channel_delta(ch_name,
+                              agent_layer.p_channels.get(ch_name, {}),
+                              ch_data,
+                              {eid: r.name for eid, r in ch_data.items()},
+                              text)
+        if delta:
+            parts.append(delta)
         agent_layer.p_channels[ch_name] = dict(ch_data)
-    ks = state_kl(agent_layer.p_state, drives, currency_key, text, thresholds, coin_epsilon)
+    ks = state_delta(agent_layer.p_state, drives, currency_key, text, thresholds, coin_epsilon)
     if ks: parts.append(ks)
-    kt = stale_kl(agent_layer.p_stale, text, stale_timeout)
+    kt = stale_check(agent_layer.p_stale, text, stale_timeout)
     if kt: parts.append(kt)
     return " | ".join(parts)
 
 
 def snapshot_p(agent_layer, sensory, drives, currency_key: str, text: dict,
                thresholds=None, coin_epsilon=None):
-    state_kl(agent_layer.p_state, drives, currency_key, text, thresholds, coin_epsilon)
+    state_delta(agent_layer.p_state, drives, currency_key, text, thresholds, coin_epsilon)
     agent_layer.p_stale = time.time()

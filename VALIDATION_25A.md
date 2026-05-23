@@ -83,7 +83,7 @@ Shani: 走到菲丽芭面前，停下脚步 (16s) ← duplicate
 Shani: 走到菲丽芭面前，停下脚步 (19s) ← duplicate again
 ```
 
-**Root cause**: KL gate triggers on every auditory change. Two agents standing near each other, each triggering the other with every speech, creates a rapid-fire loop. The `avoid_repetition` slot exists but the LLM isn't using it effectively here. Phase 4 `write_pending` lock only skips 1 cycle — not enough to break a 2-agent ping-pong.
+**Root cause**: KL gate triggers on every auditory change. Two agents standing near each other, each triggering the other with every speech, creates a rapid-fire loop. The `conversational_patience` trait (which replaced the old `avoid_repetition` slot) is not yet assigned to the affected agents. Phase 4 `write_pending` lock only skips 1 cycle — not enough to break a 2-agent ping-pong.
 
 **Proposed fix**: Increase `write_pending` to time-based cooldown (3-5s) instead of single-cycle skip. Or make `poll_interval` adaptive: longer for dense zones, shorter for sparse ones.
 

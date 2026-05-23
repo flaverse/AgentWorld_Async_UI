@@ -1,6 +1,6 @@
 """TelemetryCollector — passive observation of LLM call latency.
 
-Zero cognitive code. Records facts: how long each call took.
+Engine reports facts, LLM decides. Records: how long each call took.
 Provides median latency for WorldClock calibration.
 """
 

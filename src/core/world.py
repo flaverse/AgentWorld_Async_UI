@@ -1,3 +1,5 @@
+import yaml, os
+
 from core.clock import SimClock
 from core.spatial_grid import SpatialGrid
 from core.lifecycle import EntityLifecycle
@@ -15,6 +17,7 @@ from agent.memory import AgentMemory
 class World:
     def __init__(self, world_config: dict, systems: dict):
         self.config = world_config.get("world", {})
+        self._world_cfg = world_config
         time_scale = self.config.get("time_scale", 60)
         self.clock = SimClock(
             self.config.get("start_time", "08:00"),
@@ -26,6 +29,8 @@ class World:
         self.grids: dict[str, SpatialGrid] = {}
 
         self.lifecycle = EntityLifecycle(self)
+        self._slot_groups = self._load_slot_groups()
+        self._attr_cfg = self.config.get("simulation", {}).get("drive", {}).get("attributes", {})
 
         for zone_def in world_config.get("zones", []):
             self.zones[zone_def["id"]] = zone_def
@@ -35,8 +40,31 @@ class World:
 
         self._load_entities(world_config.get("entities", []))
 
+    def _load_slot_groups(self) -> dict:
+        base = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        path = os.path.join(base, "config", "slot_groups.yaml")
+        with open(path) as f:
+            return yaml.safe_load(f)
+
+    def _resolve_group_mask(self, layer_name: str, group_id: str) -> dict:
+        """Resolve a group row from slot_groups.yaml into a {slot: 0/1} mask."""
+        groups_cfg = self._slot_groups.get(layer_name, {})
+        columns = groups_cfg.get("columns", [])
+        groups = groups_cfg.get("groups", {})
+        row = groups.get(group_id, groups.get("default", [1] * len(columns)))
+        return {col: int(row[i]) for i, col in enumerate(columns)}
+
     def _load_entities(self, entity_defs: list[dict]) -> None:
+        world_group = self._world_cfg.get("world-group", "default")
+        contract_group = "default"
+        world_mask = self._resolve_group_mask("world", world_group)
+        contract_mask = self._resolve_group_mask("contract", contract_group)
+        # traits matrix: per-agent override, fallback default
+        traits_matrix = self._world_cfg.get("traits", {})
+        default_traits = traits_matrix.get("default", [])
+
         for ent_def in entity_defs:
+            eid = ent_def["id"]
             entity = Entity(
                 id=ent_def["id"],
                 name=ent_def["name"],
@@ -67,6 +95,11 @@ class World:
 
             if "agent" in ent_def:
                 ag = ent_def["agent"]
+                npc_group = ag.get("npc-group", "default")
+                npc_mask = self._resolve_group_mask("npc", npc_group)
+                slot_mask = {**contract_mask, **world_mask, **npc_mask}
+                # traits: per-agent in matrix overrides default
+                agent_traits = ag.get("traits") or traits_matrix.get(eid, default_traits)
                 agent_layer = AgentLayer(
                     autonomous=ag.get("autonomous", False),
                     speed=ag.get("speed", 1.0),
@@ -76,6 +109,8 @@ class World:
                     personality=ag.get("personality", ""),
                     template=ag.get("template", ""),
                     llm_provider=ag.get("llm_provider", ""),
+                    slot_mask=slot_mask,
+                    traits=agent_traits,
                 )
                 if entity.has("interaction"):
                     agent_layer.drives = DriveSystem(

@@ -27,9 +27,19 @@ class AgentLayer(Layer):
     # ── Write-pending lock ──
     _write_pending: bool = False
 
+    # ── Slot groups ──
+    slot_mask: dict = field(default_factory=dict)  # merged world+npc+contract mask {slot_name: 0/1}
+    traits: list = field(default_factory=list)     # trait names from world.yaml
+
     # ── Conversation state (factual — LLM decides what to do with it) ──
     _last_target_name: str = ""
     _last_expects_reply: bool = False
     _pending_narrative: str = ""   # NPC→Item narrative queues here, LLM #1 decides
     _conversation_buffer: list = field(default_factory=list)  # recent dialogue exchange [{speaker, text, ts}]
     _reply_deadline: float = 0.0  # when to give up waiting for a reply (time.time() + patience)
+
+    # ── Intent tracking ──
+    _last_intent: str = ""
+    _last_intent_target: str = ""
+    _last_action_ts: float = 0.0
+    _last_action_drives: dict = field(default_factory=dict)

@@ -1,5 +1,5 @@
 """WorldGateway — external agent session manager with permissions.
-Zero cognitive code — pure lifecycle + access control.
+Engine reports facts, LLM decides — pure lifecycle + access control.
 """
 
 import secrets

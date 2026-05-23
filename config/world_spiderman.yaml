@@ -2,6 +2,7 @@ world:
   name: 蜘蛛侠 — 纽约市
   time_scale: 60
   start_time: "14:00"
+  world-group: full
   simulation:
     currency: coins
     poll_interval: 0.3
@@ -40,7 +41,7 @@ world:
           min: 0
           max: 100
           decay: 0.015
-          description: 想放松。100=必须荡蛛丝玩或者约MJ。0=今天够刺激了。
+          description: 想放松。100=极度渴望出门活动或与人见面。0=今天够刺激了。
         mood:
           min: 0
           max: 100
@@ -52,9 +53,13 @@ world:
       kl_entered: '{channel}: {name} 出现'
       kl_left: '{channel}: {name} 走了'
       kl_changed: '{channel}: {name} 变动'
-      kl_stale: 很久没有动静
+      kl_stale: 距上次行动已超过 {stale_timeout}s
       kl_coin: 钱 {sign}{delta}
       kl_state_cross: '{attr} {arrow}突破{t}'
+
+traits:
+  default: []
+
 zones:
 - id: daily_bugle
   name: Daily Bugle 报社
