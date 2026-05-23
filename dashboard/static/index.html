@@ -250,7 +250,11 @@ function connect() {
     } catch(e) { console.error(e); }
   };
   ws.onerror = () => setStatus('Connection error — retrying...', false);
-  ws.onclose = () => { setStatus('Disconnected — retrying...', false); setTimeout(connect, 2000); };
+  ws.onclose = (e) => {
+    const reason = e.reason || (e.code === 1006 ? 'Server stopped (agent run ended)' : '');
+    setStatus(reason || 'Disconnected — retrying...', false);
+    setTimeout(connect, 2000);
+  };
 }
 connect();
 </script>
