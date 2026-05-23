@@ -15,7 +15,7 @@
 ---
 
 <p align="center">
-  <img src="img/architecture.png" alt="Architecture" width="100%">
+  <img src="img/architecture.png?v=2" alt="Architecture" width="100%">
 </p>
 
 ---
@@ -54,7 +54,7 @@ Agent 维护内部世界模型 P，每帧对比感官 Q。P=Q → 零 LLM 调用
 ## vs. Generative Agents
 
 <p align="center">
-  <img src="img/slot_vs_ga.png" alt="SVA vs GA" width="100%">
+  <img src="img/slot_vs_ga.png?v=2" alt="SVA vs GA" width="100%">
 </p>
 
 ---
