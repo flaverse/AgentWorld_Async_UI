@@ -67,6 +67,8 @@ body { background: var(--bg); color: var(--text); font: 13px/1.4 'DejaVu Sans', 
 .ctrl-panel .order-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 3px; color: var(--text); padding: 3px 6px; font-size: 10px; font-family: monospace; }
 .ctrl-panel .ctrl-status { color: var(--dim); }
 .ctrl-panel .ctrl-status.controlled { color: var(--gold); }
+.ctrl-btn.sent { border-color: var(--green); color: var(--green); }
+.ctrl-btn.failed { border-color: var(--red); color: var(--red); }
 </style>
 </head>
 <body>
@@ -122,17 +124,40 @@ async function releaseAgent(agent) {
     if (st) { st.textContent = 'autonomous'; st.className = 'ctrl-status'; }
   }
 }
-async function orderAgent(agent) {
+async function orderAgent(agent, btn) {
   const card = cards[agent];
   if (!card) return;
   const input = card.querySelector('.order-input');
   if (!input || !input.value.trim()) return;
   const text = input.value.trim();
-  // Support both raw JSON and plain text (plain text → action field)
   let decision;
   try { decision = JSON.parse(text); } catch(e) { decision = {action: text, duration: 4}; }
-  await api('POST', '/order/' + agent, { decision });
-  input.value = '';
+
+  // Visual feedback: sending
+  const origText = btn.textContent;
+  btn.textContent = '...'; btn.disabled = true;
+  try {
+    // Auto-take if not controlled
+    const st = card.querySelector('.ctrl-status');
+    if (st && st.textContent !== 'CONTROLLED') {
+      await api('POST', '/take/' + agent);
+      card.classList.add('controlled');
+      if (st) { st.textContent = 'CONTROLLED'; st.className = 'ctrl-status controlled'; }
+    }
+    await api('POST', '/order/' + agent, { decision });
+    input.value = '';
+    // Success feedback
+    btn.classList.add('sent');
+    btn.textContent = 'sent ✓';
+  } catch(e) {
+    btn.classList.add('failed');
+    btn.textContent = 'failed ✗';
+  }
+  setTimeout(() => {
+    btn.classList.remove('sent', 'failed');
+    btn.textContent = origText;
+    btn.disabled = false;
+  }, 1500);
 }
 
 function driveColor(v) {
@@ -171,8 +196,8 @@ function ensureCard(agent, zone) {
         <span class="ctrl-status">autonomous</span>
       </div>
       <div class="ctrl-row">
-        <input class="order-input" placeholder='{"action":"...","dialogue":"..."}' onkeydown="if(event.key==='Enter')orderAgent('${agent}')">
-        <button class="ctrl-btn" onclick="orderAgent('${agent}')">send</button>
+        <input class="order-input" placeholder='{"action":"...","dialogue":"..."}' onkeydown="if(event.key==='Enter')orderAgent('${agent}',this.nextElementSibling)">
+        <button class="ctrl-btn" onclick="orderAgent('${agent}',this)">send</button>
       </div>
     </div>`;
   document.getElementById('grid').appendChild(el);
@@ -240,7 +265,10 @@ function handleEvent(evt) {
 function connect() {
   setStatus('Connecting...', false);
   const ws = new WebSocket('ws://' + location.hostname + ':' + PORT + '/ws');
-  ws.onopen = () => setStatus('Connected · ' + Object.keys(cards).length + ' agents · ' + totalEvents + ' events', true);
+  ws.onopen = () => {
+    setStatus('Connected · ' + Object.keys(cards).length + ' agents · ' + totalEvents + ' events', true);
+    serverAlive = true;
+  };
   ws.onmessage = (msg) => {
     try {
       const evt = JSON.parse(msg.data);
@@ -251,11 +279,22 @@ function connect() {
   };
   ws.onerror = () => setStatus('Connection error — retrying...', false);
   ws.onclose = (e) => {
+    serverAlive = false;
     const reason = e.reason || (e.code === 1006 ? 'Server stopped (agent run ended)' : '');
     setStatus(reason || 'Disconnected — retrying...', false);
     setTimeout(connect, 2000);
   };
 }
+let serverAlive = false;
+// HTTP ping: detect server status independently of WebSocket
+setInterval(async () => {
+  try {
+    await fetch('/api/state');
+    if (!serverAlive) { setStatus('Server online — reconnecting...', false); connect(); }
+  } catch(e) {
+    if (serverAlive) { setStatus('Server offline', false); serverAlive = false; }
+  }
+}, 3000);
 connect();
 </script>
 </body>
