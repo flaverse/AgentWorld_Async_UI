@@ -19,7 +19,7 @@ class DashboardEmitter:
         self._clients.append(q)
         # Send catch-up history
         for event in self._history:
-            await q.put(event)
+            await q.put(json.dumps(event, ensure_ascii=False))
         return q
 
     def unregister(self, q: asyncio.Queue):
