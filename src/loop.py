@@ -199,6 +199,59 @@ async def run_agent(agent, world, brain, assembler, systems,
                 continue
 
             # ═══════════════════════════════════════════
+            #  PHASE 0.5: FLUSH — execute enqueued action when its duration expires
+            # ═══════════════════════════════════════════
+            drives = al.drives
+            coins = round(float(agent.get("interaction").private_attrs.get(cfg.currency, 0)))
+            if al._pending_action is not None and time.time() >= al._action_complete_at:
+                enqueued_decision, enqueued_target = al._pending_action
+                al._pending_action = None
+                # Execute the delayed action now — write layers, apply deltas
+                target_name = enqueued_decision.get("target_name")
+                action_text = enqueued_decision.get("action")
+                if target_name and action_text:
+                    target = interaction.find_entity_by_name(
+                        agent.zone, target_name, world.entities, exclude_id=agent.id)
+                    if target and interaction.can_interact(agent, target):
+                        result = await interaction.interact(agent, target, enqueued_decision, world)
+                        agent.last_action_time = world.clock.now()
+                        al._last_target_name = target.name
+                        al._last_expects_reply = bool(enqueued_decision.get("expects_reply"))
+                        al._last_intent = enqueued_decision.get("intent", "")
+                        al._last_intent_target = target.name
+                        al._last_action_ts = time.time()
+                        al._last_action_drives = {k: round(float(v), 1) for k, v in drives.attrs.items()}
+                        if dashboard_emit:
+                            dashboard_emit({"agent": name, "zone": agent.zone,
+                                            "phase": "action",
+                                            "action_text": action_text,
+                                            "dialogue": enqueued_decision.get("dialogue", ""),
+                                            "story": enqueued_decision.get("story", ""),
+                                            "target_name": target_name,
+                                            "drives": {k: round(float(v), 1) for k, v in drives.attrs.items()},
+                                            "coins": coins,
+                                            "intent": enqueued_decision.get("intent", ""),
+                                            "main_thread": enqueued_decision.get("main_thread", ""),
+                                            "thread_completed": enqueued_decision.get("thread_completed", False)})
+                        if trace_fn:
+                            trace_fn(_make_trace(
+                                name, target.name, target.id, action_text,
+                                agent.zone, agent.pos, drives, coins,
+                                "", world.clock.now(),
+                                llm1_output=enqueued_decision, result=result,
+                                thread_completed=enqueued_decision.get("thread_completed", False),
+                                intent=enqueued_decision.get("intent", "")))
+                    elif target and not interaction.can_interact(agent, target):
+                        agent.move_to(list(target.pos))
+                        agent.last_action_time = world.clock.now()
+                        systems["sensory"].update(agent, world.entities, world,
+                                                   channel_configs=labels.get("sensory_prompts"))
+                snapshot_p(al, sensory, drives, cfg.currency, cfg.text,
+                           cfg.thresholds, cfg.coin_epsilon)
+                await asyncio.sleep(0)
+                continue
+
+            # ═══════════════════════════════════════════
             #  PHASE 1: SENSE
             # ═══════════════════════════════════════════
             elapsed = max(world.clock.now() - agent.last_action_time, 0)
@@ -226,10 +279,8 @@ async def run_agent(agent, world, brain, assembler, systems,
                     continue
 
             # ═══════════════════════════════════════════
-            #  PHASE 2: KL GATE
+            #  PHASE 2: GATE
             # ═══════════════════════════════════════════
-            drives = al.drives
-            coins = round(float(agent.get("interaction").private_attrs.get(cfg.currency, 0)))
             delta_text = total_delta(al, sensory, drives, cfg.currency, cfg.text,
                                  cfg.thresholds, cfg.coin_epsilon, cfg.stale_timeout)
 
@@ -242,8 +293,6 @@ async def run_agent(agent, world, brain, assembler, systems,
             # ═══════════════════════════════════════════
             # Action pacing: skip if still executing prior action
             if time.time() < al._action_complete_at:
-                snapshot_p(al, sensory, drives, cfg.currency, cfg.text,
-                           cfg.thresholds, cfg.coin_epsilon)
                 await asyncio.sleep(cfg.poll_interval)
                 continue
 
@@ -276,7 +325,7 @@ async def run_agent(agent, world, brain, assembler, systems,
                 al.main_thread = decision["main_thread"]
 
             # ═══════════════════════════════════════════
-            #  PHASE 4: ACT
+            #  PHASE 4: ENQUEUE — store action for delayed execution
             # ═══════════════════════════════════════════
             target_name = decision.get("target_name")
             action_text = decision.get("action")
@@ -285,44 +334,16 @@ async def run_agent(agent, world, brain, assembler, systems,
                     agent.zone, target_name, world.entities,
                     exclude_id=agent.id)
                 if target and interaction.can_interact(agent, target):
-                    result = await interaction.interact(
-                        agent, target, decision, world)
-                    agent.last_action_time = world.clock.now()
-                    al._last_target_name = target.name
-                    al._last_expects_reply = bool(decision.get("expects_reply"))
-                    al._last_intent = decision.get("intent", "")
-                    al._last_intent_target = target.name
-                    al._last_action_ts = time.time()
-                    al._last_action_drives = {k: round(float(v), 1) for k, v in drives.attrs.items()}
+                    # Enqueue: Phase 0.5 FLUSH will execute when duration expires
+                    al._pending_action = (decision, target)
                     al._action_complete_at = time.time() + max(0.5, decision.get("duration", 3.0))
-                    if dashboard_emit:
-                        dashboard_emit({"agent": name, "zone": agent.zone,
-                                        "phase": "action",
-                                        "action_text": action_text,
-                                        "dialogue": decision.get("dialogue", ""),
-                                        "story": decision.get("story", ""),
-                                        "target_name": target_name,
-                                        "drives": {k: round(float(v), 1) for k, v in drives.attrs.items()},
-                                        "coins": coins,
-                                        "intent": decision.get("intent", ""),
-                                        "main_thread": decision.get("main_thread", ""),
-                                        "thread_completed": decision.get("thread_completed", False)})
-                    if trace_fn:
-                        trace_fn(_make_trace(
-                            name, target.name, target.id, action_text,
-                            agent.zone, agent.pos, drives, coins,
-                            delta_text, world.clock.now(),
-                            llm1_output=decision, result=result,
-                            llm1_prompt=prompt1,
-                            thread_completed=decision.get("thread_completed", False),
-                            intent=decision.get("intent", "")))
                 elif target and not interaction.can_interact(agent, target):
                     agent.move_to(list(target.pos))
                     agent.last_action_time = world.clock.now()
                     systems["sensory"].update(agent, world.entities, world,
                                                channel_configs=labels.get("sensory_prompts"))
             elif action_text and not target_name:
-                # No target specified — try action-only move
+                # No target specified — try action-only move (immediate)
                 target = interaction.find_entity_at(
                     agent.zone, agent.pos, action_text, world.entities,
                     exclude_id=agent.id)

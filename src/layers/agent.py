@@ -29,6 +29,7 @@ class AgentLayer(Layer):
 
     # ── Action pacing ──
     _action_complete_at: float = 0.0  # wall-clock timestamp; while now < this, skip decide
+    _pending_action: tuple = None     # (decision, target_entity) — enqueued, flushes on expiry
 
     # ── Slot groups ──
     slot_mask: dict = field(default_factory=dict)  # merged world+npc+contract mask {slot_name: 0/1}
