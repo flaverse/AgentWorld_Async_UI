@@ -3,9 +3,9 @@ __pycache__/
 *.pyo
 .env
 data/
+bak/
 .DS_Store
 *.swp
 *.swo
 geralt_*.md
-docs/
 docs/
