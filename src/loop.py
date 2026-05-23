@@ -240,6 +240,13 @@ async def run_agent(agent, world, brain, assembler, systems,
             # ═══════════════════════════════════════════
             #  PHASE 3: DECIDE
             # ═══════════════════════════════════════════
+            # Action pacing: skip if still executing prior action
+            if time.time() < al._action_complete_at:
+                snapshot_p(al, sensory, drives, cfg.currency, cfg.text,
+                           cfg.thresholds, cfg.coin_epsilon)
+                await asyncio.sleep(cfg.poll_interval)
+                continue
+
             # Write-pending lock: skip one cycle after interacting
             # Ensures sensory consistency — agent's own action absorbed before next decision
             if al._write_pending:
@@ -287,6 +294,7 @@ async def run_agent(agent, world, brain, assembler, systems,
                     al._last_intent_target = target.name
                     al._last_action_ts = time.time()
                     al._last_action_drives = {k: round(float(v), 1) for k, v in drives.attrs.items()}
+                    al._action_complete_at = time.time() + max(0.5, decision.get("duration", 3.0))
                     if dashboard_emit:
                         dashboard_emit({"agent": name, "zone": agent.zone,
                                         "phase": "action",

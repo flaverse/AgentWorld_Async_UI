@@ -126,6 +126,7 @@ slots:
         "thinking": "简短推理",
         "intent": "你的意图",
         "action": "做什么 (自由文本)" 或 null,
+        "duration": 3.0,
         "target_name": "对象名 (从周围抄写)" 或 null,
         "story": "叙事" 或 null,
         "dialogue": "原话" 或 null,
@@ -140,6 +141,7 @@ slots:
       }
       - intent: 你的意图
       - action: 去哪+做什么。null=本轮不行动
+      - duration: 动作耗时(秒)。说话≈2-4，移动≈3-8，发呆≈5-20
       - target_name: 从周围抄写名字。无对象 null
       - story: 可标记"✓完成"。无事留空
       - dialogue: 原话。null=沉默
@@ -243,6 +245,7 @@ output_schemas:
         thinking: {type: string}
         intent: {type: string}
         action: {type: string}
+        duration: {type: number}
         target_name: {type: string}
         story: {type: string}
         dialogue: {type: string}

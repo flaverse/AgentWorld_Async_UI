@@ -37,13 +37,15 @@ async def _stream_events(emitter, ws, q):
         pass
 
 
-async def start_dashboard(emitter, port: int = 8766):
+async def start_dashboard(emitter, director, port: int = 8766):
     """Start the dashboard HTTP + WebSocket server."""
+    from .director_api import register_director_routes
     static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
     app = web.Application()
     app["emitter"] = emitter
     app.router.add_get("/", lambda r: web.FileResponse(os.path.join(static_dir, "index.html")))
     app.router.add_get("/ws", _ws_handler)
+    register_director_routes(app, director)
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, "0.0.0.0", port)

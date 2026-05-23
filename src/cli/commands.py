@@ -63,7 +63,7 @@ async def cmd_test(args):
         from dashboard.server import start_dashboard
         dash_emitter = DashboardEmitter()
         dash_emit = dash_emitter.emit
-        dash_task = asyncio.create_task(start_dashboard(dash_emitter, args.dashboard_port))
+        dash_task = asyncio.create_task(start_dashboard(dash_emitter, director, args.dashboard_port))
 
     print(f"\n{'='*60}")
     print(f"  AgentWorld Async — {cfg['world']['world']['name']}")

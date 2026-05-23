@@ -27,6 +27,9 @@ class AgentLayer(Layer):
     # ── Write-pending lock ──
     _write_pending: bool = False
 
+    # ── Action pacing ──
+    _action_complete_at: float = 0.0  # wall-clock timestamp; while now < this, skip decide
+
     # ── Slot groups ──
     slot_mask: dict = field(default_factory=dict)  # merged world+npc+contract mask {slot_name: 0/1}
     traits: list = field(default_factory=list)     # trait names from world.yaml
