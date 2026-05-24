@@ -1,7 +1,7 @@
 default_provider: deepseek
 providers:
   deepseek:
-    api_key: 'sk-474182cf66f44f36989bb786d42944fb'
+    api_key: ''
     base_url: https://api.deepseek.com
     concurrency:
       initial: 8
