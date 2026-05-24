@@ -179,7 +179,7 @@ def _build_drive_boundaries_text(attr_cfg: dict) -> str:
 
 async def run_agent(agent, world, brain, assembler, systems,
                     runtime: float, *, trace_fn=None, cfg: LoopConfig = None,
-                    director=None, dashboard_emit=None):
+                    director=None, dashboard_emit=None, gui_emit=None):
     if cfg is None:
         cfg = LoopConfig()
     name = agent.name
@@ -213,8 +213,21 @@ async def run_agent(agent, world, brain, assembler, systems,
                     target = interaction.find_entity_by_name(
                         agent.zone, target_name, world.entities, exclude_id=agent.id)
                     if target and interaction.can_interact(agent, target):
+                        _old_pos = list(agent.pos)
+                        _old_zone = agent.zone
                         result = await interaction.interact(agent, target, enqueued_decision, world)
                         agent.last_action_time = world.clock.now()
+                        if gui_emit:
+                            gui_emit({"type": "interaction",
+                                      "agent_id": agent.id, "target_id": target.id,
+                                      "action_text": action_text,
+                                      "dialogue": enqueued_decision.get("dialogue", ""),
+                                      "agent_pos": _old_pos, "target_pos": list(target.pos),
+                                      "zone": _old_zone})
+                            if agent.pos != _old_pos or agent.zone != _old_zone:
+                                gui_emit({"type": "pos_update",
+                                          "entity_id": agent.id, "zone": agent.zone,
+                                          "pos": list(agent.pos), "old_pos": _old_pos})
                         al._last_target_name = target.name
                         al._last_expects_reply = bool(enqueued_decision.get("expects_reply"))
                         al._last_intent = enqueued_decision.get("intent", "")
@@ -242,7 +255,12 @@ async def run_agent(agent, world, brain, assembler, systems,
                                 thread_completed=enqueued_decision.get("thread_completed", False),
                                 intent=enqueued_decision.get("intent", "")))
                     elif target and not interaction.can_interact(agent, target):
+                        _old_pos = list(agent.pos)
                         agent.move_to(list(target.pos))
+                        if gui_emit:
+                            gui_emit({"type": "pos_update",
+                                      "entity_id": agent.id, "zone": agent.zone,
+                                      "pos": list(agent.pos), "old_pos": _old_pos})
                         agent.last_action_time = world.clock.now()
                         systems["sensory"].update(agent, world.entities, world,
                                                    channel_configs=labels.get("sensory_prompts"))
@@ -338,7 +356,12 @@ async def run_agent(agent, world, brain, assembler, systems,
                     al._pending_action = (decision, target)
                     al._action_complete_at = time.time() + max(0.5, decision.get("duration", 3.0))
                 elif target and not interaction.can_interact(agent, target):
+                    _old_pos = list(agent.pos)
                     agent.move_to(list(target.pos))
+                    if gui_emit:
+                        gui_emit({"type": "pos_update",
+                                  "entity_id": agent.id, "zone": agent.zone,
+                                  "pos": list(agent.pos), "old_pos": _old_pos})
                     agent.last_action_time = world.clock.now()
                     systems["sensory"].update(agent, world.entities, world,
                                                channel_configs=labels.get("sensory_prompts"))
@@ -348,7 +371,12 @@ async def run_agent(agent, world, brain, assembler, systems,
                     agent.zone, agent.pos, action_text, world.entities,
                     exclude_id=agent.id)
                 if target and not interaction.can_interact(agent, target):
+                    _old_pos = list(agent.pos)
                     agent.move_to(list(target.pos))
+                    if gui_emit:
+                        gui_emit({"type": "pos_update",
+                                  "entity_id": agent.id, "zone": agent.zone,
+                                  "pos": list(agent.pos), "old_pos": _old_pos})
                     agent.last_action_time = world.clock.now()
                     systems["sensory"].update(agent, world.entities, world,
                                                channel_configs=labels.get("sensory_prompts"))

@@ -9,11 +9,12 @@ from loop import run_agent
 async def run_concurrent(agents, world, brain, assembler, systems,
                          runtime: float, cfg,
                          *, trace_fn=None, director=None,
-                         dashboard_emit=None):
+                         dashboard_emit=None, gui_emit=None):
     """Run all agents concurrently."""
     tasks = [run_agent(a, world, brain, assembler, systems,
                        runtime, trace_fn=trace_fn, cfg=cfg,
-                       director=director, dashboard_emit=dashboard_emit)
+                       director=director, dashboard_emit=dashboard_emit,
+                       gui_emit=gui_emit)
              for a in agents]
     await asyncio.gather(*tasks, return_exceptions=True)
 

@@ -20,10 +20,10 @@ def load_config(world_path: str | None = None):
     """Load world, prompt, and LLM configs. Returns structured dict.
     World YAML inherits simulation defaults from _sim_defaults.yaml.
     """
-    with open(os.path.join(base_dir, "config/_sim_defaults.yaml")) as f:
+    with open(os.path.join(base_dir, "config/_sim_defaults.yaml"), encoding="utf-8") as f:
         defaults = yaml.safe_load(f)
     w_path = world_path or os.path.join(base_dir, "config/world.yaml")
-    with open(w_path) as f:
+    with open(w_path, encoding="utf-8") as f:
         wc = yaml.safe_load(f)
     if "world" in wc and "simulation" not in wc["world"]:
         wc["world"]["simulation"] = defaults["simulation"]
@@ -31,7 +31,7 @@ def load_config(world_path: str | None = None):
         wc["world"]["simulation"] = _deep_merge(
             defaults["simulation"],
             wc.get("world", {}).get("simulation", {}))
-    with open(os.path.join(base_dir, "config/llm.yaml")) as f:
+    with open(os.path.join(base_dir, "config/llm.yaml"), encoding="utf-8") as f:
         lc = yaml.safe_load(f)
 
     from llm.concurrency import ConcurrencyGate

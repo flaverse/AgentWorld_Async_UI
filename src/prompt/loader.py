@@ -3,7 +3,7 @@ import yaml
 
 class PromptLoader:
     def __init__(self, config_path: str):
-        with open(config_path) as f:
+        with open(config_path, encoding="utf-8") as f:
             self.data = yaml.safe_load(f)
 
     def get_system_prompt(self, name: str) -> str:

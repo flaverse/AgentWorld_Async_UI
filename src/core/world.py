@@ -43,7 +43,7 @@ class World:
     def _load_slot_groups(self) -> dict:
         base = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         path = os.path.join(base, "config", "slot_groups.yaml")
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             return yaml.safe_load(f)
 
     def _resolve_group_mask(self, layer_name: str, group_id: str) -> dict:

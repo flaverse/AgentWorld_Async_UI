@@ -1,0 +1,1 @@
+"""GUI plugin -- independently deletable. Zero coupling to dashboard."""

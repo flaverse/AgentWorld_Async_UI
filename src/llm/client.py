@@ -103,6 +103,11 @@ class LLMClient:
     async def chat(self, system: str, messages: list[dict],
                    temperature: float = 0.7,
                    response_format: dict = None) -> str:
+        if not self.api_key:
+            raise RuntimeError(
+                f"No API key for provider '{self.provider}'. "
+                "Set api_key in config/llm.yaml or via environment variable."
+            )
         loop = asyncio.get_running_loop()
         if self._gate:
             await loop.run_in_executor(_executor, self._gate.acquire)

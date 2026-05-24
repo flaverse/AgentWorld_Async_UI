@@ -9,6 +9,9 @@
 """
 import sys, os, asyncio, argparse
 
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 base_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(base_dir, "src"))
 
@@ -35,6 +38,8 @@ def parse_args():
                         help="Start Gateway API on given port (0=disabled)")
     parser.add_argument("--dashboard", type=int, default=0,
                         help="Start Live Dashboard on given port (0=disabled)", dest="dashboard_port")
+    parser.add_argument("--gui", type=int, default=0,
+                        help="Start GUI visualization on given port (0=disabled)", dest="gui_port")
     return parser.parse_args()
 
 

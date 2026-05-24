@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentWorld GUI</title>
+<link rel="stylesheet" href="gui.css">
+</head>
+<body>
+<div class="header">
+  <h1>AgentWorld GUI</h1>
+  <div class="controls">
+    <button class="btn active" id="btn-map" onclick="switchView('map')">Map</button>
+    <button class="btn" id="btn-stats" onclick="switchView('status')">Status</button>
+    <span id="clock">00:00</span>
+  </div>
+</div>
+<div class="status-bar" id="status-bar"><span class="dot off"></span>Connecting...</div>
+<div class="canvas-wrap" id="map-wrap"><canvas id="main-canvas"></canvas></div>
+<div class="canvas-wrap" id="stats-wrap" style="display:none"><canvas id="stats-canvas"></canvas></div>
+<div id="tooltip"><div class="tt-name"></div><div class="tt-zone"></div><div class="tt-pos"></div></div>
+<script src="gui.js"></script>
+</body>
+</html>

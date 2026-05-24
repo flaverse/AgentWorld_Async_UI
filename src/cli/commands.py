@@ -65,6 +65,17 @@ async def cmd_test(args):
         dash_emit = dash_emitter.emit
         dash_task = asyncio.create_task(start_dashboard(dash_emitter, director, args.dashboard_port))
 
+    # ── GUI emitter ──
+    gui_emit = None
+    gui_task = None
+    if getattr(args, 'gui_port', 0):
+        from gui.emitter import GuiEmitter
+        from gui.server import start_gui_server
+        gui_emitter = GuiEmitter(world)
+        gui_emit = gui_emitter.emit
+        gui_emitter.start_snapshots(interval=1.0)
+        gui_task = asyncio.create_task(start_gui_server(gui_emitter, args.gui_port))
+
     print(f"\n{'='*60}")
     print(f"  AgentWorld Async — {cfg['world']['world']['name']}")
     print(f"  {len(agents)} agents | {args.runtime}s | Start: {datetime.now().strftime('%H:%M:%S')}")
@@ -84,7 +95,8 @@ async def cmd_test(args):
     await run_concurrent(agents, world, brain, cfg["assembler"],
                          systems, args.runtime, loop_cfg,
                          trace_fn=tracer.callback(), director=director,
-                         dashboard_emit=dash_emit)
+                         dashboard_emit=dash_emit,
+                         gui_emit=gui_emit)
 
     if api_task:
         api_server.should_exit = True
@@ -97,6 +109,13 @@ async def cmd_test(args):
         dash_task.cancel()
         try:
             await dash_task
+        except (asyncio.CancelledError, Exception):
+            pass
+    if gui_task:
+        await gui_emitter.stop_snapshots()
+        gui_task.cancel()
+        try:
+            await gui_task
         except (asyncio.CancelledError, Exception):
             pass
 
