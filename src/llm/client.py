@@ -40,8 +40,7 @@ class LLMClient:
         self.api_key = api_key
         self.base_url = base_url or config.get("base_url", "")
 
-        if not self.api_key:
-            raise RuntimeError("No API key found. Set env var or check openclaw config.")
+        # API key checked lazily in chat() — not all configured providers may be used
 
         self._gate = concurrency_gate
         self._hit_429 = False
@@ -103,6 +102,11 @@ class LLMClient:
     async def chat(self, system: str, messages: list[dict],
                    temperature: float = 0.7,
                    response_format: dict = None) -> str:
+        if not self.api_key:
+            raise RuntimeError(
+                f"No API key for provider '{self.provider}'. "
+                "Set api_key in config/llm.yaml or via environment variable."
+            )
         loop = asyncio.get_running_loop()
         if self._gate:
             await loop.run_in_executor(_executor, self._gate.acquire)

@@ -9,6 +9,9 @@
 """
 import sys, os, asyncio, argparse
 
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 base_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(base_dir, "src"))
 
